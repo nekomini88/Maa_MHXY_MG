@@ -313,6 +313,23 @@ class Yaowang(CustomRecognition):
                     _ylog_info(f"[yaowang] 满足冷却，发送通知: {content[:60]}")
                     ok = send_message("妖王出现", content)
                     _ylog_info(f"[yaowang] 通知发送结果: {'成功 ✅' if ok else '失败 ❌（send_message返回False）'}")
+                    if not ok:
+                        # 发送失败时，主动抓取 message 模块的失败原因写入 yaowang.log，
+                        # 便于直接定位是"token为空/config没读到"还是"HTTP失败"。
+                        try:
+                            from utils import message as _msg_mod
+                            _msg_mod.read_config()
+                            _cfg = _msg_mod.config or {}
+                            _en = _cfg.get("ExternalNotificationEnabled", "")
+                            _tk = str(_cfg.get("ExternalNotificationTelegramBotToken", ""))
+                            _ci = str(_cfg.get("ExternalNotificationTelegramChatId", ""))
+                            _ylog_err(
+                                "[yaowang] 发送失败诊断: ExternalNotificationEnabled="
+                                f"{_en} | token_len={len(_tk)} | chatid='{_ci[:6]}...' "
+                                f"(token为空或chat_id为空 → 需要填写 config/config.json)"
+                            )
+                        except Exception as _e:
+                            _ylog_err(f"[yaowang] 读取诊断信息失败: {_e}")
                     if ok:
                         self._LAST_NOTIFY_TS = now
                 else:
