@@ -16,7 +16,7 @@ class zhuogui_hundui(CustomRecognition):
     满足以下条件之一，结束任务：
     1. 时间超过定时的时间
     Uset_time_HH = 23
-    Uset_time_MM = 50
+    Uset_time_MM = 30
     2.活力为0或者活力低于用户指定值
     User_points=0
     """
@@ -31,14 +31,10 @@ class zhuogui_hundui(CustomRecognition):
         Received_double_points = 0
         Not_Received_double_points = 0
         
-        # 解析自定义参数，并判断是否为空
-        argv_dict: dict = json.loads(argv.custom_action_param)
-        if not argv_dict:
-            return  CustomRecognition.AnalyzeResult(box=(0,0,0,0),detail="自定义参数为空")
         # 获取自定义参数
-        User_points = argv_dict.get("User_points", 0)
-        Uset_time_HH = argv_dict.get("Uset_time_HH", 23)
-        Uset_time_MM = argv_dict.get("Uset_time_MM", 50)
+        User_points: dict = context.get_node_data("混队-抓鬼-判断结束条件")["attach"]["User_points"]
+        Uset_time_HH: dict = context.get_node_data("混队-抓鬼-判断结束条件")["attach"]["Uset_time_HH"]
+        Uset_time_MM: dict = context.get_node_data("混队-抓鬼-判断结束条件")["attach"]["Uset_time_MM"]
         # 已领取双倍点数Received_double_points
         image1 = context.tasker.controller.post_screencap().wait().get()
         reco1 = context.run_recognition(
