@@ -448,6 +448,7 @@ install
 tools/ImageCropper/**/*.png
 
 config
+!config/config.json
 debug
 
 # 答题日志文件

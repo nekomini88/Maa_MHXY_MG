@@ -184,10 +184,14 @@ class Yaowang(CustomRecognition):
             if hit_box:
                 logger.info(f"[yaowang] 识别到妖王出现公告：{hit_word}")
                 now = time.time()
+                # 冷却：仅在满足间隔且发送实际成功时才更新通知时间戳。
+                # 若发送失败（网络/配置问题），不更新 _LAST_NOTIFY_TS，下次命中仍会重试，
+                # 避免"妖王出现却被静默吞掉"。
                 if now - self._LAST_NOTIFY_TS >= cooldown:
-                    self._LAST_NOTIFY_TS = now
                     content = hit_word or full_text or "妖王出现"
-                    send_message("妖王出现", content)
+                    ok = send_message("妖王出现", content)
+                    if ok:
+                        self._LAST_NOTIFY_TS = now
                 return CustomRecognition.AnalyzeResult(
                     box=hit_box, detail=f"识别到妖王出现：{hit_word}"
                 )

@@ -1,0 +1,12 @@
+{
+    "ExternalNotificationEnabled": "Telegram",
+    "ExternalNotificationTelegramBotToken": "",
+    "ExternalNotificationTelegramChatId": "",
+    "yaowang_enabled": true,
+    "yaowang_chat_ratio_x": 0.45,
+    "yaowang_chat_ratio_y": 0.18,
+    "yaowang_frame_interval": 0.25,
+    "yaowang_frame_diff": 3000,
+    "yaowang_cooldown_seconds": 60,
+    "yaowang_max_scan": 200
+}

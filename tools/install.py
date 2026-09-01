@@ -5,7 +5,6 @@ import sys
 import json
 
 import os
-import sys
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -117,10 +116,33 @@ def install_agent():
         json.dump(interface, f, ensure_ascii=False, indent=4)
 
 
+def install_config():
+    """把 config/config.json 模板复制进包，确保外部通知配置键存在。
+
+    程序包内默认不含 config.json，导致 send_message 读不到
+    ExternalNotificationEnabled 而静默跳过发送。此函数把模板复制进包，
+    用户只需在包内 config/config.json 填 Telegram token/chat_id 即可启用通知。
+    """
+    src = working_dir / "config" / "config.json"
+    if not src.exists():
+        print("[install] 未找到 config/config.json 模板，跳过外部通知模板安装。")
+        return
+    dst_dir = install_path / "config"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / "config.json"
+    if dst.exists():
+        # 不覆盖用户已有的配置
+        print("[install] 检测到已有 config/config.json，保留用户配置。")
+        return
+    shutil.copy2(src, dst)
+    print(f"[install] 已安装 config 模板到 {dst}")
+
+
 if __name__ == "__main__":
     install_deps(platform_tag)
     install_resource()
     install_chores()
     install_agent()
+    install_config()
 
     print(f"Install to {install_path} successfully.")
