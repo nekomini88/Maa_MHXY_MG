@@ -209,14 +209,21 @@ class Yaowang(CustomRecognition):
 
         # 高扫描次数上限，避免单次 analyze 无限循环占死
         max_scan = int(param.get("yaowang_max_scan", 200))
-        _ylog_info(f"[yaowang] 本轮最大扫描 {max_scan} 次，进入监测循环。")
+        # 兜底 OCR 周期：连续多少帧无变化才强制 OCR 一次，确保"静止的妖王公告"也能被识别。
+        # 帧差方案对"滚动消息"有效，但若妖王公告静止停留、_LAST_FRAME 已缓存含妖王帧，
+        # 帧差会一直是 0 永不再触发 OCR → 漏检。加周期兜底可解决。
+        force_ocr_every = int(param.get("yaowang_force_ocr_every", 6))
+        _ylog_info(
+            f"[yaowang] 本轮最大扫描 {max_scan} 次，无变化每 {force_ocr_every} 帧强制 OCR 一次（兜底防漏静止公告）。"
+        )
 
+        no_change_count = 0  # 连续无变化的帧计数
         for scan in range(max_scan):
             image = context.tasker.controller.post_screencap().wait().get()
             changed = False
             change_roi = rois[0]
             last_diff = 0.0
-            # 帧差：对每个 ROI 检测是否变化
+            # 帧差：对每个 ROI 检测是否变化（仅作加速信号，不强制依赖）
             for roi in rois:
                 cur = self._roi_gray(image, roi)
                 diff = self._frame_diff(self._LAST_FRAME, cur)
@@ -229,13 +236,24 @@ class Yaowang(CustomRecognition):
             # 更新基准帧（只保存第一个 ROI 的灰度，降低内存）
             self._LAST_FRAME = self._roi_gray(image, rois[0])
 
-            if not changed:
+            # 触发条件：区域变化（加速）OR 连续无变化达周期（兜底静止公告）
+            if changed:
+                no_change_count = 0
+                should_ocr = True
+            else:
+                no_change_count += 1
+                should_ocr = no_change_count >= force_ocr_every
+
+            if not should_ocr:
                 if scan % 20 == 0:
                     _ylog_debug(f"[yaowang] 第{scan}次扫描：公告栏无变化 diff={last_diff:.0f}，继续监测")
                 time.sleep(frame_interval)
                 continue
 
-            _ylog_info(f"[yaowang] 检测到公告栏变化 diff={last_diff:.0f}>阈{frame_diff_thr}，触发 OCR 确认")
+            log_reason = "公告栏变化" if changed else f"连续{no_change_count}帧静止(兜底OCR)"
+            _ylog_info(
+                f"[yaowang] 触发 OCR（{log_reason} diff={last_diff:.0f}）"
+            )
 
             # 有变化 → OCR 确认
             hit_box = None
