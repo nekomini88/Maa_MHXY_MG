@@ -208,13 +208,13 @@ class Yaowang(CustomRecognition):
             rois = custom_rois
             _ylog_info(f"[yaowang] 使用自定义 ROI: {rois}")
         else:
-            # 先截图获取尺寸
-            image0 = context.tasker.controller.post_screencap().wait().get()
+            # 先截图获取尺寸（多开切换时也可能失败, 记日志并降级返回, 不崩任务）
             try:
+                image0 = context.tasker.controller.post_screencap().wait().get()
                 h, w = image0.shape[:2]
-            except Exception:
-                _ylog_err("[yaowang] 无法获取截图尺寸，跳过。")
-                return CustomRecognition.AnalyzeResult(box=None, detail="截图异常")
+            except Exception as e:
+                _ylog_warn(f"[yaowang] 初始截图失败（{e}），无法确定 ROIs，本轮降级跳过。")
+                return CustomRecognition.AnalyzeResult(box=None, detail="初始截图异常")
             rois = self._chat_rois(h, w, rx, ry)
             _ylog_info(f"[yaowang] 截图尺寸 {w}x{h}，系统公告栏 ROI: {rois}")
 
@@ -230,7 +230,18 @@ class Yaowang(CustomRecognition):
 
         no_change_count = 0  # 连续无变化的帧计数
         for scan in range(max_scan):
-            image = context.tasker.controller.post_screencap().wait().get()
+            # 截图可能因多开切换/模拟器最小化而失败(脱钩)。此处捕获, 短暂等待重试,
+            # 避免整个 analyze 抛异常导致 MaaFramework 判"任务失败"。
+            try:
+                image = context.tasker.controller.post_screencap().wait().get()
+                if image is None:
+                    raise RuntimeError("post_screencap 返回 None")
+            except Exception as e:
+                if scan % 5 == 0:
+                    _ylog_warn(f"[yaowang] 第{scan}次截图失败（{e}），重试中...")
+                time.sleep(frame_interval)
+                continue
+
             changed = False
             change_roi = rois[0]
             last_diff = 0.0
@@ -270,18 +281,23 @@ class Yaowang(CustomRecognition):
             hit_box = None
             hit_word = None
             full_text = ""
-            reco = context.run_recognition(
-                self._ROC_NAME,
-                image,
-                pipeline_override={
-                    self._ROC_NAME: {
-                        "recognition": "OCR",
-                        "roi": change_roi,
-                        "expected": expected,
-                        "threshold": 0.6,
-                    }
-                },
-            )
+            try:
+                reco = context.run_recognition(
+                    self._ROC_NAME,
+                    image,
+                    pipeline_override={
+                        self._ROC_NAME: {
+                            "recognition": "OCR",
+                            "roi": change_roi,
+                            "expected": expected,
+                            "threshold": 0.6,
+                        }
+                    },
+                )
+            except Exception as e:
+                _ylog_warn(f"[yaowang] OCR 调用异常（{e}），本轮跳过。")
+                time.sleep(frame_interval)
+                continue
             if reco and reco.hit and reco.all_results:
                 texts = [r.text for r in reco.all_results if r.text]
                 full_text = " ".join(texts)
