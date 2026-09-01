@@ -1,0 +1,168 @@
+{
+    "bangpai_qiandao": {
+        "next": [
+            "帮派签到-加号",
+            "帮派签到-乘号",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "帮派签到-加号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "打开帮派界面"
+        ]
+    },
+    "帮派签到-乘号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "打开帮派界面"
+        ]
+    },
+    "打开帮派界面": {
+        "pre_wait_freezes": 1,
+        "action": "ClickKey",
+        "key": [
+            57,
+            30
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打开帮派界面成功",
+            "[JumpBack]帮派界面-按键打开失败-点击帮派图标"
+        ]
+    },
+    "帮派界面-按键打开失败-点击帮派图标": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "qiandao/bangpai.png",
+                    "qiandao/bangpai2.png"
+                ],
+                "roi": [
+                    815,
+                    627,
+                    78,
+                    82
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "帮派"
+                ],
+                "roi": [
+                    815,
+                    627,
+                    78,
+                    82
+                ]
+            }
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "打开帮派界面成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qiandao/bangpai_jiemian_panduan.png",
+            "qiandao/bangpai_jiemian_panduan2.png"
+        ],
+        "roi": [
+            444,
+            0,
+            373,
+            116
+        ],
+        "next": [
+            "帮派签到-点击福利"
+        ]
+    },
+    "帮派签到-点击福利": {
+        "recognition": "TemplateMatch",
+        "template": "qiandao/bangpaifuli.png",
+        "roi": [
+            1115,
+            409,
+            73,
+            106
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "帮派签到-点击签到"
+        ]
+    },
+    "帮派签到-点击签到": {
+        "recognition": "OCR",
+        "expected": [
+            "签到"
+        ],
+        "roi": [
+            882,
+            461,
+            195,
+            63
+        ],
+        "action": "Click",
+        "next": [
+            "帮派签到-点击领取分红",
+            "panduan_zhujiemian"
+        ]
+    },
+    "帮派签到-点击领取分红": {
+        "recognition": "OCR",
+        "expected": [
+            "领取分红"
+        ],
+        "roi": [
+            880,
+            609,
+            189,
+            61
+        ],
+        "action": "Click",
+        "next": [
+            "帮派签到-领取分红-确认"
+        ]
+    },
+    "帮派签到-领取分红-确认": {
+        "recognition": "OCR",
+        "expected": [
+            "领取"
+        ],
+        "roi": [
+            517,
+            544,
+            237,
+            64
+        ],
+        "action": "Click",
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

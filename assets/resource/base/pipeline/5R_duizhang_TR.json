@@ -1,0 +1,112 @@
+{
+    "5R_duizhang_TR": {
+        "next": [
+            "队长踢人过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "队长踢人过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "post_delay": 500,
+        "key": [
+            57,
+            48
+        ],
+        "next": [
+            "队长踢人-进入主界面",
+            "[JumpBack]队伍界面-按键打开失败-点击队伍图标"
+        ]
+    },
+    "队长踢人-进入主界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-zudui.png",
+            "duiwu/duiwu-duiwu.png"
+        ],
+        "roi": [
+            0,
+            0,
+            229,
+            106
+        ],
+        "next": [
+            "[JumpBack]队长踢人-选人",
+            "队长踢人-只有自己-退出队伍"
+        ]
+    },
+    "队长踢人-选人": {
+        "max_hit": 5,
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "物攻型",
+            "法攻型",
+            "治疗型",
+            "辅助型",
+            "封印型"
+        ],
+        "roi": [
+            379,
+            541,
+            95,
+            39
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            379,
+            541,
+            95,
+            39
+        ],
+        "next": [
+            "队长踢人-选人-点击请离队伍"
+        ]
+    },
+    "队长踢人-选人-点击请离队伍": {
+        "recognition": "OCR",
+        "expected": [
+            "请离队伍"
+        ],
+        "roi": [
+            308,
+            129,
+            874,
+            494
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "队长踢人-只有自己-退出队伍": {
+        "recognition": "OCR",
+        "expected": [
+            "物攻型",
+            "法攻型",
+            "治疗型",
+            "辅助型",
+            "封印型"
+        ],
+        "roi": [
+            379,
+            541,
+            95,
+            39
+        ],
+        "next": [
+            "点击退出队伍"
+        ]
+    }
+}

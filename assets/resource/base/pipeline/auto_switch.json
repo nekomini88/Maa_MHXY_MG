@@ -1,0 +1,260 @@
+{
+    "auto_switch": {
+        "next": [
+            "进入切号",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "进入切号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "next": [
+            "点击系统"
+        ]
+    },
+    "点击系统": {
+        "recognition": "TemplateMatch",
+        "template": "zhanghao/xitong.png",
+        "roi": [
+            748,
+            640,
+            56,
+            48
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "next": [
+            "点击切换账号"
+        ]
+    },
+    "点击切换账号": {
+        "recognition": "OCR",
+        "expected": [
+            "切换账号"
+        ],
+        "roi": [
+            303,
+            599,
+            115,
+            40
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "next": [
+            "点击切换账号-点击登出"
+        ]
+    },
+    "点击切换账号-点击登出": {
+        "recognition": "OCR",
+        "expected": [
+            "登出"
+        ],
+        "roi": [
+            682,
+            394,
+            130,
+            48
+        ],
+        "action": "Click",
+        "next": [
+            "登录界面",
+            "登录界面-账号选择界面"
+        ]
+    },
+    "登录界面": {
+        "recognition": "OCR",
+        "expected": [
+            "未选择服务器"
+        ],
+        "roi": [
+            474,
+            399,
+            280,
+            44
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "登录界面-账号选择界面"
+        ]
+    },
+    "登录界面-账号选择界面": {
+        "recognition": "OCR",
+        "expected": [
+            "其他账号登录"
+        ],
+        "roi": [
+            535,
+            499,
+            202,
+            41
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "点击用户协议"
+        ]
+    },
+    "点击用户协议": {
+        "recognition": "TemplateMatch",
+        "template": "zhanghao/yonghuxieyi.png",
+        "roi": [
+            446,
+            525,
+            37,
+            39
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "点击网易邮箱"
+        ]
+    },
+    "点击网易邮箱": {
+        "recognition": "OCR",
+        "expected": [
+            "网易邮箱"
+        ],
+        "roi": [
+            573,
+            470,
+            95,
+            32
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "输入账号密码完成",
+            "[JumpBack]输入账号",
+            "[JumpBack]输入密码"
+        ]
+    },
+    "输入账号": {
+        "recognition": "OCR",
+        "expected": [
+            "请输入网易邮箱账号"
+        ],
+        "roi": [
+            390,
+            238,
+            263,
+            46
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "输入账号-输入账号内容"
+        ]
+    },
+    "输入账号-输入账号内容": {
+        "action": "InputText",
+        "input_text": ""
+    },
+    "输入密码": {
+        "recognition": "OCR",
+        "expected": [
+            "请输入登录密码"
+        ],
+        "roi": [
+            395,
+            325,
+            214,
+            43
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "输入密码-输入密码内容"
+        ]
+    },
+    "输入密码-输入密码内容": {
+        "action": "InputText",
+        "input_text": ""
+    },
+    "输入账号密码完成": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "请输入网易邮箱账号",
+            "请输入登录密码"
+        ],
+        "roi": [
+            381,
+            231,
+            308,
+            151
+        ],
+        "action": "Click",
+        "post_delay": 2500,
+        "target": [
+            589,
+            410,
+            104,
+            51
+        ],
+        "next": [
+            "选择角色"
+        ]
+    },
+    "选择角色": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhanghao/hong_fwq.png",
+            "zhanghao/huang_fwq.png",
+            "zhanghao/lv_fwq.png"
+        ],
+        "roi": [
+            476,
+            402,
+            40,
+            35
+        ],
+        "action": "Click",
+        "next": [
+            "点击已有角色"
+        ]
+    },
+    "点击已有角色": {
+        "recognition": "OCR",
+        "expected": [
+            "已有角色"
+        ],
+        "roi": [
+            162,
+            140,
+            192,
+            53
+        ],
+        "action": "Click",
+        "next": [
+            "点击已有角色-选择角色"
+        ]
+    },
+    "点击已有角色-选择角色": {
+        "recognition": "OCR",
+        "expected": [
+            ""
+        ],
+        "roi": [
+            377,
+            118,
+            755,
+            567
+        ],
+        "action": "Click",
+        "post_delay": 10000,
+        "next": [
+            "关闭三界热点"
+        ]
+    }
+}

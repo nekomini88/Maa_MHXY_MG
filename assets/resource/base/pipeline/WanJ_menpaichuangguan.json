@@ -1,0 +1,380 @@
+{
+    "menpaichuangguan": {
+        "next": [
+            "识别-长安城-门派闯关-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "识别-长安城-门派闯关-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "post_delay": 500,
+        "next": [
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]baotu_huadong_down",
+            "门派-已经手动领取任务-任务正式开始",
+            "识别-长安城-门派闯关",
+            "[JumpBack]打开大地图_69副本"
+        ]
+    },
+    "识别-长安城-门派闯关": {
+        "recognition": "OCR",
+        "expected": [
+            "长安城"
+        ],
+        "roi": [
+            99,
+            14,
+            137,
+            46
+        ],
+        "pre_delay": 1500,
+        "next": [
+            "主界面-门派闯关"
+        ]
+    },
+    "主界面-门派闯关": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-门派闯关",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-门派闯关": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-门派闯关-点击日常活动"
+        ]
+    },
+    "活动-门派闯关-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-门派闯关-向上滑动到顶端"
+        ]
+    },
+    "活动-门派闯关-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-门派闯关-开始",
+            "活动-门派闯关-未到开始时间",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-门派闯关-未到开始时间": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wanjian/mp/menpaizhengba_weikaishi.png",
+            "wanjian/mp/menpaizhengba_weikaishi2.png",
+            "wanjian/mp/menpaizhengba_weikaishi3.png"
+        ],
+        "roi": [
+            313,
+            69,
+            840,
+            447
+        ],
+        "threshold": 0.8,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-门派闯关-开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wanjian/mp/menpaizhengba_kaishi1.png",
+            "wanjian/mp/menpaizhengba_kaishi2.png",
+            "wanjian/mp/menpaizhengba_kaishi3.png",
+            "wanjian/mp/menpaizhengba_kaishi4.png"
+        ],
+        "roi": [
+            313,
+            69,
+            840,
+            447
+        ],
+        "threshold": 0.8,
+        "next": [
+            "点击门派闯关参加"
+        ]
+    },
+    "点击门派闯关参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 4000,
+        "roi": "活动-门派闯关-开始",
+        "next": [
+            "点击门派闯关"
+        ]
+    },
+    "点击门派闯关": {
+        "recognition": "OCR",
+        "expected": [
+            "门派闯关"
+        ],
+        "roi": [
+            931,
+            268,
+            303,
+            240
+        ],
+        "action": "Click",
+        "next": [
+            "点击领取门派闯关任务"
+        ]
+    },
+    "点击领取门派闯关任务": {
+        "recognition": "OCR",
+        "expected": [
+            "领取任务"
+        ],
+        "roi": [
+            931,
+            268,
+            303,
+            240
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "门派闯关结束",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]门派-点击任务栏任务",
+            "[JumpBack]门派一轮完成-领取任务",
+            "[JumpBack]战斗中-等待5秒"
+        ]
+    },
+    "门派-已经手动领取任务-任务正式开始": {
+        "recognition": "OCR",
+        "expected": [
+            "门派闯关*.*"
+        ],
+        "roi": [
+            1040,
+            175,
+            238,
+            325
+        ],
+        "next": [
+            "门派闯关结束",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]门派-点击任务栏任务",
+            "[JumpBack]门派一轮完成-领取任务",
+            "[JumpBack]战斗中-等待5秒"
+        ]
+    },
+    "门派-点击任务栏任务": {
+        "recognition": "OCR",
+        "expected": [
+            "门派闯关[(（]\\d+.\\d+[)）]?"
+        ],
+        "roi": [
+            1040,
+            175,
+            238,
+            325
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "门派-点击进入战斗",
+            "战斗中-等待5秒",
+            "[JumpBack]门派-再次点击任务栏任务"
+        ]
+    },
+    "门派-再次点击任务栏任务": {
+        "recognition": "OCR",
+        "expected": [
+            "门派闯关[(（]\\d+.\\d+[)）]?"
+        ],
+        "roi": [
+            1040,
+            175,
+            238,
+            325
+        ],
+        "action": "Click",
+        "post_delay": 500
+    },
+    "门派-点击进入战斗": {
+        "recognition": "OCR",
+        "expected": [
+            "进入战斗"
+        ],
+        "roi": [
+            909,
+            400,
+            338,
+            155
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "门派-次数统计"
+        ]
+    },
+    "门派-次数统计": {
+        "action": "Custom",
+        "custom_action": "input_node_success_num"
+    },
+    "门派一轮完成-领取任务": {
+        "recognition": "OCR",
+        "expected": [
+            "门派闯关.领取任务"
+        ],
+        "roi": [
+            1040,
+            175,
+            238,
+            325
+        ],
+        "action": "Click",
+        "post_delay": 4000,
+        "next": [
+            "门派一轮完成-点击门派闯关"
+        ]
+    },
+    "门派一轮完成-点击门派闯关": {
+        "recognition": "OCR",
+        "expected": [
+            "门派闯关"
+        ],
+        "roi": [
+            931,
+            268,
+            303,
+            240
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "门派一轮完成-点击领取"
+        ]
+    },
+    "门派一轮完成-点击领取": {
+        "recognition": "OCR",
+        "expected": [
+            "领取任务"
+        ],
+        "roi": [
+            931,
+            268,
+            303,
+            240
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "门派闯关结束": {
+        "focus": {
+            "Node.Recognition.Succeeded": "门派闯关结束,门派活动战斗次数如下："
+        },
+        "recognition": "OCR",
+        "expected": [
+            "21:40",
+            "21:41",
+            "21:42",
+            "21:43",
+            "21:44",
+            "21:45"
+        ],
+        "roi": [
+            79,
+            0,
+            57,
+            29
+        ],
+        "action": "Custom",
+        "custom_action": "output_node_success_num",
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

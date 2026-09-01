@@ -1,0 +1,211 @@
+{
+    "yunbiao_renwu2": {
+        "next": [
+            "主界面-运镖",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "主界面-运镖": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-运镖",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-运镖": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-运镖-检查活跃度agent"
+        ]
+    },
+    "活动-运镖-检查活跃度agent": {
+        "recognition": "Custom",
+        "custom_recognition": "OCRNum"
+    },
+    "活动-运镖-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-运镖-向上滑动到顶端"
+        ]
+    },
+    "活动-运镖-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 1000,
+        "next": [
+            "活动-运镖-开始",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-运镖-开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "yunbiao/yunbiao_cishu0.png",
+            "yunbiao/yunbiao_cishu1.png",
+            "yunbiao/yunbiao_cishu2.png",
+            "yunbiao/yunbiao_cishu0_2.png",
+            "yunbiao/yunbiao_cishu1_2.png",
+            "yunbiao/yunbiao_cishu2_2.png"
+        ],
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "threshold": 0.9,
+        "post_delay": 1000,
+        "next": [
+            "活动-运镖-开始-点击参加"
+        ]
+    },
+    "活动-运镖-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-运镖-开始",
+        "action": "Click",
+        "post_delay": 1000,
+        "post_wait_freezes": 1000,
+        "next": [
+            "识别拓印_停止",
+            "[JumpBack]点击押送普通镖银(三次)",
+            "[JumpBack]运镖中",
+            "[JumpBack]战斗中-等待20秒",
+            "运镖完成"
+        ]
+    },
+    "运镖完成": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ]
+    },
+    "运镖中": {
+        "recognition": "OCR",
+        "expected": [
+            "距离运镖完成",
+            "距离运镖完成："
+        ],
+        "roi": [
+            150,
+            1,
+            195,
+            49
+        ],
+        "pre_delay": 10000
+    },
+    "点击押送普通镖银(三次)": {
+        "max_hit": 3,
+        "recognition": "OCR",
+        "expected": [
+            "押送普通镖银"
+        ],
+        "roi": [
+            933,
+            262,
+            307,
+            237
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "点击押送普通镖_确定"
+        ]
+    },
+    "点击押送普通镖_确定": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            656,
+            367,
+            189,
+            96
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    }
+}

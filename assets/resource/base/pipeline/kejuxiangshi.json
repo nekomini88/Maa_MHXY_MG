@@ -1,0 +1,258 @@
+{
+    "kejuxiangshi": {
+        "next": [
+            "主界面-科举乡试",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "主界面-科举乡试": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-科举乡试",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-科举乡试": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-科举乡试-点击日常活动"
+        ]
+    },
+    "活动-科举乡试-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-科举乡试-向上滑动到顶端"
+        ]
+    },
+    "活动-科举乡试-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-科举乡试-开始",
+            "活动-科举乡试-未到开始时间",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-科举乡试-未到开始时间": {
+        "recognition": "TemplateMatch",
+        "pre_delay": 200,
+        "template": [
+            "richangdati/kejuxiangshi_weikaishi.png",
+            "richangdati/kejuxiangshi_weikaishi2.png"
+        ],
+        "threshold": 0.9,
+        "post_delay": 200,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-科举乡试-开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "richangdati/kejuxiangshi.png",
+            "richangdati/kejuxiangshi2.png",
+            "richangdati/kejuxiangshi3.png",
+            "richangdati/kejuxiangshi4.png"
+        ],
+        "threshold": 0.9,
+        "next": [
+            "活动-科举乡试-开始-点击参加"
+        ]
+    },
+    "活动-科举乡试-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-科举乡试-开始",
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "识别拓印_停止",
+            "活动-科举乡试-进入答题界面"
+        ]
+    },
+    "活动-科举乡试-进入答题界面": {
+        "recognition": "TemplateMatch",
+        "template": "richangdati/kjxs_datijiemian.png",
+        "roi": [
+            528,
+            65,
+            244,
+            67
+        ],
+        "next": [
+            "活动-科举乡试-结束-图片",
+            "活动-科举乡试-结束ocr",
+            "[JumpBack]活动-科举乡试-开始答题_普通"
+        ]
+    },
+    "活动-科举乡试-结束ocr": {
+        "recognition": "Or",
+        "any_of": [
+            "活动-科举乡试-结束ocr1",
+            "活动-科举乡试-结束ocr2"
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-科举乡试-结束ocr1": {
+        "recognition": "OCR",
+        "expected": [
+            "学海无涯，少侠可要多多加油吖！"
+        ],
+        "roi": [
+            580,
+            351,
+            407,
+            65
+        ],
+        "pre_delay": 200,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-科举乡试-结束ocr2": {
+        "recognition": "OCR",
+        "expected": [
+            "恭喜少侠成功获得科举会试的机会！记得一定要",
+            "恭喜少侠成功获得科举会试的机会！记得一定要"
+        ],
+        "roi": [
+            565,
+            330,
+            504,
+            74
+        ],
+        "pre_delay": 200,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-科举乡试-结束-图片": {
+        "inverse": true,
+        "recognition": "TemplateMatch",
+        "template": [
+            "richangdati/kejuxiangshi_yiwancheng.png"
+        ],
+        "roi": [
+            481,
+            137,
+            47,
+            98
+        ],
+        "threshold": 0.9,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-科举乡试-开始答题_普通": {
+        "pre_delay": 1500,
+        "action": "Click",
+        "target": [
+            487,
+            322,
+            150,
+            58
+        ]
+    },
+    "活动-科举乡试-开始答题API": {
+        "max_hit": 100,
+        "recognition": "Custom",
+        "custom_recognition": "AIAnswer",
+        "attach": {
+            "apikey": "",
+            "url": "",
+            "model": ""
+        }
+    },
+    "活动-科举乡试-开始答题agent-智谱": {
+        "max_hit": 100,
+        "recognition": "Custom",
+        "custom_recognition": "zhipu",
+        "attach": {
+            "apikey": ""
+        }
+    },
+    "活动-科举乡试-正确率": {
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            863,
+            149,
+            78,
+            43
+        ]
+    }
+}

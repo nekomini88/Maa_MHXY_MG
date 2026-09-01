@@ -1,0 +1,168 @@
+{
+    "bangpaiwanjiandati": {
+        "next": [
+            "帮派答题",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "帮派答题": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 1000,
+        "next": [
+            "帮派答题-展开聊天窗口"
+        ]
+    },
+    "帮派答题-展开聊天窗口": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dati/liaotian.png"
+        ],
+        "roi": [
+            0,
+            512,
+            86,
+            93
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "帮派答题-选择帮派频道"
+        ]
+    },
+    "帮派答题-选择帮派频道": {
+        "recognition": "OCR",
+        "expected": [
+            "帮派"
+        ],
+        "roi": [
+            10,
+            100,
+            107,
+            424
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "帮派答题-识别到感叹号",
+            "[JumpBack]帮派答题-识别问题头并点击"
+        ]
+    },
+    "帮派答题-识别问题头并点击": {
+        "recognition": "OCR",
+        "expected": [
+            "帮派答题"
+        ],
+        "roi": [
+            114,
+            531,
+            371,
+            60
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "帮派答题-识别问题头颜色": {
+        "recognition": "ColorMatch",
+        "upper": [
+            241,
+            221,
+            189
+        ],
+        "lower": [
+            237,
+            215,
+            188
+        ],
+        "count": 1000
+    },
+    "帮派答题-识别到感叹号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dati/bangpaidati_gth.png"
+        ],
+        "roi": [
+            200,
+            565,
+            85,
+            81
+        ],
+        "threshold": [
+            0.9
+        ],
+        "next": [
+            "帮派答题-结束1",
+            "帮派答题-结束2",
+            "[JumpBack]帮派答题-开始答题"
+        ]
+    },
+    "帮派答题-结束1": {
+        "recognition": "OCR",
+        "expected": [
+            "叹！",
+            "本次帮派答题已经结束，各位的聪明才智真是令人惊",
+            "本次帮派答题已经结束，各位的聪明才智真是令人惊叹！"
+        ],
+        "roi": [
+            119,
+            108,
+            468,
+            480
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "帮派答题-结束2": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dati/bangpaidati_gth.png"
+        ],
+        "roi": [
+            200,
+            565,
+            85,
+            81
+        ],
+        "threshold": [
+            0.9
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "帮派答题-开始答题": {},
+    "识别问题": {
+        "recognition": "OCR",
+        "expected": [
+            ""
+        ],
+        "roi": [
+            128,
+            617,
+            449,
+            65
+        ]
+    },
+    "第几题位置": {
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            130,
+            587,
+            95,
+            37
+        ]
+    }
+}

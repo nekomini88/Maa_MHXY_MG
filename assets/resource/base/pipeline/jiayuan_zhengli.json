@@ -1,0 +1,507 @@
+{
+    "jiayuan_zhengli": {
+        "next": [
+            "回到家园-成功",
+            "家园-主界面-加号",
+            "家园-主界面-乘号",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "家园-主界面-加号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "action": "Click",
+        "pre_delay": 1500,
+        "next": [
+            "点击家园"
+        ]
+    },
+    "家园-主界面-乘号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "点击家园"
+        ]
+    },
+    "点击家园": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/jiayuan.png",
+        "roi": [
+            977,
+            640,
+            60,
+            46
+        ],
+        "pre_delay": 1000,
+        "pre_wait_freezes": 1,
+        "action": "ClickKey",
+        "key": [
+            57,
+            42
+        ],
+        "post_delay": 1000,
+        "next": [
+            "点击回家",
+            "[JumpBack]家园界面-按键失败-点击家园图标"
+        ]
+    },
+    "家园界面-按键失败-点击家园图标": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/jiayuan.png",
+        "roi": [
+            977,
+            640,
+            60,
+            46
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "点击回家": {
+        "recognition": "OCR",
+        "expected": [
+            "回家"
+        ],
+        "roi": [
+            1008,
+            442,
+            136,
+            93
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "回到家园-成功"
+        ]
+    },
+    "回到家园-成功": {
+        "recognition": "OCR",
+        "expected": [
+            "豪华庭院",
+            "典雅庭院",
+            "普通庭院"
+        ],
+        "roi": [
+            103,
+            20,
+            126,
+            36
+        ],
+        "next": [
+            "点击打理"
+        ]
+    },
+    "点击打理": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/dali.png",
+        "roi": [
+            1036,
+            622,
+            93,
+            80
+        ],
+        "action": "Click",
+        "pre_delay": 500,
+        "next": [
+            "点击大扫除"
+        ]
+    },
+    "点击大扫除": {
+        "recognition": "OCR",
+        "expected": [
+            "大扫除"
+        ],
+        "roi": [
+            822,
+            351,
+            191,
+            125
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800,
+        "next": [
+            "点击开始大扫除",
+            "满状态-不用大扫除"
+        ]
+    },
+    "点击开始大扫除": {
+        "recognition": "OCR",
+        "expected": [
+            "开始大扫除"
+        ],
+        "roi": [
+            638,
+            400,
+            220,
+            119
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800,
+        "next": [
+            "点击佣人管理"
+        ]
+    },
+    "满状态-不用大扫除": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "开始大扫除"
+        ],
+        "roi": [
+            638,
+            400,
+            220,
+            119
+        ],
+        "next": [
+            "点击佣人管理"
+        ]
+    },
+    "点击佣人管理": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/yongrenguanli.png",
+        "roi": [
+            1032,
+            473,
+            51,
+            138
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "点击管家寻路"
+        ]
+    },
+    "点击管家寻路": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/xunlu.png",
+        "roi": [
+            700,
+            202,
+            40,
+            53
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 3000,
+        "next": [
+            "召唤灵室-使用家具",
+            "召唤灵室-未开启",
+            "[JumpBack]点击管家失败-再次点击"
+        ]
+    },
+    "点击管家失败-再次点击": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/xunlu.png",
+        "roi": [
+            700,
+            202,
+            40,
+            53
+        ],
+        "pre_delay": 1000,
+        "action": "Click"
+    },
+    "召唤灵室-未开启": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/weikaiqi.png",
+        "roi": [
+            277,
+            430,
+            183,
+            81
+        ],
+        "next": [
+            "卧室-点击打理",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "召唤灵室-使用家具": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/shiyongjiaju.png",
+        "roi": [
+            277,
+            430,
+            183,
+            81
+        ],
+        "action": "Click",
+        "next": [
+            "进入召唤灵界面"
+        ]
+    },
+    "进入召唤灵界面": {
+        "recognition": "OCR",
+        "expected": [
+            "召唤灵室"
+        ],
+        "roi": [
+            570,
+            5,
+            187,
+            77
+        ],
+        "next": [
+            "[JumpBack]召唤灵点击喂养-3次",
+            "卧室-点击打理-过渡"
+        ]
+    },
+    "召唤灵点击喂养-3次": {
+        "max_hit": 3,
+        "recognition": "OCR",
+        "expected": [
+            "喂养"
+        ],
+        "roi": [
+            672,
+            627,
+            173,
+            72
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800,
+        "next": [
+            "召唤灵点击喂养-确定",
+            "召唤灵点击喂养-未识别到确定"
+        ]
+    },
+    "召唤灵点击喂养-确定": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            650,
+            380,
+            183,
+            96
+        ],
+        "action": "Click",
+        "post_delay": 500
+    },
+    "召唤灵点击喂养-未识别到确定": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            650,
+            380,
+            183,
+            96
+        ],
+        "pre_delay": 500
+    },
+    "卧室-点击打理-过渡": {
+        "pre_delay": 2000,
+        "next": [
+            "卧室-点击打理",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "卧室-点击打理": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/dali.png",
+        "roi": [
+            1036,
+            622,
+            93,
+            80
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "卧室-点击佣人",
+            "[JumpBack]再次点击-卧室-点击打理"
+        ]
+    },
+    "再次点击-卧室-点击打理": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/dali.png",
+        "roi": [
+            1036,
+            622,
+            93,
+            80
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "卧室-点击佣人": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/yongrenguanli.png",
+        "roi": [
+            1032,
+            473,
+            51,
+            138
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "卧室-点击管家"
+        ]
+    },
+    "卧室-点击管家": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/xunlu.png",
+        "roi": [
+            700,
+            202,
+            40,
+            53
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 3000,
+        "next": [
+            "点击卧室家具",
+            "卧室家具-未开启",
+            "[JumpBack]点击管家失败-再次点击"
+        ]
+    },
+    "卧室家具-未开启": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/weikaiqi.png",
+        "roi": [
+            465,
+            430,
+            171,
+            78
+        ],
+        "action": "ClickKey",
+        "key": [
+            4
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "点击卧室家具": {
+        "recognition": "TemplateMatch",
+        "template": "jiayuan/shiyongjiaju.png",
+        "roi": [
+            465,
+            430,
+            171,
+            78
+        ],
+        "action": "Click",
+        "post_delay": 7000,
+        "next": [
+            "进入卧室休息界面",
+            "休息失败"
+        ]
+    },
+    "休息失败": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "卧室休息"
+        ],
+        "roi": [
+            540,
+            18,
+            254,
+            60
+        ]
+    },
+    "进入卧室休息界面": {
+        "recognition": "OCR",
+        "expected": [
+            "卧室休息"
+        ],
+        "roi": [
+            540,
+            18,
+            254,
+            60
+        ],
+        "next": [
+            "[JumpBack]卧室-点击休息-4次",
+            "休息已完成-回到主界面"
+        ]
+    },
+    "卧室-点击休息-4次": {
+        "max_hit": 4,
+        "recognition": "OCR",
+        "expected": "休息",
+        "roi": [
+            555,
+            619,
+            218,
+            70
+        ],
+        "action": "Click",
+        "next": [
+            "休息满活力确认",
+            "休息不需要确认"
+        ]
+    },
+    "休息满活力确认": {
+        "recognition": "OCR",
+        "expected": [
+            "确认"
+        ],
+        "roi": [
+            664,
+            375,
+            164,
+            81
+        ],
+        "action": "Click"
+    },
+    "休息不需要确认": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "确认"
+        ],
+        "roi": [
+            664,
+            375,
+            164,
+            81
+        ]
+    },
+    "休息已完成-回到主界面": {
+        "recognition": "OCR",
+        "expected": [
+            "卧室休息"
+        ],
+        "roi": [
+            540,
+            18,
+            254,
+            60
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

@@ -1,0 +1,657 @@
+{
+    "mijing_renwu": {
+        "next": [
+            "识别位置-东海湾-秘境-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "识别位置-东海湾-秘境-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "识别位置-东海湾-秘境",
+            "[JumpBack]dakai_map"
+        ]
+    },
+    "识别位置-东海湾-秘境": {
+        "pre_delay": 1000,
+        "recognition": "OCR",
+        "expected": [
+            "东海湾"
+        ],
+        "roi": [
+            105,
+            22,
+            124,
+            34
+        ],
+        "next": [
+            "click_tab_mijing"
+        ]
+    },
+    "dakai_map": {
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            41
+        ],
+        "post_delay": 2000,
+        "next": [
+            "打开大地图成功_传送东海湾_秘境任务",
+            "[JumpBack]大地图界面-按键打开失败_点击图标"
+        ]
+    },
+    "打开大地图成功_传送东海湾_秘境任务": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/ditu_jiemian_panduan.png",
+            "zonghe/ditu_jiemian_panduan2.png"
+        ],
+        "roi": [
+            111,
+            32,
+            83,
+            79
+        ],
+        "next": [
+            "chuansong_donghaiwan",
+            "[JumpBack]关闭整点活动弹窗"
+        ]
+    },
+    "chuansong_donghaiwan": {
+        "pre_delay": 2000,
+        "recognition": "TemplateMatch",
+        "template": [
+            "mijing/ditu_donghaiwan.png",
+            "mijing/ditu_donghaiwan1.png",
+            "mijing/ditu_donghaiwan2.png"
+        ],
+        "post_delay": 1500,
+        "action": "Click"
+    },
+    "click_tab_mijing": {
+        "pre_delay": 1500,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1500,
+        "next": [
+            "东海湾小地图打开成功",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "东海湾小地图打开成功": {
+        "recognition": "TemplateMatch",
+        "template": "mijing/donghaiwan_tab_panduan.png",
+        "roi": [
+            444,
+            56,
+            60,
+            64
+        ],
+        "next": [
+            "click_map_yunleyou"
+        ]
+    },
+    "click_map_yunleyou": {
+        "recognition": "OCR",
+        "expected": [
+            "云乐游"
+        ],
+        "roi": [
+            500,
+            382,
+            89,
+            37
+        ],
+        "action": "Click",
+        "target_offset": [
+            8,
+            4,
+            -10,
+            -4
+        ],
+        "post_delay": 5000,
+        "next": [
+            "mijingxiangyao",
+            "[JumpBack]秘境-云乐游失败-走活动入口"
+        ]
+    },
+    "mijingxiangyao": {
+        "recognition": "OCR",
+        "expected": [
+            "秘境降妖"
+        ],
+        "roi": [
+            921,
+            89,
+            324,
+            405
+        ],
+        "action": "Click",
+        "post_delay": 200,
+        "next": [
+            "识别拓印_停止",
+            "秘境降妖-选择模式",
+            "秘境降妖-海底秘境-继续挑战"
+        ]
+    },
+    "秘境降妖-选择模式": {
+        "recognition": "TemplateMatch",
+        "template": "mijing/mijing_moshi.png",
+        "roi": [
+            231,
+            85,
+            774,
+            106
+        ],
+        "next": [
+            "秘境降妖-选择海底秘境"
+        ]
+    },
+    "秘境降妖-选择海底秘境": {
+        "recognition": "OCR",
+        "expected": [
+            "进入"
+        ],
+        "roi": [
+            311,
+            610,
+            137,
+            44
+        ],
+        "action": "Click",
+        "next": [
+            "秘境降妖-海底秘境模式-确认"
+        ]
+    },
+    "秘境降妖-海底秘境模式-确认": {
+        "recognition": "TemplateMatch",
+        "template": "mijing/moshi_queding.png",
+        "roi": [
+            671,
+            405,
+            149,
+            59
+        ],
+        "action": "Click",
+        "next": [
+            "秘境降妖-海底秘境-继续挑战",
+            "[JumpBack]清理主界面使用-关闭"
+        ]
+    },
+    "秘境降妖-海底秘境-继续挑战": {
+        "recognition": "OCR",
+        "expected": [
+            "挑战"
+        ],
+        "roi": [
+            996,
+            481,
+            78,
+            179
+        ],
+        "action": "Click",
+        "post_delay": 200,
+        "next": [
+            "[JumpBack]海底秘境-关闭进入战斗",
+            "海底秘境-指定关卡结束任务",
+            "[JumpBack]秘境-点击进入战斗",
+            "[JumpBack]海底秘境-点击关卡",
+            "mijing_tongguan",
+            "mijing_shibai",
+            "[JumpBack]战斗中-等待20秒"
+        ]
+    },
+    "海底秘境-指定关卡结束任务": {
+        "focus": {
+            "Node.Recognition.Succeeded": "{name}"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "第25关"
+        ],
+        "roi": [
+            1014,
+            209,
+            101,
+            109
+        ],
+        "next": [
+            "[JumpBack]清理主界面使用-关闭",
+            "秘境-点击离开",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "海底秘境-点击关卡": {
+        "recognition": "OCR",
+        "expected": [
+            "第\\d*关"
+        ],
+        "roi": [
+            1014,
+            209,
+            101,
+            109
+        ],
+        "action": "Click",
+        "next": [
+            "秘境-点击进入战斗",
+            "战斗中-等待5秒"
+        ]
+    },
+    "秘境-点击进入战斗": {
+        "recognition": "OCR",
+        "expected": [
+            "进入战斗"
+        ],
+        "roi": [
+            939,
+            366,
+            285,
+            63
+        ],
+        "action": "Click"
+    },
+    "海底秘境-关闭进入战斗": {
+        "recognition": "OCR",
+        "expected": [
+            "进入战斗"
+        ],
+        "roi": [
+            939,
+            366,
+            285,
+            63
+        ],
+        "action": "Click",
+        "target": [
+            1039,
+            235,
+            79,
+            35
+        ]
+    },
+    "mijing_tongguan": {
+        "focus": {
+            "Node.Recognition.Succeeded": "秘境正常通关"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "通关"
+        ],
+        "roi": [
+            1014,
+            260,
+            122,
+            56
+        ],
+        "next": [
+            "秘境-点击离开"
+        ]
+    },
+    "mijing_shibai": {
+        "focus": {
+            "Node.Recognition.Succeeded": "秘境战斗失败，提前退出秘境任务。"
+        },
+        "recognition": "TemplateMatch",
+        "template": "mijing/mijing_shibai.png",
+        "roi": [
+            304,
+            130,
+            654,
+            275
+        ],
+        "next": [
+            "秘境-点击离开",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "秘境-点击离开": {
+        "recognition": "OCR",
+        "expected": "离开",
+        "roi": [
+            1135,
+            318,
+            145,
+            243
+        ],
+        "pre_delay": 1500,
+        "action": "Click",
+        "post_delay": 2000
+    },
+    "秘境降妖-点击日月之井": {
+        "recognition": "OCR",
+        "expected": [
+            "进入"
+        ],
+        "roi": [
+            776,
+            605,
+            205,
+            59
+        ],
+        "action": "Click",
+        "next": [
+            "秘境降妖-日月之井-确认"
+        ]
+    },
+    "秘境降妖-日月之井-确认": {
+        "recognition": "TemplateMatch",
+        "template": "mijing/moshi_queding.png",
+        "roi": [
+            671,
+            405,
+            149,
+            59
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "秘境降妖-日月之井-继续挑战",
+            "[JumpBack]清理主界面使用-关闭"
+        ]
+    },
+    "秘境降妖-日月之井-继续挑战": {
+        "recognition": "OCR",
+        "expected": [
+            "挑战"
+        ],
+        "roi": [
+            996,
+            481,
+            78,
+            179
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]日月之井-关闭进入战斗",
+            "日月之井-指定关卡结束任务",
+            "[JumpBack]秘境-点击进入战斗",
+            "[JumpBack]日月之井-点击关卡",
+            "日月之井-通关",
+            "日月之井-失败",
+            "[JumpBack]战斗中-等待20秒"
+        ]
+    },
+    "kk2": {
+        "next": [
+            "日月之井-指定关卡结束任务",
+            "[JumpBack]秘境-点击进入战斗",
+            "[JumpBack]日月之井-点击关卡",
+            "日月之井-通关",
+            "日月之井-失败",
+            "[JumpBack]战斗中-等待20秒"
+        ]
+    },
+    "日月之井-关闭进入战斗": {
+        "recognition": "OCR",
+        "expected": [
+            "进入战斗"
+        ],
+        "roi": [
+            939,
+            366,
+            285,
+            63
+        ],
+        "action": "Click",
+        "target": [
+            1039,
+            235,
+            79,
+            35
+        ]
+    },
+    "日月之井-指定关卡结束任务": {
+        "focus": {
+            "Node.Recognition.Succeeded": "{name}"
+        },
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            1012,
+            169,
+            115,
+            74
+        ],
+        "next": [
+            "[JumpBack]清理主界面使用-关闭",
+            "秘境-点击离开",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "日月之井-点击关卡": {
+        "recognition": "OCR",
+        "expected": [
+            "第\\d*关"
+        ],
+        "roi": [
+            1012,
+            169,
+            115,
+            74
+        ],
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "秘境-点击进入战斗",
+            "战斗中-等待5秒"
+        ]
+    },
+    "日月之井-通关": {
+        "focus": {
+            "Node.Recognition.Succeeded": "日月之井正常通关"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "通关"
+        ],
+        "roi": [
+            1012,
+            169,
+            115,
+            100
+        ],
+        "next": [
+            "[JumpBack]清理主界面使用-关闭",
+            "秘境-点击离开",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "日月之井-失败": {
+        "focus": {
+            "Node.Recognition.Succeeded": "日月之井战斗失败，提前退出日月之井任务。"
+        },
+        "recognition": "TemplateMatch",
+        "template": [
+            "mijing/mijing_shibai.png",
+            "mijing/mijing_shibai2.png",
+            "mijing/mijing_riyue_shibai.png"
+        ],
+        "roi": [
+            304,
+            130,
+            654,
+            375
+        ],
+        "next": [
+            "[JumpBack]清理主界面使用-关闭",
+            "秘境-点击离开",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "秘境-日月-点击离开": {
+        "recognition": "OCR",
+        "expected": [
+            "离开"
+        ],
+        "roi": [
+            1161,
+            353,
+            114,
+            196
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500
+    },
+    "秘境-云乐游失败-走活动入口": {
+        "max_hit": 1,
+        "pre_delay": 500,
+        "next": [
+            "[JumpBack]panduan_zhujiemian_ks",
+            "主界面-秘境降妖"
+        ]
+    },
+    "主界面-秘境降妖": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 2000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-秘境降妖",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-秘境降妖": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-秘境降妖-点击日常活动"
+        ]
+    },
+    "活动-秘境降妖-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-秘境降妖-向上滑动到顶端"
+        ]
+    },
+    "活动-秘境降妖-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-秘境降妖-开始",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-秘境降妖-开始": {
+        "recognition": "And",
+        "all_of": [
+            {
+                "sub_name": "rukou",
+                "recognition": "TemplateMatch",
+                "template": [
+                    "mijing/mijing_rukou.png"
+                ],
+                "roi": [
+                    316,
+                    76,
+                    834,
+                    433
+                ],
+                "green_mask": true,
+                "threshold": 0.9
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "秘境降妖"
+                ],
+                "roi": "rukou"
+            }
+        ],
+        "box_index": 0,
+        "next": [
+            "活动-秘境降妖-开始-点击参加"
+        ]
+    },
+    "活动-秘境降妖-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-秘境降妖-开始",
+        "action": "Click",
+        "post_delay": 4000,
+        "next": []
+    }
+}

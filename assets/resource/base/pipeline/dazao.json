@@ -1,0 +1,555 @@
+{
+    "dazao": {
+        "next": [
+            "打造-在长安主界面",
+            "[JumpBack]panduan_zhujiemian_ks",
+            "[JumpBack]打开大地图_69副本"
+        ]
+    },
+    "打造-在长安主界面": {
+        "recognition": "And",
+        "all_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "长安城"
+                ],
+                "roi": [
+                    108,
+                    22,
+                    117,
+                    31
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zonghe/jiahao.png"
+                ],
+                "roi": [
+                    1206,
+                    637,
+                    66,
+                    57
+                ]
+            }
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打造-展开菜单-加号",
+            "打造-展开菜单-乘号"
+        ]
+    },
+    "打造-展开菜单-加号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "打造-点击打造入口"
+        ]
+    },
+    "打造-展开菜单-乘号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "打造-点击打造入口"
+        ]
+    },
+    "打造-点击打造入口": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dazao/qianghua_rukou.png"
+        ],
+        "roi": [
+            531,
+            634,
+            439,
+            77
+        ],
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "打造-打开成功"
+        ]
+    },
+    "打造-打开成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dazao/dazao_active.png",
+            "dazao/dazao_inactive.png"
+        ],
+        "roi": [
+            1020,
+            21,
+            152,
+            190
+        ],
+        "action": "Click",
+        "next": [
+            "打造-打造装备-收集材料",
+            "打造-切换等级"
+        ]
+    },
+    "打造-切换等级": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dazao/dazao_active.png"
+        ],
+        "roi": [
+            1020,
+            21,
+            152,
+            190
+        ],
+        "next": [
+            "打造-切换等级-已展开等级界面",
+            "[JumpBack]打造-切换等级-点击展开等级界面"
+        ]
+    },
+    "打造-切换等级-点击展开等级界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dazao/zhankai_button.png"
+        ],
+        "roi": [
+            311,
+            42,
+            78,
+            61
+        ],
+        "threshold": [
+            0.7
+        ],
+        "action": "Click"
+    },
+    "打造-切换等级-已展开等级界面": {
+        "recognition": "OCR",
+        "expected": [
+            "全部"
+        ],
+        "roi": [
+            171,
+            109,
+            106,
+            53
+        ],
+        "action": "Click",
+        "next": [
+            "打造-切换等级-向上滑动三次-1"
+        ]
+    },
+    "打造-切换等级-向上滑动三次-1": {
+        "action": "Swipe",
+        "begin": [
+            353,
+            413
+        ],
+        "end": [
+            353,
+            213
+        ],
+        "next": [
+            "打造-切换等级-向上滑动三次-2"
+        ]
+    },
+    "打造-切换等级-向上滑动三次-2": {
+        "action": "Swipe",
+        "begin": [
+            353,
+            413
+        ],
+        "end": [
+            353,
+            213
+        ],
+        "next": [
+            "打造-切换等级-向上滑动三次-3"
+        ]
+    },
+    "打造-切换等级-向上滑动三次-3": {
+        "action": "Swipe",
+        "begin": [
+            353,
+            413
+        ],
+        "end": [
+            353,
+            213
+        ],
+        "next": [
+            "打造-切换等级-选择目标等级",
+            "[JumpBack]打造-切换等级-向下滑动"
+        ]
+    },
+    "打造-切换等级-向下滑动": {
+        "max_hit": 10,
+        "action": "Swipe",
+        "begin": [
+            353,
+            213
+        ],
+        "end": [
+            353,
+            283
+        ]
+    },
+    "打造-切换等级-结束过渡": {
+        "action": "Click",
+        "target": [
+            696,
+            140,
+            14,
+            13
+        ],
+        "next": [
+            "打造-切换装备-向下滑动三次-1"
+        ]
+    },
+    "打造-切换装备-向下滑动三次-1": {
+        "action": "Swipe",
+        "begin": [
+            235,
+            142
+        ],
+        "end": [
+            235,
+            542
+        ],
+        "next": [
+            "打造-切换装备-向下滑动三次-2"
+        ]
+    },
+    "打造-切换装备-向下滑动三次-2": {
+        "action": "Swipe",
+        "begin": [
+            235,
+            142
+        ],
+        "end": [
+            235,
+            542
+        ],
+        "next": [
+            "打造-切换装备-向下滑动三次-3"
+        ]
+    },
+    "打造-切换装备-向下滑动三次-3": {
+        "action": "Swipe",
+        "begin": [
+            235,
+            142
+        ],
+        "end": [
+            235,
+            542
+        ],
+        "next": [
+            "打造-切换装备-选择目标装备",
+            "[JumpBack]打造-切换装备-向上滑动"
+        ]
+    },
+    "打造-切换装备-向上滑动": {
+        "max_hit": 30,
+        "action": "Swipe",
+        "begin": [
+            235,
+            442
+        ],
+        "end": [
+            235,
+            302
+        ]
+    },
+    "打造-切换装备-选择目标装备": {
+        "recognition": "OCR",
+        "expected": [
+            "男衣"
+        ],
+        "roi": [
+            243,
+            96,
+            102,
+            543
+        ],
+        "action": "Click",
+        "next": [
+            "打造-打造装备-收集材料"
+        ]
+    },
+    "打造-切换等级-选择目标等级": {
+        "recognition": "OCR",
+        "expected": [
+            "60"
+        ],
+        "roi": [
+            303,
+            107,
+            142,
+            378
+        ],
+        "action": "Click",
+        "next": [
+            "打造-切换等级-结束过渡"
+        ]
+    },
+    "打造-打造装备-收集材料": {
+        "recognition": "OCR",
+        "expected": [
+            "夜魔披风"
+        ],
+        "roi": [
+            620,
+            391,
+            176,
+            70
+        ],
+        "next": [
+            "[JumpBack]打造-购买材料-购买制造书",
+            "[JumpBack]打造-购买材料-购买精铁",
+            "[JumpBack]打造-购买材料-购买打造符",
+            "[JumpBack]打造-购买材料-取消石头",
+            "打造-购买材料-点击打造"
+        ]
+    },
+    "打造-购买材料-点击打造": {
+        "recognition": "OCR",
+        "expected": [
+            "普通打造"
+        ],
+        "roi": [
+            566,
+            605,
+            270,
+            73
+        ],
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "[JumpBack]打造-购买材料-点击打造-确认",
+            "panduan_zhujiemian"
+        ]
+    },
+    "打造-购买材料-点击打造-确认": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            647,
+            419,
+            190,
+            76
+        ],
+        "action": "Click"
+    },
+    "打造-购买材料-取消石头": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "dazao/dazao_shitou_xuanzhong.png"
+        ],
+        "roi": [
+            942,
+            431,
+            110,
+            119
+        ],
+        "threshold": [
+            0.8
+        ],
+        "action": "Click"
+    },
+    "打造-购买材料-购买制造书": {
+        "recognition": "ColorMatch",
+        "upper": [
+            248,
+            90,
+            116
+        ],
+        "lower": [
+            158,
+            20,
+            16
+        ],
+        "roi": [
+            496,
+            201,
+            38,
+            24
+        ],
+        "count": 150,
+        "action": "Click",
+        "next": [
+            "打造-购买材料-点击商会"
+        ]
+    },
+    "打造-购买材料-购买精铁": {
+        "recognition": "ColorMatch",
+        "upper": [
+            248,
+            90,
+            116
+        ],
+        "lower": [
+            158,
+            20,
+            16
+        ],
+        "roi": [
+            497,
+            490,
+            38,
+            24
+        ],
+        "count": 150,
+        "action": "Click",
+        "next": [
+            "打造-购买材料-点击商会"
+        ]
+    },
+    "打造-购买材料-购买打造符": {
+        "recognition": "ColorMatch",
+        "upper": [
+            248,
+            90,
+            116
+        ],
+        "lower": [
+            158,
+            20,
+            16
+        ],
+        "roi": [
+            901,
+            198,
+            38,
+            24
+        ],
+        "count": 150,
+        "action": "Click",
+        "next": [
+            "打造-购买材料-点击摆摊"
+        ]
+    },
+    "打造-购买材料-点击商会": {
+        "recognition": "OCR",
+        "expected": [
+            "商会"
+        ],
+        "roi": [
+            585,
+            178,
+            407,
+            212
+        ],
+        "action": "Click",
+        "target_offset": [
+            0,
+            -50,
+            0,
+            0
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打造-购买材料-点击购买"
+        ]
+    },
+    "打造-购买材料-点击摆摊": {
+        "recognition": "OCR",
+        "expected": [
+            "摆摊"
+        ],
+        "roi": [
+            585,
+            284,
+            402,
+            196
+        ],
+        "action": "Click",
+        "target_offset": [
+            0,
+            -50,
+            0,
+            0
+        ],
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]打造-购买材料-点击摆摊-选中物品",
+            "打造-购买材料-点击购买"
+        ]
+    },
+    "打造-购买材料-点击摆摊-选中物品": {
+        "recognition": "ColorMatch",
+        "lower": [
+            234,
+            220,
+            201
+        ],
+        "upper": [
+            254,
+            240,
+            221
+        ],
+        "roi": [
+            960,
+            175,
+            40,
+            30
+        ],
+        "count": 500,
+        "action": "Click"
+    },
+    "打造-购买材料-点击购买": {
+        "recognition": "OCR",
+        "expected": [
+            "购买"
+        ],
+        "roi": [
+            927,
+            619,
+            184,
+            66
+        ],
+        "action": "Click",
+        "next": [
+            "[JumpBack]打造-购买材料-点击购买-确认",
+            "打造-购买材料-点击返回"
+        ]
+    },
+    "打造-购买材料-点击购买-确认": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            659,
+            423,
+            174,
+            78
+        ],
+        "action": "Click"
+    },
+    "打造-购买材料-点击返回": {
+        "action": "ClickKey",
+        "key": [
+            4
+        ]
+    }
+}

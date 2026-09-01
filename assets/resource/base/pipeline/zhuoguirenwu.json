@@ -1,0 +1,827 @@
+{
+    "zhuoguirenwu": {
+        "next": [
+            "识别位置-长安城-抓鬼-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "识别位置-长安城-抓鬼-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "点击任务栏-捉鬼任务",
+            "识别位置-长安城-抓鬼",
+            "[JumpBack]打开大地图_捉鬼"
+        ]
+    },
+    "识别位置-长安城-抓鬼": {
+        "recognition": "OCR",
+        "expected": [
+            "长安城"
+        ],
+        "roi": [
+            108,
+            22,
+            117,
+            31
+        ],
+        "post_delay": 3000,
+        "next": [
+            "打开小地图-钟馗"
+        ]
+    },
+    "打开大地图_捉鬼": {
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            41
+        ],
+        "post_delay": 1000,
+        "next": [
+            "传送长安城_捉鬼",
+            "[JumpBack]大地图界面-按键打开失败_点击图标"
+        ]
+    },
+    "传送长安城_捉鬼": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/tab_changancheng.png",
+            "zonghe/tab_changancheng2.png",
+            "zonghe/tab_changancheng3.png"
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "打开小地图-钟馗": {
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1000,
+        "next": [
+            "点击钟馗",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "点击钟馗": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zonghe/xiaoditu_CA.png"
+                ],
+                "roi": [
+                    114,
+                    69,
+                    1040,
+                    630
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "钟馗",
+                    "钟道",
+                    "钟",
+                    "道"
+                ],
+                "roi": [
+                    357,
+                    391,
+                    72,
+                    43
+                ]
+            }
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 3000,
+        "target": [
+            377,
+            403,
+            38,
+            19
+        ],
+        "next": [
+            "钟馗-捉鬼任务-循环",
+            "钟馗-捉鬼任务-已领取捉鬼任务"
+        ]
+    },
+    "钟馗-捉鬼任务-已领取捉鬼任务": {
+        "focus": {
+            "Node.Action.Succeeded": "{name}开始执行,已经领取抓鬼任务。"
+        },
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhuagui/zhuagui_yilingqurenwu1.png",
+            "zhuagui/zhuagui_yilingqurenwu2.png"
+        ],
+        "roi": [
+            872,
+            94,
+            355,
+            441
+        ],
+        "threshold": [
+            0.9
+        ],
+        "action": "ClickKey",
+        "key": [
+            4
+        ],
+        "post_delay": 2000,
+        "next": [
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "点击任务栏-捉鬼任务",
+            "[JumpBack]捉鬼-下滑任务栏"
+        ]
+    },
+    "钟馗-捉鬼任务-循环": {
+        "focus": {
+            "Node.Action.Succeeded": "{name}开始执行,领取抓鬼任务成功，开始本轮抓鬼"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "捉鬼任务"
+        ],
+        "roi": [
+            925,
+            73,
+            312,
+            482
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "识别拓印_停止",
+            "[JumpBack]抓鬼领取双倍弹窗",
+            "[JumpBack]捉鬼-没有辅助提示-点击取消",
+            "[JumpBack]抓鬼不足五人-图片识别",
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "点击任务栏-捉鬼任务",
+            "[JumpBack]捉鬼-下滑任务栏"
+        ]
+    },
+    "展开-首页任务栏": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/rwl_suojin.png",
+            "zonghe/rwl_suojin2.png"
+        ],
+        "roi": [
+            1200,
+            114,
+            79,
+            62
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "任务栏切换为任务": {
+        "recognition": "ColorMatch",
+        "upper": [
+            177,
+            175,
+            145
+        ],
+        "lower": [
+            28,
+            31,
+            22
+        ],
+        "roi": [
+            1047,
+            119,
+            35,
+            35
+        ],
+        "count": 950,
+        "pre_delay": 1000,
+        "action": "Click",
+        "target": [
+            1044,
+            115,
+            101,
+            50
+        ],
+        "post_delay": 1000
+    },
+    "捉鬼-下滑任务栏": {
+        "max_hit": 4,
+        "post_delay": 1000,
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "begin": [
+                    1147,
+                    207,
+                    1,
+                    1
+                ],
+                "end": [
+                    1138,
+                    403,
+                    1,
+                    1
+                ]
+            }
+        ]
+    },
+    "捉鬼-没有辅助提示-点击取消": {
+        "recognition": "OCR",
+        "expected": [
+            "取消"
+        ],
+        "roi": [
+            403,
+            367,
+            265,
+            124
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "捉鬼-领取双倍点数弹窗": {
+        "recognition": "OCR",
+        "expected": [
+            "双倍点数不足，是否领取100点双倍？"
+        ],
+        "roi": [
+            430,
+            300,
+            393,
+            100
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "target": [
+            718,
+            403,
+            57,
+            31
+        ],
+        "post_delay": 1000
+    },
+    "mmzhuagui": {
+        "next": [
+            "点击任务栏-捉鬼任务",
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]捉鬼-下滑任务栏"
+        ]
+    },
+    "捉鬼-领取任务失败-再次尝试领取-打开小地图": {
+        "max_hit": 1,
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1000,
+        "next": [
+            "捉鬼-领取任务失败-再次尝试领取-点击钟馗",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "捉鬼-领取任务失败-再次尝试领取-点击钟馗": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zonghe/xiaoditu_CA.png"
+                ],
+                "roi": [
+                    114,
+                    69,
+                    1040,
+                    630
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "钟馗",
+                    "钟道",
+                    "钟",
+                    "道"
+                ],
+                "roi": [
+                    357,
+                    391,
+                    72,
+                    43
+                ]
+            }
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 3000,
+        "target": [
+            377,
+            403,
+            38,
+            19
+        ],
+        "next": [
+            "捉鬼-领取任务失败-再次尝试领取-点击捉鬼任务"
+        ]
+    },
+    "捉鬼-领取任务失败-再次尝试领取-点击捉鬼任务": {
+        "recognition": "OCR",
+        "expected": [
+            "捉鬼任务"
+        ],
+        "roi": [
+            925,
+            73,
+            312,
+            482
+        ],
+        "pre_delay": 500,
+        "action": "Click"
+    },
+    "点击任务栏-捉鬼任务": {
+        "recognition": "OCR",
+        "expected": [
+            "捉鬼[(（]\\d*/\\d*[)）]",
+            "捉拿.*鬼",
+            "千年厉鬼"
+        ],
+        "roi": [
+            1035,
+            170,
+            243,
+            334
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "next": [
+            "[JumpBack]捉鬼-领取双倍点数弹窗",
+            "抓鬼一轮完成",
+            "[JumpBack]自动寻路中-图片识别",
+            "[JumpBack]战斗中-等待100秒",
+            "[JumpBack]抓鬼-点击任务栏-通用",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]关闭福利弹窗"
+        ]
+    },
+    "抓鬼一轮完成": {
+        "focus": {
+            "Node.Recognition.Succeeded": "{name} 识别命中，抓鬼一轮完成"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "少侠已经捉完1轮鬼，是否继续捉鬼？",
+            "少侠已经捉完1轮鬼，是否继续捉鬼"
+        ],
+        "roi": [
+            420,
+            270,
+            450,
+            110
+        ],
+        "action": "Click",
+        "target": [
+            718,
+            403,
+            57,
+            31
+        ],
+        "post_delay": 5000,
+        "next": [
+            "[JumpBack]抓鬼一轮完成-再次点击确定",
+            "捉鬼-队伍人员满员判断"
+        ]
+    },
+    "12": {},
+    "抓鬼一轮完成-再次点击确定": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zhuagui/zhuaguijiesu3.png"
+                ],
+                "roi": [
+                    654,
+                    370,
+                    180,
+                    96
+                ],
+                "threshold": 0.9
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "确定"
+                ],
+                "roi": [
+                    385,
+                    225,
+                    540,
+                    325
+                ]
+            }
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            718,
+            403,
+            57,
+            31
+        ],
+        "post_delay": 1000
+    },
+    "抓鬼轮数": {
+        "action": "Custom",
+        "custom_action": "countZG",
+        "custom_action_param": {
+            "target_count": 2
+        }
+    },
+    "抓鬼轮次计算-agent": {
+        "action": "Custom",
+        "custom_action": "countZG",
+        "custom_action_param": {
+            "count": 1,
+            "target_count": 2,
+            "nextTask": "panduan_zhujiemian",
+            "LoopNode": "钟馗-捉鬼任务-循环"
+        }
+    },
+    "抓鬼轮次计算-max": {
+        "max_hit": 1,
+        "next": [
+            "钟馗-捉鬼任务-循环",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]抓鬼-关闭组队后打开小地图"
+        ]
+    },
+    "捉鬼-结束": {
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "捉鬼-队伍人员满员判断": {
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "post_delay": 2000,
+        "key": [
+            57,
+            48
+        ],
+        "next": [
+            "捉鬼-进入组队界面成功",
+            "[JumpBack]捉鬼-取消钟馗接取任务列表",
+            "[JumpBack]队伍界面-按键打开失败-点击队伍图标"
+        ]
+    },
+    "捉鬼-取消钟馗接取任务列表": {
+        "recognition": "OCR",
+        "expected": [
+            "钟馗",
+            "钟道",
+            "钟",
+            "道",
+            "馗"
+        ],
+        "roi": [
+            91,
+            646,
+            204,
+            74
+        ],
+        "replace": [
+            "道",
+            "馗"
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "捉鬼-进入组队界面成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-duiwu.png"
+        ],
+        "roi": [
+            0,
+            0,
+            229,
+            106
+        ],
+        "threshold": 0.9,
+        "next": [
+            "抓鬼-未识别队伍离线/暂离",
+            "[JumpBack]抓鬼-识别队伍离线/暂离"
+        ]
+    },
+    "抓鬼-识别队伍离线/暂离": {
+        "recognition": "OCR",
+        "expected": [
+            "离线",
+            "暂离"
+        ],
+        "roi": [
+            341,
+            432,
+            757,
+            41
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "抓鬼-踢出离线（暂离）人员"
+        ]
+    },
+    "抓鬼-踢出离线（暂离）人员": {
+        "recognition": "OCR",
+        "expected": [
+            "请离队伍"
+        ],
+        "roi": [
+            336,
+            153,
+            767,
+            295
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "next": [
+            "捉鬼-点击自动匹配"
+        ]
+    },
+    "捉鬼-点击自动匹配": {
+        "recognition": "OCR",
+        "expected": "自动匹配",
+        "roi": [
+            1024,
+            57,
+            152,
+            60
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 2000
+    },
+    "抓鬼-未识别队伍离线/暂离": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "离线",
+            "暂离"
+        ],
+        "roi": [
+            341,
+            433,
+            749,
+            40
+        ],
+        "next": [
+            "捉鬼-点击自动匹配2",
+            "捉鬼-未识别到自动匹配2"
+        ]
+    },
+    "捉鬼-点击自动匹配2": {
+        "recognition": "OCR",
+        "expected": "自动匹配",
+        "roi": [
+            1024,
+            57,
+            152,
+            60
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "抓鬼-关闭组队界面"
+        ]
+    },
+    "捉鬼-未识别到自动匹配2": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": "自动匹配",
+        "roi": [
+            1024,
+            57,
+            152,
+            60
+        ],
+        "next": [
+            "抓鬼-关闭组队界面"
+        ]
+    },
+    "抓鬼-关闭组队界面": {
+        "recognition": "TemplateMatch",
+        "template": "duiwu/duiwu-guanbi.png",
+        "roi": [
+            1153,
+            0,
+            100,
+            98
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "钟馗-捉鬼任务-循环",
+            "[JumpBack]抓鬼-关闭组队后打开小地图"
+        ]
+    },
+    "抓鬼-关闭组队后打开小地图": {
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1000,
+        "next": [
+            "抓鬼-关闭组队后打开小地图点击钟馗",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "抓鬼-关闭组队后打开小地图点击钟馗": {
+        "recognition": "OCR",
+        "expected": [
+            "钟馗",
+            "钟道",
+            "钟",
+            "道",
+            "馗"
+        ],
+        "replace": [
+            "道",
+            "馗"
+        ],
+        "roi": [
+            357,
+            391,
+            72,
+            43
+        ],
+        "action": "Click",
+        "post_delay": 3000,
+        "target_offset": [
+            0,
+            0,
+            -4,
+            -8
+        ]
+    },
+    "捉鬼-fuben桥接": {
+        "max_hit": 1,
+        "next": [
+            "识别位置-长安城-抓鬼-过渡"
+        ]
+    },
+    "抓鬼不足五人-图片识别": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhuagui/buzu5ren.png"
+        ],
+        "roi": [
+            384,
+            224,
+            502,
+            280
+        ],
+        "next": [
+            "抓鬼不足五人-点击取消"
+        ]
+    },
+    "抓鬼不足五人-点击取消": {
+        "recognition": "OCR",
+        "expected": [
+            "取消"
+        ],
+        "roi": "抓鬼不足五人-图片识别",
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "抓鬼不足五人-点击钟馗"
+        ]
+    },
+    "抓鬼不足五人-点击钟馗": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zhuagui/zhongkui.png"
+                ],
+                "roi": [
+                    294,
+                    102,
+                    583,
+                    386
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "钟馗",
+                    "钟道",
+                    "钟",
+                    "道"
+                ],
+                "roi": [
+                    186,
+                    157,
+                    853,
+                    426
+                ]
+            }
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500,
+        "target_offset": [
+            0,
+            0,
+            -4,
+            -8
+        ],
+        "next": [
+            "抓鬼不足五人-捉鬼任务"
+        ]
+    },
+    "抓鬼不足五人-捉鬼任务": {
+        "recognition": "OCR",
+        "expected": [
+            "捉鬼任务"
+        ],
+        "roi": [
+            925,
+            73,
+            312,
+            482
+        ],
+        "action": "Click",
+        "post_delay": 2000
+    },
+    "抓鬼领取双倍弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhuagui/zhuagui_shuangbei.png"
+        ],
+        "roi": [
+            402,
+            263,
+            475,
+            196
+        ],
+        "pre_delay": 1000,
+        "next": [
+            "抓鬼关闭领取双倍弹窗-点击确定"
+        ]
+    },
+    "抓鬼关闭领取双倍弹窗-点击确定": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": "抓鬼领取双倍弹窗",
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1500
+    },
+    "抓鬼-点击任务栏-通用": {
+        "recognition": "OCR",
+        "expected": [
+            "捉鬼[(（]\\d*/\\d*[)）]",
+            "捉拿.*鬼",
+            "千年厉鬼"
+        ],
+        "roi": [
+            1032,
+            165,
+            247,
+            300
+        ],
+        "pre_delay": 1000,
+        "action": "Click"
+    }
+}

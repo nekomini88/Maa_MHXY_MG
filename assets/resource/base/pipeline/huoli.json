@@ -1,0 +1,95 @@
+{
+    "huoli": {
+        "next": [
+            "打开人物界面-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "打开人物界面-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            51
+        ],
+        "post_delay": 2000,
+        "next": [
+            "打开人物界面-成功",
+            "[JumpBack]人物界面-按键打开失败-点击图标"
+        ]
+    },
+    "人物界面-按键打开失败-点击图标": {
+        "max_hit": 1,
+        "action": "Click",
+        "target": [
+            1185,
+            5,
+            91,
+            92
+        ],
+        "post_delay": 1000
+    },
+    "打开人物界面-成功": {
+        "recognition": "OCR",
+        "expected": [
+            "人物属性"
+        ],
+        "roi": [
+            531,
+            3,
+            175,
+            60
+        ],
+        "next": [
+            "点击活力使用"
+        ]
+    },
+    "点击活力使用": {
+        "recognition": "OCR",
+        "expected": [
+            "使用"
+        ],
+        "roi": [
+            977,
+            232,
+            120,
+            71
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "点击打工-agnet"
+        ]
+    },
+    "点击打工-agnet": {
+        "recognition": "Custom",
+        "custom_recognition": "OCRVitality",
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "点击打工": {
+        "recognition": "OCR",
+        "expected": [
+            "打工"
+        ],
+        "roi": [
+            891,
+            202,
+            152,
+            438
+        ],
+        "action": "Click"
+    }
+}

@@ -1,0 +1,266 @@
+{
+    "wuxingxiuye": {
+        "next": [
+            "主界面-五行修业",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "主界面-五行修业": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]baotu_huadong_down",
+            "五行修业-领取任务成功",
+            "活动-五行修业",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-五行修业": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-五行修业-点击竞技休闲"
+        ]
+    },
+    "活动-五行修业-点击竞技休闲": {
+        "recognition": "OCR",
+        "expected": [
+            "竞技休闲"
+        ],
+        "roi": [
+            142,
+            237,
+            151,
+            55
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-五行修业-向上滑动到顶端"
+        ]
+    },
+    "活动-五行修业-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-五行修业-开始",
+            "活动-五行修业-已完成",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-五行修业-已完成": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wuxing/wuxing_yiwancheng1.png"
+        ],
+        "green_mask": true,
+        "threshold": 0.9,
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "pre_delay": 500,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-五行修业-开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wuxing/wuxingxiuye1.png"
+        ],
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "threshold": 0.9,
+        "next": [
+            "活动-五行修业-开始-点击参加"
+        ]
+    },
+    "活动-五行修业-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-五行修业-开始",
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 5000,
+        "post_wait_freezes": 2000,
+        "next": [
+            "五行修业-点击五行修业"
+        ]
+    },
+    "五行修业-点击五行修业": {
+        "recognition": "OCR",
+        "expected": [
+            "五行修业"
+        ],
+        "roi": [
+            920,
+            285,
+            326,
+            271
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "五行修业-点击领取任务"
+        ]
+    },
+    "五行修业-点击领取任务": {
+        "recognition": "OCR",
+        "expected": [
+            "领取任务"
+        ],
+        "roi": [
+            920,
+            285,
+            326,
+            271
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "五行修业-点击领取十环"
+        ]
+    },
+    "五行修业-点击领取十环": {
+        "recognition": "OCR",
+        "expected": [
+            "领取十环"
+        ],
+        "roi": [
+            920,
+            285,
+            326,
+            271
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "五行修业-点击领取十环-确定"
+        ]
+    },
+    "五行修业-点击领取十环-确定": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            677,
+            426,
+            146,
+            53
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "五行修业-领取任务成功"
+        ]
+    },
+    "五行修业-领取任务成功": {
+        "recognition": "OCR",
+        "expected": [
+            "五行修业[(（]\\d*/\\d*[)）]"
+        ],
+        "roi": [
+            1037,
+            165,
+            243,
+            394
+        ],
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "五行修业-任务完成-OCR",
+            "[JumpBack]战斗中-等待5秒",
+            "[JumpBack]自动寻路中-图片识别"
+        ]
+    },
+    "五行修业-任务完成-OCR": {
+        "recognition": "OCR",
+        "expected": [
+            "五行修业[(（]10/10[)）]"
+        ],
+        "roi": [
+            1037,
+            165,
+            243,
+            394
+        ],
+        "post_delay": 5000,
+        "post_wait_freezes": 2000,
+        "next": [
+            "[JumpBack]战斗中-等待10秒",
+            "panduan_zhujiemian"
+        ]
+    }
+}

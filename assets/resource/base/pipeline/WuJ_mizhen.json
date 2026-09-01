@@ -1,0 +1,234 @@
+{
+    "bangpaimizhen": {
+        "next": [
+            "主界面-迷阵",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "主界面-迷阵": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_delay": 2000,
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-迷阵",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-迷阵": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-迷阵-点击日常活动"
+        ]
+    },
+    "活动-迷阵-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-迷阵-向上滑动到顶端"
+        ]
+    },
+    "活动-迷阵-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-迷阵-开始",
+            "活动-迷阵-已完成",
+            "活动-迷阵-未开始",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-迷阵-未开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wujian/mz/bangpaimizhen_weikaishi.png"
+        ],
+        "threshold": 0.9,
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-迷阵-已完成": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wujian/mz/bangpaimizhen_yiwancheng.png"
+        ],
+        "threshold": 0.9,
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-迷阵-开始": {
+        "recognition": "TemplateMatch",
+        "template": [],
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "threshold": 0.9,
+        "next": [
+            "活动-迷阵-开始-点击参加"
+        ]
+    },
+    "活动-迷阵-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-迷阵-开始",
+        "pre_delay": 2000,
+        "action": "Click",
+        "post_delay": 4000,
+        "next": [
+            "点击迷阵人员-图片"
+        ]
+    },
+    "点击迷阵人员-图片": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wujian/mz/mizhen_chuansongren.png",
+            "wujian/mz/mizhen_chuansongren2.png",
+            "wujian/mz/mizhen_chuansongren3.png",
+            "wujian/mz/mizhen_chuansongren4.png"
+        ],
+        "action": "Click",
+        "post_delay": 3000,
+        "next": [
+            "点击开始迷阵"
+        ]
+    },
+    "点击开始迷阵": {
+        "recognition": "OCR",
+        "expected": "传送到帮派迷阵",
+        "roi": [
+            926,
+            336,
+            319,
+            99
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "进入迷阵界面"
+        ]
+    },
+    "进入迷阵界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wujian/mz/mizhenjiemmian.png"
+        ],
+        "roi": [
+            552,
+            0,
+            178,
+            76
+        ],
+        "next": [
+            "迷阵到达终点-弹窗",
+            "迷阵到达终点地板",
+            "[JumpBack]迷阵走路agent"
+        ]
+    },
+    "迷阵到达终点-弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wujian/mz/wancheng2.png",
+            "wujian/mz/wanc.png"
+        ],
+        "roi": [
+            396,
+            242,
+            490,
+            234
+        ]
+    },
+    "迷阵到达终点地板": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wujian/mz/mz_mubiao_diban.png",
+            "wujian/mz/mz_mubiao_diban2.png"
+        ],
+        "threshold": 0.9
+    },
+    "迷阵走路agent": {}
+}

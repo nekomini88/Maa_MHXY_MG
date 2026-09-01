@@ -1,0 +1,167 @@
+{
+    "chushoushanghui": {
+        "next": [
+            "打开摆摊",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "打开摆摊": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 200,
+        "action": "ClickKey",
+        "key": [
+            57,
+            29
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打开摆摊成功",
+            "[JumpBack]摆摊界面-按键打开失败-点击摆摊图标"
+        ]
+    },
+    "摆摊界面-按键打开失败-点击摆摊图标": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "shangcheng/shangcheng.png"
+                ],
+                "threshold": [
+                    0.9
+                ],
+                "roi": [
+                    2,
+                    175,
+                    86,
+                    89
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "商城"
+                ],
+                "roi": [
+                    2,
+                    175,
+                    86,
+                    89
+                ]
+            }
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "打开摆摊成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "shangcheng/baitan_zhujiemian.png",
+            "shangcheng/baitan_zhujiemian2.png",
+            "shangcheng/baitan_zhujiemian3.png"
+        ],
+        "roi": [
+            435,
+            0,
+            382,
+            119
+        ],
+        "threshold": [
+            0.8
+        ],
+        "next": [
+            "点击商会"
+        ]
+    },
+    "点击商会": {
+        "recognition": "OCR",
+        "expected": [
+            "商会"
+        ],
+        "roi": [
+            1127,
+            152,
+            51,
+            85
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "next": [
+            "点击我要出售"
+        ]
+    },
+    "点击我要出售": {
+        "recognition": "OCR",
+        "expected": [
+            "我要出售"
+        ],
+        "roi": [
+            373,
+            82,
+            158,
+            44
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "next": [
+            "出售完成",
+            "[JumpBack]开始出售"
+        ]
+    },
+    "出售完成": {
+        "inverse": true,
+        "recognition": "TemplateMatch",
+        "template": "beibao/shanghui_chushou.png",
+        "roi": [
+            190,
+            279,
+            52,
+            47
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "开始出售": {
+        "recognition": "TemplateMatch",
+        "template": "beibao/shanghui_chushou.png",
+        "roi": [
+            190,
+            279,
+            52,
+            47
+        ],
+        "pre_delay": 200,
+        "action": "Click",
+        "post_delay": 200,
+        "next": [
+            "点击出售"
+        ]
+    },
+    "点击出售": {
+        "recognition": "OCR",
+        "expected": [
+            "出售",
+            "出",
+            "售"
+        ],
+        "roi": [
+            936,
+            629,
+            166,
+            56
+        ],
+        "action": "Click"
+    }
+}

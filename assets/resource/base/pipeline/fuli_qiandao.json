@@ -1,0 +1,304 @@
+{
+    "fuli_qiandao": {
+        "next": [
+            "fuli_qiandao-ocr",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "fuli_qiandao-ocr": {
+        "recognition": "OCR",
+        "expected": [
+            "福利"
+        ],
+        "roi": [
+            1,
+            112,
+            72,
+            65
+        ],
+        "pre_wait_freezes": 1,
+        "action": "ClickKey",
+        "key": [
+            57,
+            32
+        ],
+        "post_delay": 1000,
+        "next": [
+            "dakaiguaguale",
+            "[JumpBack]福利界面-按键失败-点击福利图标"
+        ]
+    },
+    "福利界面-按键失败-点击福利图标": {
+        "recognition": "OCR",
+        "expected": [
+            "福利"
+        ],
+        "roi": [
+            1,
+            112,
+            72,
+            65
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "dakaiguaguale": {
+        "recognition": "OCR",
+        "expected": [
+            "打开刮刮乐"
+        ],
+        "roi": [
+            877,
+            590,
+            229,
+            79
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]刮刮乐识别是否有高价值物品",
+            "qiandaohuadong"
+        ]
+    },
+    "刮刮乐识别是否有高价值物品": {
+        "max_hit": 1,
+        "inverse": true,
+        "recognition": "TemplateMatch",
+        "template": [
+            "qiandao/FL_qinglongshi.png",
+            "qiandao/FL_baihushi.png",
+            "qiandao/FL_zhuqueshi.png",
+            "qiandao/FL_xuanwushi.png",
+            "qiandao/FL_jinliulu.png",
+            "qiandao/FL_gaoshoujue.png",
+            "qiandao/FL_qianyeliulu.png",
+            "qiandao/FL_chaojihuanshedan.png",
+            "qiandao/FL_shenshoulingshi.png"
+        ],
+        "roi": [
+            572,
+            173,
+            538,
+            106
+        ],
+        "next": [
+            "刮刮乐未识别到高价值物品-点击刷新"
+        ]
+    },
+    "刮刮乐未识别到高价值物品-点击刷新": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qiandao/shuaxin.png"
+        ],
+        "roi": [
+            568,
+            89,
+            435,
+            84
+        ],
+        "pre_delay": 300,
+        "action": "Click"
+    },
+    "qiandaohuadong": {
+        "max_hit": 2,
+        "action": "Swipe",
+        "begin": [
+            633,
+            365,
+            1,
+            1
+        ],
+        "end": [
+            1048,
+            364,
+            1,
+            1
+        ],
+        "duration": 500,
+        "next": [
+            "qiandaohuadong2"
+        ]
+    },
+    "qiandaohuadong2": {
+        "max_hit": 2,
+        "action": "Swipe",
+        "begin": [
+            615,
+            383,
+            1,
+            1
+        ],
+        "end": [
+            1051,
+            383,
+            1,
+            1
+        ],
+        "duration": 500,
+        "next": [
+            "qiandaohuadong3"
+        ]
+    },
+    "qiandaohuadong3": {
+        "max_hit": 2,
+        "action": "Swipe",
+        "begin": [
+            629,
+            418,
+            1,
+            1
+        ],
+        "end": [
+            1053,
+            418,
+            1,
+            1
+        ],
+        "duration": 500,
+        "next": [
+            "qiandaohuadong4"
+        ]
+    },
+    "qiandaohuadong4": {
+        "max_hit": 2,
+        "action": "Swipe",
+        "begin": [
+            606,
+            399,
+            1,
+            1
+        ],
+        "end": [
+            1069,
+            401,
+            1,
+            1
+        ],
+        "duration": 500,
+        "next": [
+            "qiandaohuadong5"
+        ]
+    },
+    "qiandaohuadong5": {
+        "max_hit": 2,
+        "action": "Swipe",
+        "begin": [
+            617,
+            449,
+            1,
+            1
+        ],
+        "end": [
+            1056,
+            450,
+            1,
+            1
+        ],
+        "duration": 500,
+        "next": [
+            "qiandaohuadong6"
+        ]
+    },
+    "qiandaohuadong6": {
+        "max_hit": 2,
+        "action": "Swipe",
+        "begin": [
+            597,
+            462,
+            1,
+            1
+        ],
+        "end": [
+            1048,
+            472,
+            1,
+            1
+        ],
+        "duration": 500,
+        "next": [
+            "click_fuli_leiji1"
+        ]
+    },
+    "click_fuli_leiji1": {
+        "recognition": "TemplateMatch",
+        "template": "qiandao/leiji2.png",
+        "roi": [
+            789,
+            638,
+            98,
+            44
+        ],
+        "action": "Click",
+        "next": [
+            "click_fuli_leiji1_lingqu"
+        ]
+    },
+    "click_fuli_leiji1_lingqu": {
+        "max_hit": 2,
+        "action": "Click",
+        "target": [
+            800,
+            564,
+            78,
+            77
+        ],
+        "next": [
+            "click_fuli_leiji2"
+        ]
+    },
+    "click_fuli_leiji2": {
+        "recognition": "TemplateMatch",
+        "template": "qiandao/leiji5.png",
+        "roi": [
+            903,
+            639,
+            99,
+            41
+        ],
+        "action": "Click",
+        "next": [
+            "click_fuli_leiji2_lingqu"
+        ]
+    },
+    "click_fuli_leiji2_lingqu": {
+        "max_hit": 2,
+        "action": "Click",
+        "target": [
+            915,
+            564,
+            76,
+            72
+        ],
+        "next": [
+            "click_fuli_leiji3"
+        ]
+    },
+    "click_fuli_leiji3": {
+        "recognition": "TemplateMatch",
+        "template": "qiandao/leiji7.png",
+        "roi": [
+            1019,
+            639,
+            101,
+            41
+        ],
+        "action": "Click",
+        "next": [
+            "click_fuli_leiji3_lingqu"
+        ]
+    },
+    "click_fuli_leiji3_lingqu": {
+        "max_hit": 2,
+        "action": "Click",
+        "target": [
+            1031,
+            561,
+            76,
+            77
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

@@ -1,0 +1,377 @@
+{
+    "chongwuqifu": {
+        "next": [
+            "已经在-祈福庭院",
+            "宠物祈福",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "宠物祈福": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "target": [
+            1028,
+            6,
+            68,
+            69
+        ],
+        "post_delay": 1000,
+        "next": [
+            "点击凤凰记忆"
+        ]
+    },
+    "点击凤凰记忆": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/fenghuangjiyi.png"
+        ],
+        "roi": [
+            86,
+            223,
+            85,
+            161
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "点击祈福庭院"
+        ]
+    },
+    "点击祈福庭院": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/qifutingyuan.png"
+        ],
+        "roi": [
+            102,
+            533,
+            126,
+            97
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "已经在-祈福庭院",
+            "[JumpBack]再次点击祈福庭院"
+        ]
+    },
+    "再次点击祈福庭院": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/qifutingyuan.png"
+        ],
+        "roi": [
+            102,
+            533,
+            126,
+            97
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500
+    },
+    "已经在-祈福庭院": {
+        "focus": {
+            "Node.Recognition.Succeeded": "{name} 识别命中，准备开始执行宠物祈福"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "祈福庭院"
+        ],
+        "roi": [
+            106,
+            22,
+            121,
+            34
+        ],
+        "post_delay": 2000,
+        "next": [
+            "识别祈福神树",
+            "[JumpBack]移动到神树附近"
+        ]
+    },
+    "移动到神树附近": {
+        "pre_delay": 1500,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1500,
+        "next": [
+            "祈福-打开小地图成功-开始移动",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "小地图-按键打开失败-点击小地图图标": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/xiaoditu_taiyang.png",
+            "zonghe/xiaoditu_yueliang.png"
+        ],
+        "roi": [
+            58,
+            1,
+            75,
+            79
+        ],
+        "threshold": [
+            0.85
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "祈福-打开小地图成功-开始移动": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/qifu_tab.png"
+        ],
+        "threshold": [
+            0.9
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            635,
+            372,
+            17,
+            26
+        ],
+        "post_delay": 3000,
+        "next": [
+            "祈福-关闭祈福庭院小地图"
+        ]
+    },
+    "祈福-关闭祈福庭院小地图": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/qifu_tab_cha.png"
+        ],
+        "threshold": [
+            0.9
+        ],
+        "roi": [
+            1032,
+            42,
+            108,
+            99
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500
+    },
+    "识别祈福神树": {
+        "recognition": "OCR",
+        "expected": [
+            "祈福神树"
+        ],
+        "replace": [
+            [
+                "斤",
+                "祈"
+            ],
+            [
+                "材",
+                "树"
+            ]
+        ],
+        "roi": [
+            202,
+            105,
+            893,
+            475
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "点击祈福",
+            "祈福-已完成/未开通"
+        ]
+    },
+    "祈福-已完成/未开通": {
+        "recognition": "OCR",
+        "expected": [
+            "祈福[（(]1/1[)）]",
+            "祈福[（(]0/0[)）]"
+        ],
+        "roi": [
+            905,
+            165,
+            348,
+            339
+        ],
+        "post_delay": 1000,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "点击祈福": {
+        "recognition": "OCR",
+        "expected": [
+            "祈福[（(]0/1[)）]"
+        ],
+        "roi": [
+            905,
+            165,
+            348,
+            339
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "进入选择召唤零界面"
+        ]
+    },
+    "进入选择召唤零界面": {
+        "recognition": "OCR",
+        "expected": [
+            "选择召唤灵"
+        ],
+        "post_delay": 1500,
+        "next": [
+            "默认选择第一个",
+            "[JumpBack]祈福-选择宠物-向上滑动"
+        ]
+    },
+    "祈福-选择宠物-向上滑动": {
+        "max_hit": 10,
+        "action": "Swipe",
+        "begin": [
+            645,
+            463
+        ],
+        "end": [
+            645,
+            328
+        ],
+        "post_delay": 1000
+    },
+    "默认选择第一个": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/qifuONE.png"
+        ],
+        "roi": [
+            473,
+            163,
+            94,
+            100
+        ],
+        "threshold": [
+            0.9
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "识别到对号点击确定"
+        ]
+    },
+    "用户选择需要祈福的召唤灵": {
+        "recognition": "OCR",
+        "expected": [
+            ""
+        ],
+        "replace": [
+            [
+                "昂",
+                "昴"
+            ]
+        ],
+        "roi": [
+            353,
+            163,
+            579,
+            415
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "识别到对号点击确定"
+        ]
+    },
+    "识别到对号点击确定": {
+        "focus": {
+            "Node.Action.Succeeded": "{name}开始执行,宠物祈福完成"
+        },
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/duihao1.png",
+            "qifu/duihao2.png"
+        ],
+        "roi": [
+            339,
+            75,
+            620,
+            546
+        ],
+        "threshold": [
+            0.9
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            542,
+            592,
+            193,
+            48
+        ],
+        "post_delay": 2500,
+        "next": [
+            "宠物祈福完成-满99领取内丹",
+            "宠物祈福完成"
+        ]
+    },
+    "宠物祈福完成-满99领取内丹": {
+        "focus": {
+            "Node.Action.Succeeded": "获得宠物专属内丹"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "领取"
+        ],
+        "roi": [
+            979,
+            441,
+            108,
+            62
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "宠物祈福完成": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qifu/qifuwancheng.png",
+            "qifu/qifuwancheng2.png",
+            "qifu/qifuwancheng3.png"
+        ],
+        "roi": [
+            672,
+            147,
+            132,
+            398
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

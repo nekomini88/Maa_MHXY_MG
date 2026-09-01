@@ -1,0 +1,363 @@
+{
+    "baotu_renwu": {
+        "next": [
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]baotu_huadong_down",
+            "已领取宝图任务",
+            "主界面-宝图任务",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "baotu_huadong_down": {
+        "max_hit": 1,
+        "action": "Swipe",
+        "begin": [
+            1145,
+            234,
+            1,
+            1
+        ],
+        "end": [
+            1149,
+            419,
+            1,
+            1
+        ],
+        "post_delay": 1000
+    },
+    "主界面-宝图任务": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 2000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-宝图任务",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-宝图任务": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-宝图任务-点击日常活动"
+        ]
+    },
+    "活动-宝图任务-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-宝图任务-向上滑动到顶端"
+        ]
+    },
+    "活动-宝图任务-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-宝图任务-开始",
+            "活动-宝图任务-已完成",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-宝图任务-已完成": {
+        "recognition": "TemplateMatch",
+        "pre_delay": 200,
+        "template": [
+            "baotu/hd_baotu_wancheng.png",
+            "baotu/hd_baotu_wancheng2.png"
+        ],
+        "threshold": 0.9,
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "green_mask": true,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-宝图任务-开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "baotu/baotu1.png",
+            "baotu/baotu2.png",
+            "baotu/baotu3.png"
+        ],
+        "roi": [
+            316,
+            76,
+            834,
+            433
+        ],
+        "green_mask": true,
+        "threshold": 0.9,
+        "next": [
+            "活动-宝图任务-开始-点击参加"
+        ]
+    },
+    "活动-宝图任务-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-宝图任务-开始",
+        "action": "Click",
+        "post_delay": 2000,
+        "post_wait_freezes": 1500,
+        "next": [
+            "click_baotu_ttwf"
+        ]
+    },
+    "click_baotu_ttwf": {
+        "recognition": "OCR",
+        "expected": [
+            "听听无妨"
+        ],
+        "roi": [
+            925,
+            137,
+            311,
+            363
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "识别拓印_停止",
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "[JumpBack]战斗中-等待5秒",
+            "宝图完成判断",
+            "[JumpBack]宝图-间隔30秒-最大10分钟",
+            "[JumpBack]宝图任务单次点击"
+        ]
+    },
+    "已领取宝图任务": {
+        "recognition": "OCR",
+        "expected": [
+            "宝图任务"
+        ],
+        "roi": [
+            1034,
+            171,
+            235,
+            336
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "[JumpBack]战斗中-等待5秒",
+            "宝图完成判断",
+            "[JumpBack]宝图-间隔30秒-最大10分钟",
+            "[JumpBack]宝图任务单次点击"
+        ]
+    },
+    "kaishi_datu": {
+        "next": []
+    },
+    "宝图任务单次点击": {
+        "recognition": "OCR",
+        "expected": [
+            "宝图任务"
+        ],
+        "roi": [
+            1034,
+            171,
+            235,
+            336
+        ],
+        "pre_delay": 500,
+        "action": "Click"
+    },
+    "宝图-间隔30秒-最大10分钟": {
+        "max_hit": 20,
+        "pre_delay": 30000
+    },
+    "baotu_renwu_sleep": {
+        "pre_delay": 700000,
+        "next": [
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "panduan_zhujiemian"
+        ]
+    },
+    "宝图完成判断": {
+        "inverse": true,
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "宝图任务",
+                    "贼王"
+                ],
+                "roi": [
+                    1034,
+                    171,
+                    235,
+                    336
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zhandou/zidong.png",
+                    "zhandou/quxiao.png"
+                ],
+                "roi": [
+                    1175,
+                    549,
+                    103,
+                    159
+                ],
+                "threshold": [
+                    0.9
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zonghe/zidongxunlu1.png",
+                    "zonghe/zidongxunlu2.png",
+                    "zonghe/zidongxunlu3.png",
+                    "zonghe/zidongxunlu4.png"
+                ],
+                "roi": [
+                    257,
+                    133,
+                    770,
+                    461
+                ],
+                "threshold": [
+                    0.9
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zhandou/zhandou1.png",
+                    "zhandou/zhandou2.png",
+                    "zhandou/zhandou3.png"
+                ],
+                "roi": [
+                    568,
+                    0,
+                    140,
+                    101
+                ],
+                "threshold": [
+                    0.9
+                ]
+            }
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "52": {},
+    "战斗平衡弹窗-点击关闭": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/zhandoupingheng_guanbi1.png"
+        ],
+        "roi": [
+            1215,
+            4,
+            48,
+            51
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "baotu_huodong_down": {
+        "max_hit": 6,
+        "action": "Swipe",
+        "begin": [
+            733,
+            380,
+            1,
+            1
+        ],
+        "end": [
+            735,
+            250,
+            1,
+            1
+        ],
+        "post_delay": 2000
+    }
+}

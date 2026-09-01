@@ -1,0 +1,817 @@
+{
+    "fuben69": {
+        "next": [
+            "识别位置-长安城-副本-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "识别位置-长安城-副本-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "post_delay": 3000,
+        "next": [
+            "识别位置-长安城-副本",
+            "[JumpBack]panduan_zhujiemian_ks",
+            "[JumpBack]打开大地图_69副本"
+        ]
+    },
+    "打开大地图_69副本": {
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            41
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打开大地图成功_传送长安城_69副本",
+            "[JumpBack]panduan_zhujiemian_ks",
+            "[JumpBack]大地图界面-按键打开失败_点击图标"
+        ]
+    },
+    "大地图界面-按键打开失败_点击图标": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "ColorMatch",
+                "upper": [
+                    135,
+                    88,
+                    50
+                ],
+                "lower": [
+                    130,
+                    85,
+                    48
+                ],
+                "roi": [
+                    1,
+                    2,
+                    80,
+                    82
+                ],
+                "count": 1000
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zonghe/xiaoditu_taiyang.png",
+                    "zonghe/xiaoditu_yueliang.png"
+                ],
+                "roi": [
+                    58,
+                    1,
+                    75,
+                    79
+                ],
+                "threshold": 0.8
+            }
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            8,
+            7,
+            70,
+            74
+        ],
+        "post_delay": 1000
+    },
+    "55": {},
+    "打开大地图成功_传送长安城_69副本": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/ditu_jiemian_panduan.png",
+            "zonghe/ditu_jiemian_panduan2.png"
+        ],
+        "roi": [
+            111,
+            32,
+            83,
+            79
+        ],
+        "next": [
+            "传送长安城_69副本",
+            "[JumpBack]关闭整点活动弹窗"
+        ]
+    },
+    "传送长安城_69副本": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/tab_changancheng.png",
+            "zonghe/tab_changancheng2.png",
+            "zonghe/tab_changancheng3.png"
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "识别位置-长安城-副本": {
+        "recognition": "OCR",
+        "expected": [
+            "长安城"
+        ],
+        "roi": [
+            108,
+            22,
+            117,
+            31
+        ],
+        "post_delay": 3000,
+        "next": [
+            "打开小地图_百晓仙子"
+        ]
+    },
+    "打开小地图_百晓仙子": {
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1000,
+        "next": [
+            "点击地图-百晓仙子",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "长安城地图打开成功": {
+        "recognition": "TemplateMatch",
+        "template": "baotu/cac_tab_panduan.png",
+        "roi": [
+            200,
+            2,
+            80,
+            75
+        ],
+        "next": [
+            "点击地图-百晓仙子"
+        ]
+    },
+    "点击地图-百晓仙子": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "百晓",
+                    "仙子",
+                    "晓仙",
+                    "晓",
+                    "百晓仙子"
+                ],
+                "roi": [
+                    396,
+                    354,
+                    153,
+                    46
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "fuben/baixiao.png",
+                    "fuben/baixiao2.png",
+                    "fuben/baixiao3.png"
+                ],
+                "roi": [
+                    421,
+                    357,
+                    106,
+                    38
+                ]
+            }
+        ],
+        "action": "Click",
+        "target_offset": [
+            3,
+            3,
+            -4,
+            -8
+        ],
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]再次点击地图百晓仙子",
+            "百晓仙子-选择副本"
+        ]
+    },
+    "百晓仙子-选择副本": {
+        "recognition": "OCR",
+        "expected": [
+            "选择副本"
+        ],
+        "roi": [
+            923,
+            156,
+            324,
+            356
+        ],
+        "action": "Click",
+        "post_delay": 200,
+        "next": [
+            "选择侠士副本"
+        ]
+    },
+    "选择侠士副本": {
+        "recognition": "OCR",
+        "expected": [
+            "侠士副本"
+        ],
+        "roi": [
+            399,
+            104,
+            158,
+            42
+        ],
+        "action": "Click",
+        "post_delay": 200,
+        "next": [
+            "进入50级侠士副本"
+        ]
+    },
+    "进入50级侠士副本": {
+        "recognition": "OCR",
+        "expected": [
+            "进入"
+        ],
+        "roi": [
+            316,
+            570,
+            150,
+            52
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "识别拓印_停止",
+            "进入50级侠士副本-成功",
+            "[JumpBack]115进入侠士副本-等待队员同意",
+            "[JumpBack]进入50级侠士副本-失败-再次进入"
+        ]
+    },
+    "进入50级侠士副本-失败-再次进入": {
+        "max_hit": 2,
+        "recognition": "OCR",
+        "expected": [
+            "进入"
+        ],
+        "roi": [
+            316,
+            570,
+            150,
+            52
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "进入50级侠士副本-成功": {
+        "focus": {
+            "Node.Recognition.Succeeded": "进入50级侠士副本成功"
+        },
+        "recognition": "OCR",
+        "expected": "因缘绘",
+        "roi": [
+            502,
+            53,
+            94,
+            42
+        ],
+        "pre_delay": 1000,
+        "next": [
+            "50侠士-副本完成-退出",
+            "[JumpBack]点击副本-跳过剧情动画",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]点击副本-开始战斗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]推荐好友信息",
+            "[JumpBack]关闭福利弹窗",
+            "[JumpBack]关闭师门弹窗",
+            "[JumpBack]任务栏切换为任务"
+        ]
+    },
+    "测试-进入50级侠士副本": {
+        "next": [
+            "50侠士-副本完成-退出",
+            "[JumpBack]点击副本-跳过剧情动画",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]点击副本-开始战斗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]推荐好友信息",
+            "[JumpBack]关闭福利弹窗",
+            "[JumpBack]关闭师门弹窗",
+            "[JumpBack]任务栏切换为任务"
+        ]
+    },
+    "50侠士-副本完成-退出": {
+        "focus": {
+            "Node.Recognition.Succeeded": "50侠士副本完成"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "副本已完成"
+        ],
+        "roi": [
+            1032,
+            208,
+            149,
+            56
+        ],
+        "pre_delay": 1500,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "打开小地图_百晓仙子-50普通-1",
+            "[JumpBack]打开大地图_69副本"
+        ]
+    },
+    "点击副本-跳过剧情动画": {
+        "recognition": "OCR",
+        "expected": [
+            "跳过剧情动画"
+        ],
+        "roi": [
+            1029,
+            240,
+            251,
+            110
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "post_wait_freezes": 10
+    },
+    "点击副本-开始战斗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "fuben/fubenzhandou.png",
+            "fuben/fubenzhandou2.png"
+        ],
+        "threshold": [
+            0.9
+        ],
+        "roi": [
+            1240,
+            225,
+            39,
+            48
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 3000,
+        "next": [
+            "副本-战斗-对话",
+            "战斗中-等待10秒"
+        ]
+    },
+    "副本-战斗-对话": {
+        "recognition": "OCR",
+        "expected": [
+            "请选择要做的事"
+        ],
+        "roi": [
+            730,
+            351,
+            522,
+            66
+        ],
+        "pre_wait_freezes": 10,
+        "action": "Click",
+        "post_delay": 1000,
+        "target": [
+            951,
+            442,
+            268,
+            46
+        ]
+    },
+    "跳过剧情动画-快进键": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "fuben/fubentiaoguo1.png",
+            "fuben/fubentiaoguo2.png",
+            "fuben/fubentiaoguo3.png",
+            "fuben/fubentiaoguo4.png",
+            "fuben/shimen_kuaijin.png"
+        ],
+        "roi": [
+            1185,
+            4,
+            94,
+            78
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "推荐好友信息": {
+        "recognition": "OCR",
+        "expected": [
+            "推荐好友信息"
+        ],
+        "roi": [
+            477,
+            108,
+            318,
+            64
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            4
+        ],
+        "post_delay": 1000
+    },
+    "关闭福利弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qiandao/fuli.png"
+        ],
+        "roi": [
+            414,
+            17,
+            487,
+            103
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            1140,
+            57,
+            32,
+            35
+        ],
+        "post_delay": 1000
+    },
+    "关闭师门弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/shimen_GB.png"
+        ],
+        "roi": [
+            1097,
+            121,
+            30,
+            53
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "打开小地图_百晓仙子-50普通-1": {
+        "recognition": "OCR",
+        "expected": [
+            "长安城"
+        ],
+        "roi": [
+            108,
+            22,
+            117,
+            31
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1000,
+        "next": [
+            "点击地图-百晓仙子-50普通-1",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "点击地图-百晓仙子-50普通-1": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "百晓",
+                    "仙子",
+                    "晓仙",
+                    "晓",
+                    "百晓仙子"
+                ],
+                "roi": [
+                    396,
+                    354,
+                    153,
+                    46
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "fuben/baixiao.png",
+                    "fuben/baixiao2.png",
+                    "fuben/baixiao3.png"
+                ],
+                "roi": [
+                    421,
+                    357,
+                    106,
+                    38
+                ]
+            }
+        ],
+        "action": "Click",
+        "target_offset": [
+            3,
+            3,
+            -4,
+            -8
+        ],
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]再次点击地图百晓仙子",
+            "百晓仙子-选择副本-50普通-1"
+        ]
+    },
+    "百晓仙子-选择副本-50普通-1": {
+        "recognition": "OCR",
+        "expected": [
+            "选择副本"
+        ],
+        "roi": [
+            923,
+            156,
+            324,
+            356
+        ],
+        "action": "Click",
+        "next": [
+            "进入50级普通副本-1"
+        ]
+    },
+    "进入50级普通副本-1": {
+        "focus": {
+            "Node.Recognition.Succeeded": "进入50级普通副本-1成功"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "进入"
+        ],
+        "roi": [
+            319,
+            571,
+            145,
+            49
+        ],
+        "action": "Click",
+        "post_delay": 800,
+        "next": [
+            "识别拓印_停止",
+            "50普通-1-副本完成-退出",
+            "[JumpBack]点击副本-跳过剧情动画",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]点击副本-开始战斗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]推荐好友信息",
+            "[JumpBack]关闭福利弹窗",
+            "[JumpBack]关闭师门弹窗",
+            "[JumpBack]任务栏切换为任务"
+        ]
+    },
+    "50普通-1-副本完成-退出": {
+        "focus": {
+            "Node.Action.Succeeded": "50普通-1-副本完成"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "副本已完成"
+        ],
+        "roi": [
+            1032,
+            208,
+            149,
+            56
+        ],
+        "pre_delay": 1500,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "打开小地图_百晓仙子-50普通-2",
+            "[JumpBack]打开大地图_69副本"
+        ]
+    },
+    "打开小地图_百晓仙子-50普通-2": {
+        "recognition": "OCR",
+        "expected": [
+            "长安城"
+        ],
+        "roi": [
+            108,
+            22,
+            117,
+            31
+        ],
+        "pre_delay": 1500,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1500,
+        "next": [
+            "点击地图-百晓仙子-50普通-2",
+            "[JumpBack]小地图-按键打开失败-点击小地图图标"
+        ]
+    },
+    "点击地图-百晓仙子-50普通-2": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "百晓",
+                    "仙子",
+                    "晓仙",
+                    "晓",
+                    "百晓仙子"
+                ],
+                "roi": [
+                    396,
+                    354,
+                    153,
+                    46
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "fuben/baixiao.png",
+                    "fuben/baixiao2.png",
+                    "fuben/baixiao3.png"
+                ],
+                "roi": [
+                    421,
+                    357,
+                    106,
+                    38
+                ]
+            }
+        ],
+        "action": "Click",
+        "target_offset": [
+            3,
+            3,
+            -4,
+            -8
+        ],
+        "post_delay": 1000,
+        "next": [
+            "[JumpBack]再次点击地图百晓仙子",
+            "百晓仙子-选择副本-50普通-2"
+        ]
+    },
+    "百晓仙子-选择副本-50普通-2": {
+        "recognition": "OCR",
+        "expected": [
+            "选择副本"
+        ],
+        "roi": [
+            923,
+            156,
+            324,
+            356
+        ],
+        "action": "Click",
+        "next": [
+            "进入50级普通副本-2"
+        ]
+    },
+    "进入50级普通副本-2": {
+        "focus": {
+            "Node.Action.Succeeded": "进入50级普通副本-2成功"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "进入"
+        ],
+        "roi": [
+            603,
+            570,
+            147,
+            51
+        ],
+        "action": "Click",
+        "post_delay": 800,
+        "next": [
+            "识别拓印_停止",
+            "50普通-2-副本完成-退出",
+            "[JumpBack]点击副本-跳过剧情动画",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]点击副本-开始战斗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]推荐好友信息",
+            "[JumpBack]关闭福利弹窗",
+            "[JumpBack]关闭师门弹窗",
+            "[JumpBack]任务栏切换为任务"
+        ]
+    },
+    "测试-进入50级普通副本-2": {
+        "next": [
+            "50普通-2-副本完成-退出",
+            "[JumpBack]点击副本-跳过剧情动画",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]点击副本-开始战斗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]推荐好友信息",
+            "[JumpBack]关闭福利弹窗",
+            "[JumpBack]关闭师门弹窗",
+            "[JumpBack]任务栏切换为任务"
+        ]
+    },
+    "50普通-2-副本完成-退出": {
+        "focus": {
+            "Node.Action.Succeeded": "50普通-2-副本完成"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "副本已完成"
+        ],
+        "roi": [
+            1032,
+            208,
+            149,
+            56
+        ],
+        "pre_delay": 1500,
+        "action": "Click",
+        "post_delay": 1500,
+        "next": [
+            "[JumpBack]捉鬼-fuben桥接",
+            "panduan_zhujiemian"
+        ]
+    },
+    "退出队伍": {
+        "pre_wait_freezes": 10,
+        "action": "ClickKey",
+        "key": [
+            57,
+            48
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打开队伍界面成功_退出队伍",
+            "[JumpBack]队伍界面-按键打开失败-点击队伍图标"
+        ]
+    },
+    "打开队伍界面成功_退出队伍": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-zudui.png",
+            "duiwu/duiwu-duiwu.png"
+        ],
+        "roi": [
+            0,
+            0,
+            229,
+            106
+        ],
+        "next": [
+            "点击退出队伍",
+            "退出队伍成功"
+        ]
+    },
+    "退出队伍成功": {
+        "recognition": "OCR",
+        "expected": [
+            "创建队伍"
+        ],
+        "roi": [
+            85,
+            632,
+            188,
+            60
+        ],
+        "pre_delay": 1000,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "点击退出队伍": {
+        "recognition": "OCR",
+        "expected": [
+            "退出队伍"
+        ],
+        "roi": [
+            85,
+            632,
+            188,
+            60
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

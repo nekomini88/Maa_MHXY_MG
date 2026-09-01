@@ -1,0 +1,8 @@
+{
+    "Default": {
+        "post_delay": 1000,
+        "on_error": [
+            "空节点"
+        ]
+    }
+}

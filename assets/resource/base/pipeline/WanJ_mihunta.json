@@ -1,0 +1,315 @@
+{
+    "mihunta": {
+        "next": [
+            "识别-长安城-迷魂塔-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "识别-长安城-迷魂塔-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "post_delay": 1000,
+        "next": [
+            "进入迷魂塔成功",
+            "识别-长安城-迷魂塔",
+            "[JumpBack]打开大地图_69副本"
+        ]
+    },
+    "识别-长安城-迷魂塔": {
+        "recognition": "OCR",
+        "expected": [
+            "长安城"
+        ],
+        "roi": [
+            99,
+            14,
+            137,
+            46
+        ],
+        "pre_delay": 1500,
+        "next": [
+            "主界面-迷魂塔"
+        ]
+    },
+    "主界面-迷魂塔": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-迷魂塔",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-迷魂塔": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-迷魂塔-点击日常活动"
+        ]
+    },
+    "活动-迷魂塔-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-迷魂塔-向上滑动到顶端"
+        ]
+    },
+    "活动-迷魂塔-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-迷魂塔-开始",
+            "活动-迷魂塔-未到开始时间",
+            "[JumpBack]baotu_huodong_down"
+        ]
+    },
+    "活动-迷魂塔-未到开始时间": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wanjian/mihunta_weikais1.png",
+            "wanjian/mihunta_weikais2.png"
+        ],
+        "roi": [
+            313,
+            69,
+            840,
+            447
+        ],
+        "threshold": 0.8,
+        "next": [
+            "迷魂塔-等待开始"
+        ]
+    },
+    "迷魂塔-等待开始": {},
+    "活动-迷魂塔-开始": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "wanjian/mihunta_kaishi1.png",
+            "wanjian/mihunta_kaishi2.png"
+        ],
+        "roi": [
+            313,
+            69,
+            840,
+            447
+        ],
+        "threshold": 0.8,
+        "next": [
+            "点击迷魂塔参加"
+        ]
+    },
+    "点击迷魂塔参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 4000,
+        "roi": "活动-迷魂塔-开始",
+        "next": [
+            "点击前往迷魂塔"
+        ]
+    },
+    "点击前往迷魂塔": {
+        "recognition": "OCR",
+        "expected": [
+            "前往迷魂塔"
+        ],
+        "roi": [
+            932,
+            163,
+            312,
+            337
+        ],
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "进入迷魂塔成功"
+        ]
+    },
+    "进入迷魂塔成功": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "wanjian/mihunta_zhujiemian.png"
+                ],
+                "roi": [
+                    4,
+                    5,
+                    75,
+                    78
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "迷魂塔1层"
+                ],
+                "roi": [
+                    104,
+                    22,
+                    122,
+                    31
+                ]
+            }
+        ],
+        "next": [
+            "迷魂塔完成",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]点击勇闯迷魂塔",
+            "[JumpBack]战斗中-等待5秒"
+        ]
+    },
+    "点击勇闯迷魂塔": {
+        "recognition": "OCR",
+        "expected": [
+            "勇闯迷魂塔"
+        ],
+        "roi": [
+            1034,
+            163,
+            239,
+            332
+        ],
+        "action": "Click",
+        "post_delay": 6000,
+        "next": [
+            "迷魂塔-点击确定传送"
+        ]
+    },
+    "迷魂塔-点击确定传送": {
+        "recognition": "OCR",
+        "expected": "确定传送",
+        "roi": [
+            917,
+            410,
+            335,
+            102
+        ],
+        "action": "Click"
+    },
+    "迷魂塔完成": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "迷魂塔10层"
+                ],
+                "roi": [
+                    106,
+                    22,
+                    110,
+                    33
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "wanjian/mihunta_wanchengjiemian.png"
+                ],
+                "roi": [
+                    3,
+                    5,
+                    74,
+                    75
+                ],
+                "threshold": 0.9
+            }
+        ],
+        "pre_delay": 500,
+        "next": [
+            "点击-离开迷魂塔"
+        ]
+    },
+    "点击-离开迷魂塔": {
+        "recognition": "OCR",
+        "expected": [
+            "离开迷魂塔"
+        ],
+        "roi": [
+            929,
+            347,
+            311,
+            85
+        ]
+    }
+}

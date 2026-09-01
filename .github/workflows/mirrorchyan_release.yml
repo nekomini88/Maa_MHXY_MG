@@ -1,0 +1,30 @@
+name: mirrorchyan_release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mirrorchyan_release:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [win, macos, linux]
+        arch: [aarch64, x86_64]
+        exclude:
+          - os: win
+            arch: aarch64
+    steps:
+      - id: uploading
+        uses: MirrorChyan/uploading-action@v1
+        with:
+          filetype: latest-release
+          filename: "Maa_MHXY_MG-${{ matrix.os }}-${{ matrix.arch }}-*"
+          mirrorchyan_rid: Maa_MHXY_MG
+
+          owner: gitlihang
+          repo: Maa_MHXY_MG
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          os: ${{ matrix.os }}
+          arch: ${{ matrix.arch }}

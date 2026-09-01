@@ -1,0 +1,65 @@
+{
+    "tuichuduiwu": {
+        "next": [
+            "退出队伍过度",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "退出队伍过度": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 2000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            48
+        ],
+        "post_delay": 2000,
+        "next": [
+            "打开队伍界面成功",
+            "[JumpBack]队伍界面-按键打开失败-点击队伍图标"
+        ]
+    },
+    "打开队伍界面成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-zudui.png",
+            "duiwu/duiwu-duiwu.png"
+        ],
+        "roi": [
+            0,
+            0,
+            229,
+            106
+        ],
+        "pre_delay": 500,
+        "next": [
+            "点击退出队伍",
+            "未在队伍中-返回主界面"
+        ]
+    },
+    "未在队伍中-返回主界面": {
+        "recognition": "OCR",
+        "expected": [
+            "创建队伍"
+        ],
+        "roi": [
+            85,
+            632,
+            188,
+            60
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

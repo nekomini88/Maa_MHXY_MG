@@ -1,0 +1,247 @@
+{
+    "TS_zhuzhan": {
+        "next": [
+            "特殊助战-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "特殊助战-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "识别位置-云岚浮岛",
+            "[JumpBack]在两界山_打开小地图",
+            "[JumpBack]打开大地图_传送两界山"
+        ]
+    },
+    "在两界山_打开小地图": {
+        "max_hit": 1,
+        "recognition": "OCR",
+        "expected": [
+            "两界山"
+        ],
+        "roi": [
+            105,
+            22,
+            124,
+            34
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            61
+        ],
+        "post_delay": 1000,
+        "next": [
+            "两界山小地图_打开成功"
+        ]
+    },
+    "两界山小地图_打开成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "baotu/cac_tab_panduan.png"
+        ],
+        "roi": [
+            318,
+            78,
+            95,
+            83
+        ],
+        "post_delay": 500,
+        "next": [
+            "两界山小地图_打开成功_点击云岚浮岛"
+        ]
+    },
+    "两界山小地图_打开成功_点击云岚浮岛": {
+        "action": "Click",
+        "target": [
+            555,
+            199,
+            80,
+            19
+        ],
+        "post_delay": 6000
+    },
+    "打开大地图_传送两界山": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "两界山"
+        ],
+        "roi": [
+            105,
+            22,
+            124,
+            34
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            41
+        ],
+        "post_delay": 1000,
+        "next": [
+            "打开大地图成功_传送两界山",
+            "[JumpBack]大地图界面-按键打开失败_点击图标"
+        ]
+    },
+    "打开大地图成功_传送两界山": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/ditu_jiemian_panduan.png",
+            "zonghe/ditu_jiemian_panduan2.png"
+        ],
+        "roi": [
+            111,
+            32,
+            83,
+            79
+        ],
+        "next": [
+            "大地图_传送两界山",
+            "[JumpBack]关闭整点活动弹窗"
+        ]
+    },
+    "大地图_传送两界山": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/tab_liangjieshan1.png",
+            "zonghe/tab_liangjieshan2.png"
+        ],
+        "roi": [
+            118,
+            40,
+            1033,
+            622
+        ],
+        "pre_delay": 500,
+        "action": "Click"
+    },
+    "识别位置-云岚浮岛": {
+        "focus": {
+            "Node.Recognition.Succeeded": "进入云岚浮岛成功"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "云岚浮岛"
+        ],
+        "roi": [
+            105,
+            22,
+            124,
+            34
+        ],
+        "pre_delay": 1000,
+        "next": [
+            "特殊助战_伽蓝"
+        ]
+    },
+    "特殊助战_伽蓝": {
+        "recognition": "OCR",
+        "expected": [
+            "伽蓝"
+        ],
+        "roi": [
+            825,
+            227,
+            138,
+            52
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target_offset": [
+            0,
+            -50,
+            -5,
+            -5
+        ],
+        "post_delay": 1000,
+        "next": [
+            "伽蓝_聊天"
+        ]
+    },
+    "伽蓝_聊天": {
+        "recognition": "OCR",
+        "expected": [
+            "和他聊天"
+        ],
+        "roi": [
+            923,
+            231,
+            317,
+            274
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "伽蓝_聊天_选择第一个"
+        ]
+    },
+    "伽蓝_聊天_选择第一个": {
+        "action": "Click",
+        "target": [
+            962,
+            307,
+            237,
+            46
+        ],
+        "post_delay": 500,
+        "next": [
+            "伽蓝_已经完成聊天",
+            "[JumpBack]伽蓝_聊天_点击任意地方继续",
+            "伽蓝_聊天_正常完成"
+        ]
+    },
+    "伽蓝_聊天_点击任意地方继续": {
+        "recognition": "OCR",
+        "expected": [
+            "点击任意地方继续"
+        ],
+        "roi": [
+            803,
+            2,
+            476,
+            126
+        ],
+        "action": "Click",
+        "post_delay": 500
+    },
+    "伽蓝_已经完成聊天": {
+        "recognition": "OCR",
+        "expected": [
+            "伽蓝"
+        ],
+        "roi": [
+            144,
+            665,
+            106,
+            39
+        ],
+        "pre_delay": 500,
+        "action": "Click"
+    },
+    "伽蓝_聊天_正常完成": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ]
+    }
+}

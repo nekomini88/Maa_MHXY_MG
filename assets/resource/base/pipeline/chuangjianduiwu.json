@@ -1,0 +1,582 @@
+{
+    "chuangjianduiwu": {
+        "next": [
+            "队伍-打开界面",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "队伍-打开界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "post_delay": 1000,
+        "key": [
+            57,
+            48
+        ],
+        "next": [
+            "队伍-进入主界面",
+            "[JumpBack]队伍界面-按键打开失败-点击队伍图标"
+        ]
+    },
+    "队伍界面-按键打开失败-点击队伍图标": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "duiwu/duiwu.png"
+                ],
+                "roi": [
+                    1161,
+                    104,
+                    119,
+                    65
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": "队伍",
+                "roi": [
+                    1161,
+                    104,
+                    119,
+                    65
+                ]
+            }
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "队伍-进入主界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-zudui.png",
+            "duiwu/duiwu-duiwu.png"
+        ],
+        "roi": [
+            0,
+            0,
+            229,
+            106
+        ],
+        "next": [
+            "队伍-点击创建队伍",
+            "队伍-已创建队伍"
+        ]
+    },
+    "队伍-点击创建队伍": {
+        "recognition": "OCR",
+        "expected": [
+            "创建队伍"
+        ],
+        "roi": [
+            85,
+            632,
+            188,
+            60
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "队伍-目标已设置",
+            "[JumpBack]队伍-设置目标"
+        ]
+    },
+    "队伍-已创建队伍": {
+        "recognition": "OCR",
+        "expected": [
+            "退出队伍"
+        ],
+        "roi": [
+            85,
+            632,
+            188,
+            60
+        ],
+        "next": [
+            "队伍-目标已设置",
+            "[JumpBack]队伍-设置目标"
+        ]
+    },
+    "队伍-设置目标": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-mubiao.png"
+        ],
+        "roi": [
+            761,
+            52,
+            69,
+            69
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-目标-主界面"
+        ]
+    },
+    "队伍-目标-主界面": {
+        "recognition": "OCR",
+        "expected": "调整目标",
+        "roi": [
+            560,
+            6,
+            157,
+            51
+        ],
+        "next": [
+            "队伍-点击日常任务"
+        ]
+    },
+    "队伍-点击日常任务": {
+        "recognition": "OCR",
+        "expected": "日常任务",
+        "roi": [
+            259,
+            123,
+            261,
+            472
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-点击副本任务520"
+        ]
+    },
+    "队伍-点击副本任务520": {
+        "recognition": "OCR",
+        "expected": "副本任务",
+        "roi": [
+            259,
+            123,
+            261,
+            472
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-副本任务520-已选择90-115",
+            "[JumpBack]点击90-115"
+        ]
+    },
+    "队伍-副本任务520-已选择90-115": {
+        "recognition": "ColorMatch",
+        "upper": [
+            253,
+            213,
+            109
+        ],
+        "lower": [
+            252,
+            207,
+            102
+        ],
+        "roi": [
+            936,
+            309,
+            80,
+            39
+        ],
+        "count": 700,
+        "next": [
+            "队伍-副本任务520-调整下限至89",
+            "[JumpBack]等级（左）-向下滑动-一个等级单位"
+        ]
+    },
+    "等级（左）-向下滑动-一个等级单位": {
+        "action": "Swipe",
+        "begin": [
+            799,
+            210
+        ],
+        "end": [
+            799,
+            235
+        ],
+        "end_hold": 500
+    },
+    "队伍-副本任务520-调整下限至89": {
+        "recognition": "OCR",
+        "expected": [
+            "89"
+        ],
+        "roi": [
+            775,
+            220,
+            45,
+            44
+        ],
+        "next": [
+            "队伍-任务描述"
+        ]
+    },
+    "队伍-点击副本任务320": {
+        "recognition": "OCR",
+        "expected": "副本任务",
+        "roi": [
+            259,
+            123,
+            261,
+            472
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-副本任务320-已选择1-69",
+            "[JumpBack]点击1-69"
+        ]
+    },
+    "点击1-69": {
+        "recognition": "ColorMatch",
+        "upper": [
+            240,
+            227,
+            211
+        ],
+        "lower": [
+            239,
+            226,
+            210
+        ],
+        "roi": [
+            760,
+            309,
+            80,
+            39
+        ],
+        "count": 2000,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "队伍-副本任务320-已选择1-69": {
+        "recognition": "ColorMatch",
+        "upper": [
+            253,
+            213,
+            109
+        ],
+        "lower": [
+            252,
+            207,
+            102
+        ],
+        "roi": [
+            760,
+            309,
+            80,
+            39
+        ],
+        "count": 700,
+        "next": [
+            "队伍-任务描述"
+        ]
+    },
+    "队伍-任务描述": {
+        "action": "Click",
+        "target": [
+            778,
+            422,
+            138,
+            36
+        ],
+        "post_delay": 1000,
+        "next": [
+            "队伍-任务描述-用户输入"
+        ]
+    },
+    "队伍-任务描述-用户输入": {
+        "action": "InputText",
+        "input_text": "",
+        "post_delay": 2000,
+        "next": [
+            "队伍-输入框确定"
+        ]
+    },
+    "队伍-输入框确定": {
+        "recognition": "OCR",
+        "expected": "确定",
+        "roi": [
+            1208,
+            0,
+            67,
+            65
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "next": [
+            "队伍-目标设置完成-点击确定"
+        ]
+    },
+    "队伍-目标设置完成-点击确定": {
+        "recognition": "OCR",
+        "expected": "确定",
+        "roi": [
+            554,
+            627,
+            172,
+            55
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 2000
+    },
+    "队伍-目标已设置": {
+        "recognition": "OCR",
+        "expected": "^(?!无$)[\u4e00-\u9fa5]+$",
+        "roi": [
+            430,
+            64,
+            170,
+            48
+        ],
+        "next": [
+            "队伍-人员已满",
+            "[JumpBack]队伍-点击自动匹配",
+            "[JumpBack]队伍-点击一键喊话-当前"
+        ]
+    },
+    "队伍-点击自动匹配": {
+        "recognition": "OCR",
+        "expected": "自动匹配",
+        "roi": [
+            1024,
+            57,
+            152,
+            60
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 2000
+    },
+    "队伍-点击一键喊话-当前": {
+        "recognition": "OCR",
+        "expected": [
+            "键喊话",
+            "一键喊话"
+        ],
+        "roi": [
+            998,
+            634,
+            178,
+            55
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-点击-当前频道"
+        ]
+    },
+    "队伍-点击-当前频道": {
+        "recognition": "OCR",
+        "expected": "当前频道",
+        "roi": [
+            1003,
+            302,
+            171,
+            319
+        ],
+        "action": "Click",
+        "post_delay": 7000
+    },
+    "队伍-人员已满": {
+        "recognition": "OCR",
+        "expected": [
+            "大唐官府",
+            "方寸山",
+            "狮驼岭",
+            "普陀山",
+            "阴曹地府",
+            "龙宫",
+            "魔王寨",
+            "化生寺",
+            "月宫",
+            "女儿村",
+            "小雷音",
+            "花果山",
+            "须弥海",
+            "盘丝洞"
+        ],
+        "roi": [
+            1028,
+            540,
+            102,
+            42
+        ],
+        "next": [
+            "队伍-人员已满-且未有暂离/离线",
+            "[JumpBack]队伍-有暂离/离线"
+        ]
+    },
+    "队伍-有暂离/离线": {
+        "recognition": "OCR",
+        "expected": [
+            "离线"
+        ],
+        "roi": [
+            341,
+            432,
+            757,
+            41
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-有暂离/离线-点击请离队伍"
+        ]
+    },
+    "队伍-有暂离/离线-点击请离队伍": {
+        "recognition": "OCR",
+        "expected": [
+            "请离队伍"
+        ],
+        "roi": [
+            336,
+            153,
+            767,
+            295
+        ],
+        "pre_delay": 1000,
+        "action": "Click"
+    },
+    "队伍-人员已满-且未有暂离/离线": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "离线"
+        ],
+        "roi": [
+            341,
+            432,
+            757,
+            41
+        ],
+        "next": [
+            "队伍-退出组队界面"
+        ]
+    },
+    "队伍-退出组队界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "duiwu/duiwu-guanbi.png"
+        ],
+        "roi": [
+            1153,
+            0,
+            100,
+            98
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "队伍-点击捉鬼任务": {
+        "recognition": "OCR",
+        "expected": "捉鬼任务",
+        "roi": [
+            259,
+            123,
+            261,
+            472
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "队伍-捉鬼任务-已选择90-115",
+            "[JumpBack]点击90-115"
+        ]
+    },
+    "点击90-115": {
+        "recognition": "ColorMatch",
+        "upper": [
+            240,
+            227,
+            211
+        ],
+        "lower": [
+            239,
+            226,
+            210
+        ],
+        "roi": [
+            936,
+            309,
+            80,
+            39
+        ],
+        "count": 2000,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "队伍-捉鬼任务-已选择90-115": {
+        "recognition": "ColorMatch",
+        "upper": [
+            253,
+            213,
+            109
+        ],
+        "lower": [
+            252,
+            207,
+            102
+        ],
+        "roi": [
+            936,
+            309,
+            80,
+            39
+        ],
+        "count": 700,
+        "next": [
+            "队伍-捉鬼任务-最低20级",
+            "[JumpBack]等级（左）-向下滑动-max20"
+        ]
+    },
+    "等级（左）-向下滑动-max20": {
+        "max_hit": 20,
+        "action": "Swipe",
+        "begin": [
+            800,
+            149
+        ],
+        "end": [
+            799,
+            285
+        ],
+        "post_delay": 500,
+        "post_wait_freezes": 500
+    },
+    "队伍-捉鬼任务-最低20级": {
+        "recognition": "OCR",
+        "expected": [
+            "20"
+        ],
+        "roi": [
+            775,
+            220,
+            45,
+            44
+        ],
+        "next": [
+            "队伍-任务描述"
+        ]
+    },
+    "队伍-目标-创建520": {}
+}

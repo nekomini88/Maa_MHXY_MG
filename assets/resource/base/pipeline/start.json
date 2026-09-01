@@ -1,0 +1,87 @@
+{
+    "start": {
+        "next": [
+            "启动游戏"
+        ]
+    },
+    "启动游戏": {
+        "action": "StartApp",
+        "package": "com.netease.myq",
+        "post_delay": 20000,
+        "next": [
+            "点击登录游戏",
+            "主界面",
+            "[JumpBack]更新客户端",
+            "[JumpBack]正在下载本周更新",
+            "[JumpBack]登录等待10秒"
+        ]
+    },
+    "更新客户端": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "zhanghao/require_update.png"
+                ],
+                "roi": [
+                    188,
+                    69,
+                    899,
+                    343
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "关闭"
+                ],
+                "roi": [
+                    431,
+                    485,
+                    200,
+                    79
+                ]
+            }
+        ],
+        "action": "Click",
+        "target": [
+            494,
+            512,
+            75,
+            30
+        ]
+    },
+    "正在下载本周更新": {
+        "recognition": "OCR",
+        "expected": [
+            "正在下载本周更新"
+        ],
+        "roi": [
+            196,
+            618,
+            963,
+            66
+        ],
+        "pre_delay": 10000
+    },
+    "点击登录游戏": {
+        "recognition": "OCR",
+        "expected": "登录游戏",
+        "roi": [
+            504,
+            490,
+            268,
+            76
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 25000,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "登录等待10秒": {
+        "pre_delay": 10000
+    }
+}

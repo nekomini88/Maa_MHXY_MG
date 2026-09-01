@@ -1,0 +1,687 @@
+{
+    "renwulian": {
+        "next": [
+            "经验任务链-过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "经验任务链-过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "next": [
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]背包金币数量-第一次",
+            "经验链-开始"
+        ]
+    },
+    "背包金币数量-第一次": {
+        "max_hit": 1,
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            33
+        ],
+        "post_delay": 1000,
+        "next": [
+            "背包金币数量-打开背包成功",
+            "[JumpBack]背包界面-按键打开失败-点击图标"
+        ]
+    },
+    "背包金币数量-第二次": {
+        "max_hit": 1,
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            33
+        ],
+        "post_delay": 1000,
+        "next": [
+            "背包金币数量-打开背包成功",
+            "[JumpBack]背包界面-按键打开失败-点击图标"
+        ]
+    },
+    "背包金币数量-打开背包成功": {
+        "recognition": "TemplateMatch",
+        "template": "beibao/beibao_jiemian_panduan.png",
+        "roi": [
+            335,
+            5,
+            577,
+            68
+        ],
+        "action": "Custom",
+        "custom_action": "returnOCR",
+        "custom_action_param": {
+            "recognition_name": "背包金币识别",
+            "action_key": "",
+            "return_text": "背包金币："
+        },
+        "next": [
+            "关闭背包界面"
+        ]
+    },
+    "关闭背包界面": {
+        "recognition": "TemplateMatch",
+        "template": "beibao/beibao_jiemian_panduan.png",
+        "roi": [
+            335,
+            5,
+            577,
+            68
+        ],
+        "action": "Click",
+        "target": [
+            1083,
+            27,
+            41,
+            47
+        ]
+    },
+    "背包金币识别": {
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            177,
+            633,
+            174,
+            45
+        ]
+    },
+    "经验链-开始": {
+        "recognition": "OCR",
+        "expected": [
+            "经验链-(?:寻(?:宠|物|人)|战斗)（\\d+/\\d+）"
+        ],
+        "roi": [
+            1034,
+            167,
+            245,
+            340
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "timeout": 50000,
+        "next": [
+            "识别拓印_停止",
+            "经验链-最后一个任务",
+            "[JumpBack]经验链-寻人-对话确认",
+            "[JumpBack]经验链-寻宠-购买",
+            "[JumpBack]经验链-寻宠-对话确认",
+            "[JumpBack]经验链-寻宠-上交",
+            "[JumpBack]经验链-寻物-二级药购买",
+            "[JumpBack]经验链-寻物-红/绿罗羹购买",
+            "[JumpBack]经验链-寻物-摆摊购买",
+            "[JumpBack]经验链-寻物-对话确认",
+            "[JumpBack]经验链-寻物-上交",
+            "[JumpBack]经验链-战斗-对话确认",
+            "[JumpBack]经验链-战斗-点击开始战斗",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]自动寻路中-图片识别",
+            "[JumpBack]关闭整点活动弹窗"
+        ]
+    },
+    "经验链-寻人-对话确认": {
+        "recognition": "OCR",
+        "expected": [
+            "经验任务链-寻人"
+        ],
+        "roi": [
+            923,
+            26,
+            324,
+            540
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800
+    },
+    "经验链-寻宠-购买": {
+        "recognition": "OCR",
+        "expected": [
+            "购买召唤灵"
+        ],
+        "roi": [
+            525,
+            14,
+            250,
+            46
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            955,
+            625,
+            164,
+            45
+        ],
+        "post_delay": 800,
+        "post_wait_freezes": 800,
+        "next": [
+            "[JumpBack]经验链-寻宠-对话确认",
+            "经验链-寻宠-上交"
+        ]
+    },
+    "经验链-寻宠-对话确认": {
+        "recognition": "OCR",
+        "expected": [
+            "经验任务链-寻宠"
+        ],
+        "roi": [
+            923,
+            26,
+            324,
+            540
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800
+    },
+    "经验链-寻宠-上交": {
+        "recognition": "OCR",
+        "expected": [
+            "上交"
+        ],
+        "roi": [
+            769,
+            559,
+            166,
+            55
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800
+    },
+    "经验链-寻物-二级药购买": {
+        "recognition": "OCR",
+        "expected": [
+            "药店"
+        ],
+        "roi": [
+            577,
+            12,
+            131,
+            51
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            908,
+            565,
+            132,
+            42
+        ],
+        "post_delay": 800
+    },
+    "经验链-寻物-红/绿罗羹购买": {
+        "recognition": "OCR",
+        "expected": [
+            "酒店老板"
+        ],
+        "roi": [
+            577,
+            12,
+            131,
+            51
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            908,
+            565,
+            132,
+            42
+        ],
+        "post_delay": 800
+    },
+    "经验链-寻物-摆摊购买": {
+        "focus": {
+            "Node.Recognition.Succeeded": "摆摊购买"
+        },
+        "recognition": "TemplateMatch",
+        "template": [
+            "shangcheng/baitan_zhujiemian.png",
+            "shangcheng/baitan_zhujiemian2.png",
+            "shangcheng/baitan_zhujiemian3.png"
+        ],
+        "roi": [
+            435,
+            0,
+            382,
+            119
+        ],
+        "threshold": [
+            0.8
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            908,
+            565,
+            132,
+            42
+        ],
+        "post_delay": 800
+    },
+    "经验链-寻物-三药/烹饪购买": {
+        "recognition": "OCR",
+        "expected": [
+            "臭豆腐.?",
+            "佛跳墙.?",
+            "桂花丸.?",
+            "珍露酒.?",
+            "翡翠豆腐.?",
+            "长寿面.?",
+            "蛇胆酒.?",
+            "金香玉.?",
+            "定神香.?",
+            "五龙丹.?",
+            "九转回魂丹.?"
+        ],
+        "roi": [
+            806,
+            84,
+            83,
+            38
+        ],
+        "pre_delay": 500,
+        "next": [
+            "经验链-寻物-点击购买"
+        ]
+    },
+    "经验链-寻物-点击购买": {
+        "recognition": "OCR",
+        "expected": [
+            "购买"
+        ],
+        "roi": [
+            930,
+            629,
+            165,
+            54
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-购买物品被抢-再次选择物品",
+            "经验链-寻物-购买物品成功"
+        ]
+    },
+    "经验链-寻物-购买物品被抢-再次选择物品": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "shangcheng/baitan_zhujiemian.png",
+            "shangcheng/baitan_zhujiemian2.png",
+            "shangcheng/baitan_zhujiemian3.png"
+        ],
+        "roi": [
+            435,
+            0,
+            382,
+            119
+        ],
+        "threshold": [
+            0.8
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target": [
+            492,
+            175,
+            219,
+            75
+        ],
+        "post_delay": 800,
+        "next": [
+            "经验链-寻物-购买物品被抢-点击购买"
+        ]
+    },
+    "经验链-寻物-购买物品被抢-点击购买": {
+        "action": "Click",
+        "target": [
+            929,
+            630,
+            165,
+            50
+        ],
+        "post_delay": 800
+    },
+    "经验链-寻物-购买物品成功": {
+        "inverse": true,
+        "recognition": "TemplateMatch",
+        "template": [
+            "shangcheng/baitan_zhujiemian.png",
+            "shangcheng/baitan_zhujiemian2.png"
+        ],
+        "roi": [
+            435,
+            0,
+            382,
+            119
+        ],
+        "threshold": [
+            0.8
+        ]
+    },
+    "经验链-寻物-玫瑰/金兰花": {
+        "recognition": "OCR",
+        "expected": [
+            "玫瑰花",
+            "金兰花"
+        ],
+        "roi": [
+            813,
+            80,
+            161,
+            52
+        ],
+        "pre_delay": 500,
+        "next": [
+            "[JumpBack]经验链-寻物-关闭摆摊界面",
+            "经验链-寻物-玫瑰/金兰花-传说过度"
+        ]
+    },
+    "经验链-寻物-玫瑰/金兰花-传说过度": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "经验链-寻物-打开挂机界面"
+        ]
+    },
+    "经验链-寻物-打开挂机界面": {
+        "action": "ClickKey",
+        "key": [
+            57,
+            35
+        ],
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-打开挂机界面成功"
+        ]
+    },
+    "经验链-寻物-打开挂机界面成功": {
+        "recognition": "OCR",
+        "expected": [
+            "挂机"
+        ],
+        "roi": [
+            535,
+            16,
+            214,
+            51
+        ],
+        "next": [
+            "经验链-寻物-打开挂机界面成功-点击云梦泽"
+        ]
+    },
+    "经验链-寻物-打开挂机界面成功-点击云梦泽": {
+        "recognition": "OCR",
+        "expected": [
+            "云梦泽"
+        ],
+        "roi": [
+            167,
+            373,
+            989,
+            135
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-传说成功",
+            "经验链-寻物-传说倒计时",
+            "经验链-寻物-传说失败"
+        ]
+    },
+    "经验链-寻物-传说成功": {
+        "inverse": true,
+        "recognition": "OCR",
+        "expected": [
+            "云梦泽"
+        ],
+        "roi": [
+            107,
+            23,
+            117,
+            34
+        ]
+    },
+    "经验链-寻物-传说倒计时": {
+        "max_hit": 40,
+        "pre_delay": 30000
+    },
+    "经验链-寻物-传说失败": {},
+    "经验链-寻物-对话确认": {
+        "recognition": "OCR",
+        "expected": [
+            "经验任务链-寻物"
+        ],
+        "roi": [
+            923,
+            26,
+            324,
+            540
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-上交"
+        ]
+    },
+    "经验链-寻物-上交": {
+        "recognition": "OCR",
+        "expected": [
+            "上交"
+        ],
+        "roi": [
+            980,
+            561,
+            163,
+            60
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800
+    },
+    "经验链-战斗-对话确认": {
+        "recognition": "OCR",
+        "expected": [
+            "经验任务链-战斗"
+        ],
+        "roi": [
+            923,
+            26,
+            324,
+            540
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "经验链-战斗-点击开始战斗"
+        ]
+    },
+    "经验链-战斗-点击开始战斗": {
+        "recognition": "OCR",
+        "expected": [
+            "开始战斗"
+        ],
+        "roi": [
+            923,
+            26,
+            324,
+            540
+        ],
+        "action": "Click",
+        "post_delay": 800
+    },
+    "经验链-最后一个任务": {
+        "max_hit": 1,
+        "focus": {
+            "Node.Recognition.Succeeded": "经验链-最后一个任务"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "经验链-(?:寻(?:宠|物|人)|战斗)（200/200）"
+        ],
+        "roi": [
+            1034,
+            167,
+            245,
+            340
+        ],
+        "post_delay": 5000,
+        "post_wait_freezes": 1000,
+        "next": [
+            "背包金币数量-第二次"
+        ]
+    },
+    "经验链-寻物-50/60装备": {
+        "recognition": "OCR",
+        "expected": [
+            "金缕羽衣"
+        ],
+        "roi": [
+            813,
+            80,
+            161,
+            52
+        ],
+        "pre_delay": 500,
+        "action": "Custom",
+        "custom_action": "craftName",
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-关闭摆摊界面"
+        ]
+    },
+    "经验链-寻物-装备名称": {
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            813,
+            80,
+            161,
+            52
+        ],
+        "pre_delay": 500
+    },
+    "经验链-寻物-关闭摆摊界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/guanbi1.png",
+            "zonghe/guanbi2.png",
+            "zonghe/guanbi3.png",
+            "zonghe/guanbi4.png"
+        ],
+        "roi": [
+            1043,
+            8,
+            143,
+            101
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "经验链-寻物-打造-加号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 800,
+        "next": [
+            "经验链-寻物-打开打造界面"
+        ]
+    },
+    "经验链-寻物-打造-乘号": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "next": [
+            "经验链-寻物-打开打造界面"
+        ]
+    },
+    "经验链-寻物-打开打造界面": {
+        "action": "ClickKey",
+        "key": [
+            57,
+            50
+        ],
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-打开打造界面成功"
+        ]
+    },
+    "经验链-寻物-打开打造界面成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "qianghua/qainghua_jiemian.png"
+        ],
+        "roi": [
+            1022,
+            24,
+            131,
+            268
+        ],
+        "post_delay": 500,
+        "next": [
+            "经验链-寻物-打开打造界面成功-切换打造"
+        ]
+    },
+    "经验链-寻物-打开打造界面成功-切换打造": {
+        "recognition": "OCR",
+        "expected": [
+            "打",
+            "造"
+        ],
+        "roi": [
+            1022,
+            24,
+            131,
+            268
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": []
+    }
+}

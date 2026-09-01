@@ -1,0 +1,308 @@
+{
+    "5R_duizhang": {
+        "next": [
+            "队长过渡",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "队长过渡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/chenghao.png",
+            "zonghe/jiahao.png"
+        ],
+        "roi": [
+            1206,
+            637,
+            66,
+            57
+        ],
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            34
+        ],
+        "next": [
+            "邀请队员-打开好友界面成功",
+            "[JumpBack]好友界面-按键打开失败-点击好友图标"
+        ]
+    },
+    "好友界面-按键打开失败-点击好友图标": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "r5/haoyou1.png",
+                    "r5/haoyou2.png"
+                ],
+                "roi": [
+                    0,
+                    435,
+                    84,
+                    80
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "好友"
+                ],
+                "roi": [
+                    0,
+                    435,
+                    84,
+                    80
+                ]
+            }
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "邀请队员-打开好友界面成功": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "r5/haoyou_zhujiemian.png"
+        ],
+        "roi": [
+            352,
+            0,
+            543,
+            103
+        ],
+        "post_delay": 1000,
+        "next": [
+            "邀请队员-切换联系人"
+        ]
+    },
+    "邀请队员-切换联系人": {
+        "recognition": "OCR",
+        "expected": [
+            "联系人"
+        ],
+        "roi": [
+            362,
+            89,
+            92,
+            50
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "next": [
+            "[JumpBack]邀请队员-向下滑动",
+            "邀请队员完成"
+        ]
+    },
+    "邀请队员完成": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "r5/yaoqing_wancheng.png"
+        ],
+        "roi": [
+            147,
+            87,
+            415,
+            160
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "邀请队员-向下滑动": {
+        "max_hit": 4,
+        "action": "Swipe",
+        "begin": [
+            366,
+            220
+        ],
+        "end": [
+            369,
+            364
+        ],
+        "post_delay": 500,
+        "next": [
+            "邀请队员-点击搜索"
+        ]
+    },
+    "邀请队员-agent": {
+        "recognition": "Custom",
+        "custom_recognition": "invite"
+    },
+    "邀请队员-点击搜索": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "r5/search_button.png"
+                ],
+                "roi": [
+                    153,
+                    209,
+                    408,
+                    64
+                ]
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "搜索"
+                ],
+                "roi": [
+                    153,
+                    209,
+                    408,
+                    64
+                ]
+            }
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "邀请队员-输入队员名称1",
+            "邀请队员-输入队员名称2",
+            "邀请队员-输入队员名称3",
+            "邀请队员-输入队员名称4"
+        ]
+    },
+    "邀请队员-输入队员名称1": {
+        "focus": {
+            "Node.Recognition.Succeeded": "邀请队员1号"
+        },
+        "max_hit": 1,
+        "action": "InputText",
+        "input_text": "",
+        "next": [
+            "邀请队员-输入队员名称-确认"
+        ]
+    },
+    "邀请队员-输入队员名称2": {
+        "focus": {
+            "Node.Recognition.Succeeded": "邀请队员2号"
+        },
+        "max_hit": 1,
+        "action": "InputText",
+        "input_text": "",
+        "next": [
+            "邀请队员-输入队员名称-确认"
+        ]
+    },
+    "邀请队员-输入队员名称3": {
+        "focus": {
+            "Node.Recognition.Succeeded": "邀请队员3号"
+        },
+        "max_hit": 1,
+        "action": "InputText",
+        "input_text": "",
+        "next": [
+            "邀请队员-输入队员名称-确认"
+        ]
+    },
+    "邀请队员-输入队员名称4": {
+        "focus": {
+            "Node.Recognition.Succeeded": "邀请队员4号"
+        },
+        "max_hit": 1,
+        "action": "InputText",
+        "input_text": "",
+        "next": [
+            "邀请队员-输入队员名称-确认"
+        ]
+    },
+    "邀请队员-输入队员名称-确认": {
+        "recognition": "OCR",
+        "expected": "确定",
+        "roi": [
+            1208,
+            0,
+            67,
+            65
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "邀请队员-人员信息展开"
+        ]
+    },
+    "邀请队员-人员信息展开": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "r5/zhankai_renyuanxinxi.png"
+        ],
+        "roi": [
+            471,
+            258,
+            97,
+            100
+        ],
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "邀请队员-点击邀请入队",
+            "邀请队员-队员已经在队伍中"
+        ]
+    },
+    "邀请队员-点击邀请入队": {
+        "focus": {
+            "Node.Action.Succeeded": "邀请成功"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "邀请入队"
+        ],
+        "roi": [
+            554,
+            234,
+            285,
+            401
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500,
+        "next": [
+            "邀请队员-清除搜索信息"
+        ]
+    },
+    "邀请队员-清除搜索信息": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "r5/sousuo_qingchu.png"
+        ],
+        "roi": [
+            482,
+            202,
+            83,
+            81
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "target_offset": [
+            0,
+            0,
+            -3,
+            -3
+        ],
+        "post_delay": 500
+    },
+    "邀请队员-队员已经在队伍中": {
+        "focus": {
+            "Node.Recognition.Succeeded": "当前邀请的队员已经在队伍中"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "申请入队"
+        ],
+        "roi": [
+            554,
+            234,
+            285,
+            401
+        ],
+        "next": [
+            "邀请队员-清除搜索信息"
+        ]
+    }
+}

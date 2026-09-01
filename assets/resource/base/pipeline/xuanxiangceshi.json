@@ -1,0 +1,14 @@
+{
+    "xuanxiangceshi": {
+        "next": [
+            "跳转地图选择"
+        ]
+    },
+    "跳转地图选择": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/tab_changancheng.png"
+        ],
+        "action": "Click"
+    }
+}

@@ -1,0 +1,538 @@
+{
+    "MyTask1": {
+        "recognition": "OCR",
+        "expected": "存储",
+        "action": "Click"
+    },
+    "huadongcs": {
+        "action": "Swipe",
+        "begin": [
+            900,
+            500,
+            10,
+            10
+        ],
+        "end": [
+            900,
+            100,
+            10,
+            10
+        ]
+    },
+    "startgame": {
+        "action": "StartApp",
+        "package": "com.netease.my.uc",
+        "next": [
+            "dengluyouxi"
+        ]
+    },
+    "dengluyouxi": {
+        "pre_wait_freezes": 3000,
+        "recognition": "OCR",
+        "expected": [
+            "登录游戏"
+        ],
+        "roi": [
+            537,
+            501,
+            192,
+            46
+        ],
+        "action": "Click"
+    },
+    "dashaochu": {
+        "recognition": "OCR",
+        "expected": [
+            "大扫除"
+        ],
+        "roi": [
+            940,
+            431,
+            287,
+            62
+        ],
+        "action": "Click"
+    },
+    "returnmain": {
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            4
+        ]
+    },
+    "returnmain1": {
+        "pre_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            4,
+            4
+        ]
+    },
+    "主界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ]
+    },
+    "panduan_zhujiemian": {
+        "next": [
+            "[JumpBack]amazing_discount",
+            "[JumpBack]panduan_zhujiemian_ks",
+            "[JumpBack]close_exit_confirm",
+            "zai_zhujiemian"
+        ]
+    },
+    "close_exit_confirm": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/exit_confirm.png"
+        ],
+        "roi": [
+            246,
+            398,
+            791,
+            200
+        ],
+        "green_mask": true,
+        "action": "ClickKey",
+        "post_wait_freezes": 200,
+        "key": [
+            4
+        ],
+        "post_delay": 500
+    },
+    "amazing_discount": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/amazing_discount.png"
+        ],
+        "roi": [
+            233,
+            40,
+            846,
+            324
+        ],
+        "next": [
+            "amazing_discount_close"
+        ]
+    },
+    "amazing_discount_close": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/amazing_discount_close.png"
+        ],
+        "roi": [
+            947,
+            61,
+            120,
+            127
+        ],
+        "action": "Click"
+    },
+    "zai_zhujiemian": {
+        "pre_delay": 1000
+    },
+    "panduan_zhujiemian_ks": {
+        "inverse": true,
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "post_wait_freezes": 200,
+        "key": [
+            4
+        ],
+        "post_delay": 500
+    },
+    "关闭X9联赛弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/shouye_huodong_zedang.png",
+            "zonghe/shouye_huodong_zedang2.png"
+        ],
+        "roi": [
+            1048,
+            51,
+            66,
+            64
+        ],
+        "threshold": [
+            0.9
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "关闭三界热点": {
+        "recognition": "OCR",
+        "expected": [
+            "点击下方空白处关闭界面",
+            "点击下万空白处关闭界面",
+            "点击任意空白处关闭界面"
+        ],
+        "roi": [
+            472,
+            666,
+            332,
+            38
+        ],
+        "action": "Click",
+        "post_delay": 500
+    },
+    "MyTask3": {},
+    "战斗中-等待100秒": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhandou/zidong.png",
+            "zhandou/quxiao.png"
+        ],
+        "roi": [
+            1175,
+            549,
+            103,
+            159
+        ],
+        "pre_delay": 100000
+    },
+    "战斗中-等待50秒": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhandou/zidong.png",
+            "zhandou/quxiao.png"
+        ],
+        "roi": [
+            1175,
+            549,
+            103,
+            159
+        ],
+        "pre_delay": 50000
+    },
+    "战斗中-等待20秒": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhandou/zidong.png",
+            "zhandou/quxiao.png"
+        ],
+        "roi": [
+            1175,
+            549,
+            103,
+            159
+        ],
+        "pre_delay": 20000
+    },
+    "战斗中-等待10秒": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhandou/zidong.png",
+            "zhandou/quxiao.png"
+        ],
+        "roi": [
+            1175,
+            549,
+            103,
+            159
+        ],
+        "pre_delay": 10000
+    },
+    "战斗中-等待5秒": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zhandou/zidong.png",
+            "zhandou/quxiao.png"
+        ],
+        "roi": [
+            1175,
+            549,
+            103,
+            159
+        ],
+        "pre_delay": 5000
+    },
+    "MyTask4": {
+        "recognition": "Custom",
+        "custom_recognition": "my_reco_222",
+        "action": "Custom",
+        "custom_action": "my_action_111"
+    },
+    "自动寻路中-图片识别": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/zidongxunlu1.png",
+            "zonghe/zidongxunlu2.png",
+            "zonghe/zidongxunlu3.png",
+            "zonghe/zidongxunlu4.png"
+        ],
+        "roi": [
+            257,
+            133,
+            770,
+            461
+        ],
+        "pre_delay": 3000
+    },
+    "计数器": {
+        "action": "Custom",
+        "custom_action": "count",
+        "custom_action_param": {
+            "count": 0,
+            "target_count": 4,
+            "nextTask": "panduan_zhujiemian",
+            "LoopNode": "123"
+        }
+    },
+    "123": {
+        "next": [
+            "使用红罗羹",
+            "使用绿芦羹",
+            "使用心魔宝珠",
+            "合成阵法",
+            "使用秘境材料",
+            "使用过期物品",
+            "背包向上滑动1"
+        ]
+    },
+    "计数器2": {
+        "action": "Custom",
+        "custom_action": "countGlobal",
+        "custom_action_param": {
+            "target_count": 4,
+            "nextTask": "panduan_zhujiemian",
+            "LoopNode": "baotu_huodong_down"
+        }
+    },
+    "mk": {
+        "next": [
+            "fuli_qiandao",
+            "[JumpBack]计数器2"
+        ]
+    },
+    "测试input": {
+        "recognition": "OCR",
+        "expected": "点击这里输入",
+        "roi": [
+            155,
+            41,
+            232,
+            43
+        ],
+        "action": "Click",
+        "next": [
+            "shuru"
+        ]
+    },
+    "shuru": {
+        "action": "InputText",
+        "input_text": "这是一个测试输入"
+    },
+    "启动梦幻西游手游": {
+        "action": "StartApp",
+        "package": "com.netease.myq"
+    },
+    "测试focus1": {
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            289,
+            63,
+            167,
+            61
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "测试focus1{best_result}"
+        }
+    },
+    "测试ocr文字替换功能2": {
+        "recognition": "OCR",
+        "expected": [
+            "抚谁吐焰"
+        ],
+        "roi": [
+            365,
+            609,
+            120,
+            58
+        ],
+        "replace": [
+            [
+                "履",
+                "抚"
+            ],
+            [
+                "水",
+                "谁"
+            ]
+        ]
+    },
+    "空节点": {},
+    "识别输出测试": {
+        "recognition": "OCR",
+        "expected": [],
+        "roi": [
+            916,
+            316,
+            139,
+            45
+        ],
+        "action": "Custom",
+        "custom_action": "returnOCR",
+        "custom_action_param": {
+            "recognition_name": "识别输出测试",
+            "action_key": "Click",
+            "return_text": "输出的描述"
+        },
+        "next": []
+    },
+    "关闭整点活动弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/renwu_tanchuang.png"
+        ],
+        "roi": [
+            846,
+            394,
+            80,
+            83
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "识别拓印_停止": {
+        "focus": {
+            "Node.Recognition.Succeeded": "遇见拓印，停止所有任务"
+        },
+        "recognition": "Or",
+        "any_of": [
+            "识别拓印-子1",
+            "识别拓印-子2",
+            "识别拓印-子3"
+        ]
+    },
+    "识别拓印": {
+        "recognition": "Or",
+        "any_of": [
+            "识别拓印-子1",
+            "识别拓印-子2",
+            "识别拓印-子3"
+        ],
+        "next": [
+            "拓印完成",
+            "[JumpBack]拓印滑动"
+        ]
+    },
+    "识别拓印-子1": {
+        "recognition": "OCR",
+        "expected": [
+            "拓印",
+            "拓",
+            "印"
+        ],
+        "roi": [
+            295,
+            185,
+            51,
+            84
+        ]
+    },
+    "识别拓印-子2": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "tayin/tayin.png"
+        ],
+        "threshold": [
+            0.9
+        ],
+        "roi": [
+            268,
+            165,
+            102,
+            170
+        ]
+    },
+    "识别拓印-子3": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "tayin/tayin2.png"
+        ],
+        "threshold": [
+            0.9
+        ],
+        "roi": [
+            205,
+            381,
+            269,
+            249
+        ]
+    },
+    "拓印滑动": {
+        "max_hit": 20,
+        "action": "Custom",
+        "custom_action": "tayin"
+    },
+    "拓印完成": {
+        "focus": {
+            "Node.Recognition.Succeeded": "拓印完成"
+        },
+        "recognition": "And",
+        "all_of": [
+            "拓印完成-子1",
+            "拓印完成-子2"
+        ],
+        "pre_delay": 500,
+        "action": "Click"
+    },
+    "拓印完成-子1": {
+        "recognition": "OCR",
+        "expected": [
+            "完成"
+        ],
+        "roi": [
+            732,
+            578,
+            166,
+            51
+        ]
+    },
+    "拓印完成-子2": {
+        "recognition": "ColorMatch",
+        "count": 800,
+        "lower": [
+            244,
+            217,
+            180
+        ],
+        "upper": [
+            247,
+            225,
+            194
+        ],
+        "roi": [
+            732,
+            578,
+            166,
+            51
+        ]
+    }
+}

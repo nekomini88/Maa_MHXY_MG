@@ -1,0 +1,572 @@
+{
+    "bangpai_renwu": {
+        "next": [
+            "[JumpBack]panduan_zhujiemian_ks",
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]bangpai_huadong_down",
+            "已领取帮派任务",
+            "[JumpBack]bangpai_rukou_limit"
+        ]
+    },
+    "bangpai_rukou_limit": {
+        "max_hit": 1,
+        "next": [
+            "[JumpBack]panduan_zhujiemian_ks",
+            "主界面-领取帮派任务"
+        ]
+    },
+    "bangpai_huadong_down": {
+        "max_hit": 1,
+        "action": "Swipe",
+        "begin": [
+            1145,
+            234,
+            1,
+            1
+        ],
+        "end": [
+            1149,
+            419,
+            1,
+            1
+        ],
+        "post_delay": 1000
+    },
+    "主界面-领取帮派任务": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 2000,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活动-帮派任务",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活动-帮派任务": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "活动-帮派任务-点击日常活动"
+        ]
+    },
+    "活动-帮派任务-点击日常活动": {
+        "recognition": "OCR",
+        "expected": [
+            "日常活动"
+        ],
+        "roi": [
+            132,
+            90,
+            156,
+            59
+        ],
+        "action": "Click",
+        "post_wait_freezes": 500,
+        "next": [
+            "活动-帮派任务-向上滑动到顶端"
+        ]
+    },
+    "活动-帮派任务-向上滑动到顶端": {
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "starting": 0,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            },
+            {
+                "starting": 1000,
+                "begin": [
+                    731,
+                    129,
+                    1,
+                    1
+                ],
+                "end": [
+                    732,
+                    444,
+                    1,
+                    1
+                ]
+            }
+        ],
+        "post_delay": 500,
+        "next": [
+            "活动-帮派任务-开始",
+            "[JumpBack]bangpai_huodong_down"
+        ]
+    },
+    "活动-帮派任务-已完成": {
+        "recognition": "OCR",
+        "expected": [
+            "请下周继续"
+        ],
+        "threshold": 0.9,
+        "roi": [
+            400,
+            241,
+            482,
+            246
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "活动-帮派任务-开始": {
+        "recognition": "And",
+        "all_of": [
+            {
+                "sub_name": "rukou",
+                "recognition": "TemplateMatch",
+                "template": [
+                    "bangpairenwu/rukou.png"
+                ],
+                "roi": [
+                    316,
+                    76,
+                    834,
+                    433
+                ],
+                "green_mask": true,
+                "threshold": 0.9
+            },
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "帮派任务"
+                ],
+                "roi": "rukou"
+            }
+        ],
+        "box_index": 0,
+        "next": [
+            "活动-帮派任务-开始-点击参加"
+        ]
+    },
+    "活动-帮派任务-开始-点击参加": {
+        "recognition": "OCR",
+        "expected": [
+            "参加"
+        ],
+        "roi": "活动-帮派任务-开始",
+        "action": "Click",
+        "post_delay": 4000,
+        "next": [
+            "click_bangpai_ttwf"
+        ]
+    },
+    "click_bangpai_ttwf": {
+        "recognition": "OCR",
+        "expected": [
+            "领取帮派任务"
+        ],
+        "roi": [
+            925,
+            137,
+            311,
+            363
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "已领取帮派任务": {
+        "recognition": "OCR",
+        "expected": [
+            "朱雀",
+            "玄武",
+            "青龙",
+            "白虎"
+        ],
+        "roi": [
+            1034,
+            171,
+            235,
+            336
+        ],
+        "pre_delay": 2000,
+        "next": [
+            "活动-帮派任务-已完成",
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "[JumpBack]帮战弹窗",
+            "[JumpBack]战斗中-等待10秒",
+            "[JumpBack]任务分支-摆摊购买",
+            "[JumpBack]任务分支-对话",
+            "[JumpBack]任务分支-物品提交",
+            "[JumpBack]任务分支-抄本",
+            "[JumpBack]任务分支-药店-购买",
+            "[JumpBack]帮派任务-完成",
+            "[JumpBack]帮派任务单次点击",
+            "[JumpBack]帮派-间隔20秒-最大10分钟",
+            "panduan_zhujiemian"
+        ]
+    },
+    "帮派任务单次点击": {
+        "recognition": "Custom",
+        "custom_recognition": "bangpai_renwu_decide",
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 3000
+    },
+    "帮派-间隔20秒-最大10分钟": {
+        "max_hit": 60,
+        "pre_delay": 10000
+    },
+    "bangpai_renwu_sleep": {
+        "pre_delay": 700000,
+        "next": [
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "panduan_zhujiemian"
+        ]
+    },
+    "战斗平衡弹窗-点击关闭1": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/zhandoupingheng_guanbi1.png"
+        ],
+        "roi": [
+            1215,
+            4,
+            48,
+            51
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 500
+    },
+    "bangpai_huodong_down": {
+        "max_hit": 15,
+        "action": "Swipe",
+        "begin": [
+            733,
+            380,
+            1,
+            1
+        ],
+        "end": [
+            735,
+            250,
+            1,
+            1
+        ],
+        "post_delay": 2000
+    },
+    "bangpai_放弃任务": {
+        "next": [
+            "放弃任务_在任务界面",
+            "[JumpBack]panduan_zhujiemian_ks",
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]打开任务界面"
+        ]
+    },
+    "打开任务界面": {
+        "action": "Click",
+        "target": [
+            1044,
+            115,
+            101,
+            50
+        ],
+        "post_delay": 500
+    },
+    "放弃任务_在任务界面": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "bangpairenwu/renwu_jiemian_logo.png"
+        ],
+        "next": [
+            "放弃任务_点击日常任务"
+        ]
+    },
+    "放弃任务_点击日常任务": {
+        "recognition": "OCR",
+        "expected": [
+            "日常"
+        ],
+        "roi": [
+            90,
+            111,
+            190,
+            166
+        ],
+        "action": "Click",
+        "next": [
+            "放弃任务_点击帮派任务"
+        ]
+    },
+    "放弃任务_点击帮派任务": {
+        "recognition": "OCR",
+        "expected": [
+            "帮派任务"
+        ],
+        "roi": [
+            262,
+            140,
+            254,
+            255
+        ],
+        "action": "Click",
+        "next": [
+            "放弃任务_过渡"
+        ]
+    },
+    "放弃任务_过渡": {
+        "action": "Click",
+        "next": [
+            "放弃任务_确认放弃",
+            "[JumpBack]放弃任务_点击放弃"
+        ]
+    },
+    "放弃任务_点击放弃": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "bangpairenwu/fangqi_renwu.png"
+        ],
+        "roi": [
+            507,
+            523,
+            129,
+            120
+        ],
+        "action": "Click"
+    },
+    "放弃任务_确认放弃": {
+        "recognition": "OCR",
+        "expected": [
+            "确定"
+        ],
+        "roi": [
+            637,
+            364,
+            213,
+            134
+        ],
+        "action": "Click",
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "任务分支-摆摊购买": {
+        "recognition": "And",
+        "all_of": [
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "bangpairenwu/baitan_logo.png"
+                ]
+            }
+        ],
+        "action": "Click",
+        "post_delay": 1000,
+        "target": [
+            948,
+            636,
+            115,
+            38
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "任务分支-抄本": {
+        "recognition": "OCR",
+        "expected": [
+            "公告抄本"
+        ],
+        "roi": [
+            1025,
+            481,
+            142,
+            72
+        ],
+        "action": "Click",
+        "target": [
+            1060,
+            560,
+            67,
+            36
+        ]
+    },
+    "任务分支-药店": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "bangpairenwu/bangpai_yaodian.png"
+        ],
+        "roi": [
+            445,
+            3,
+            394,
+            80
+        ],
+        "next": [
+            "任务分支-药店-购买"
+        ]
+    },
+    "任务分支-药店-购买": {
+        "recognition": "OCR",
+        "expected": [
+            "购买"
+        ],
+        "roi": [
+            866,
+            542,
+            210,
+            82
+        ],
+        "action": "Click"
+    },
+    "任务分支-对话": {
+        "recognition": "OCR",
+        "expected": [
+            "请选择要做的事"
+        ],
+        "roi": [
+            876,
+            5,
+            311,
+            544
+        ],
+        "next": [
+            "帮派任务-对话-点击"
+        ]
+    },
+    "帮派任务-对话-点击": {
+        "recognition": "OCR",
+        "expected": [
+            "帮派任务",
+            "切磋切磋"
+        ],
+        "roi": [
+            876,
+            5,
+            311,
+            544
+        ],
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "任务分支-物品提交": {
+        "recognition": "And",
+        "all_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "任务物品选择"
+                ],
+                "roi": [
+                    960,
+                    74,
+                    191,
+                    60
+                ]
+            }
+        ],
+        "action": "Click",
+        "target": [
+            997,
+            573,
+            111,
+            38
+        ],
+        "post_delay": 1000
+    },
+    "帮派任务-完成": {
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "expected": [
+                    "帮派任务完成"
+                ],
+                "roi": [
+                    467,
+                    194,
+                    341,
+                    84
+                ]
+            },
+            {
+                "recognition": "TemplateMatch",
+                "template": [
+                    "bangpairenwu/baipangrenwu_wancheng_logo.png"
+                ],
+                "roi": [
+                    220,
+                    229,
+                    201,
+                    324
+                ]
+            }
+        ],
+        "next": [
+            "帮派任务-完成-再来一轮"
+        ]
+    },
+    "帮派任务-完成-再来一轮": {
+        "recognition": "OCR",
+        "expected": [
+            "再来一轮"
+        ],
+        "roi": [
+            684,
+            550,
+            174,
+            69
+        ],
+        "action": "Click"
+    },
+    "帮战弹窗": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "bangpairenwu/bangzhan_jiemian.png"
+        ],
+        "roi": [
+            116,
+            89,
+            587,
+            235
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}

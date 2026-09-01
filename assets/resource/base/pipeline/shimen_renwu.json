@@ -1,0 +1,219 @@
+{
+    "shimen_renwu": {
+        "next": [
+            "师门任务开始",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "师门任务开始": {
+        "pre_delay": 200,
+        "next": [
+            "shimen_renwu2_dianji",
+            "shimen_renwu2_dianji2",
+            "[JumpBack]展开-首页任务栏",
+            "[JumpBack]任务栏切换为任务",
+            "[JumpBack]师门-下滑任务栏-三次"
+        ]
+    },
+    "师门-下滑任务栏-三次": {
+        "max_hit": 3,
+        "post_delay": 1000,
+        "action": "MultiSwipe",
+        "swipes": [
+            {
+                "begin": [
+                    1147,
+                    207,
+                    1,
+                    1
+                ],
+                "end": [
+                    1138,
+                    403,
+                    1,
+                    1
+                ]
+            }
+        ]
+    },
+    "shimen_renwu2_dianji": {
+        "recognition": "OCR",
+        "expected": [
+            "师门任务"
+        ],
+        "roi": [
+            1035,
+            112,
+            245,
+            294
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000,
+        "next": [
+            "识别拓印_停止",
+            "师门-点击去完成",
+            "[JumpBack]识别拓印",
+            "[JumpBack]点击师门任务失败-再次点击"
+        ]
+    },
+    "点击师门任务失败-再次点击": {
+        "recognition": "OCR",
+        "expected": [
+            "师门任务"
+        ],
+        "roi": [
+            1035,
+            112,
+            245,
+            294
+        ],
+        "pre_delay": 500,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "shimen_renwu2_dianji2": {
+        "pre_delay": 500,
+        "recognition": "OCR",
+        "expected": [
+            "^师门-.*"
+        ],
+        "threshold": 0.9,
+        "roi": [
+            1035,
+            112,
+            245,
+            294
+        ],
+        "action": "Click",
+        "next": [
+            "识别拓印_停止",
+            "师门完成确定-图片识别",
+            "师门完成确定-文字识别",
+            "[JumpBack]识别拓印",
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "[JumpBack]关闭X9联赛弹窗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]issub_sleep-10分钟",
+            "[JumpBack]师门任务-单次点击",
+            "[JumpBack]issub_sleep-无限"
+        ]
+    },
+    "师门-点击去完成": {
+        "pre_delay": 200,
+        "recognition": "OCR",
+        "roi": [
+            398,
+            408,
+            704,
+            59
+        ],
+        "expected": [
+            "去完成",
+            "继续任务"
+        ],
+        "threshold": 0.9,
+        "action": "Click",
+        "next": [
+            "师门完成确定-图片识别",
+            "师门完成确定-文字识别",
+            "[JumpBack]识别拓印",
+            "[JumpBack]师门完成-九转天阶遮挡",
+            "[JumpBack]师门完成-九幽遮挡",
+            "[JumpBack]战斗平衡弹窗-点击关闭",
+            "[JumpBack]关闭X9联赛弹窗",
+            "[JumpBack]跳过剧情动画-快进键",
+            "[JumpBack]关闭三界热点",
+            "[JumpBack]issub_sleep-10分钟",
+            "[JumpBack]师门任务-单次点击",
+            "[JumpBack]issub_sleep-无限"
+        ]
+    },
+    "师门任务-单次点击": {
+        "max_hit": 1,
+        "pre_delay": 500,
+        "recognition": "OCR",
+        "expected": [
+            "^师门.*"
+        ],
+        "threshold": 0.9,
+        "roi": [
+            1036,
+            113,
+            240,
+            150
+        ],
+        "action": "Click",
+        "post_delay": 7000
+    },
+    "师门完成-九转天阶遮挡": {
+        "recognition": "OCR",
+        "expected": [
+            "九转天阶"
+        ],
+        "roi": [
+            293,
+            47,
+            834,
+            260
+        ],
+        "pre_delay": 1000,
+        "action": "ClickKey",
+        "key": [
+            4
+        ]
+    },
+    "师门完成-九幽遮挡": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiuyoudiyu.png",
+            "zonghe/jiuyoudiyu2.png"
+        ],
+        "roi": [
+            1085,
+            128,
+            64,
+            71
+        ],
+        "pre_delay": 1000,
+        "action": "Click",
+        "post_delay": 1000
+    },
+    "师门完成确定-图片识别": {
+        "recognition": "TemplateMatch",
+        "template": "shimen/shimenwancheng2.png",
+        "roi": [
+            404,
+            181,
+            444,
+            80
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "师门完成确定-文字识别": {
+        "recognition": "OCR",
+        "expected": [
+            "师门任务完成"
+        ],
+        "roi": [
+            430,
+            180,
+            410,
+            96
+        ],
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    },
+    "issub_sleep-10分钟": {
+        "max_hit": 60,
+        "pre_delay": 10000
+    },
+    "issub_sleep-无限": {
+        "pre_delay": 10000
+    }
+}

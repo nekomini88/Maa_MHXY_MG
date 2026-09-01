@@ -1,0 +1,118 @@
+{
+    "huoyue_lingqu": {
+        "next": [
+            "主界面-活跃领取",
+            "[JumpBack]panduan_zhujiemian"
+        ]
+    },
+    "主界面-活跃领取": {
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/jiahao.png",
+            "zonghe/chenghao.png",
+            "zonghe/baoguo.png",
+            "zonghe/baoguo_man.png"
+        ],
+        "roi": [
+            1197,
+            540,
+            78,
+            157
+        ],
+        "post_delay": 500,
+        "action": "ClickKey",
+        "key": [
+            57,
+            31
+        ],
+        "post_wait_freezes": 100,
+        "next": [
+            "活跃奖励领取-打开活动界面成功",
+            "[JumpBack]活动-界面-打开失败-点击活动图片",
+            "[JumpBack]战斗平衡弹窗-点击关闭"
+        ]
+    },
+    "活跃奖励领取-打开活动界面成功": {
+        "recognition": "TemplateMatch",
+        "template": "zonghe/huodong_jiemian_panduan.png",
+        "roi": [
+            350,
+            23,
+            600,
+            62
+        ],
+        "next": [
+            "领取活跃奖励5"
+        ]
+    },
+    "领取活跃奖励5": {
+        "action": "Click",
+        "max_hit": 2,
+        "target": [
+            1031,
+            530,
+            72,
+            75
+        ],
+        "post_delay": 500,
+        "next": [
+            "领取活跃奖励4"
+        ]
+    },
+    "领取活跃奖励4": {
+        "action": "Click",
+        "max_hit": 2,
+        "target": [
+            872,
+            524,
+            81,
+            79
+        ],
+        "post_delay": 500,
+        "next": [
+            "领取活跃奖励3"
+        ]
+    },
+    "领取活跃奖励3": {
+        "action": "Click",
+        "max_hit": 2,
+        "target": [
+            730,
+            528,
+            70,
+            80
+        ],
+        "post_delay": 500,
+        "next": [
+            "领取活跃奖励2"
+        ]
+    },
+    "领取活跃奖励2": {
+        "action": "Click",
+        "max_hit": 2,
+        "target": [
+            572,
+            527,
+            80,
+            77
+        ],
+        "post_delay": 500,
+        "next": [
+            "领取活跃奖励1"
+        ]
+    },
+    "领取活跃奖励1": {
+        "action": "Click",
+        "max_hit": 2,
+        "target": [
+            428,
+            528,
+            69,
+            77
+        ],
+        "post_delay": 500,
+        "next": [
+            "panduan_zhujiemian"
+        ]
+    }
+}
