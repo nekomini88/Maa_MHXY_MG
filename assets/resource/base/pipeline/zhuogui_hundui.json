@@ -221,6 +221,7 @@
     },
     "混队-抓鬼-匹配成功": {
         "focus": {
+            "Node.Recognition.Succeeded": "混队-抓鬼-匹配成功",
             "Node.PipelineNode.Failed": "混队-抓鬼-超5分钟，超时节点，整体流程结束。"
         },
         "recognition": "Or",
