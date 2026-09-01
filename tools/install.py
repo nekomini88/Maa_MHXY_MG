@@ -5,6 +5,16 @@ import sys
 import json
 
 import os
+import sys
+
+# Windows 下控制台默认 GBK 编码，print 含中文会抛 UnicodeEncodeError。
+# 强制 stdout/stderr 用 UTF-8，避免打包脚本在中文环境下崩溃。
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -125,17 +135,17 @@ def install_config():
     """
     src = working_dir / "config" / "config.json"
     if not src.exists():
-        print("[install] 未找到 config/config.json 模板，跳过外部通知模板安装。")
+        print("[install] config/config.json template not found, skip config template install.")
         return
     dst_dir = install_path / "config"
     dst_dir.mkdir(parents=True, exist_ok=True)
     dst = dst_dir / "config.json"
     if dst.exists():
         # 不覆盖用户已有的配置
-        print("[install] 检测到已有 config/config.json，保留用户配置。")
+        print("[install] config/config.json already exists, keep user config.")
         return
     shutil.copy2(src, dst)
-    print(f"[install] 已安装 config 模板到 {dst}")
+    print(f"[install] Installed config template to {dst}")
 
 
 if __name__ == "__main__":
