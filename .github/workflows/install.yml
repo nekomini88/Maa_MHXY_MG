@@ -264,6 +264,8 @@ jobs:
       - name: Package and upload win-${{ matrix.arch }} to GitHub Release (bypass Actions artifact quota)
         if: matrix.arch == 'x86_64'
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -e
           # 固定上传到用户的正式 Release v0.1.0（GitHub Release 资产不走 Actions artifact 配额）
