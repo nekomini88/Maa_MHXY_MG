@@ -7,7 +7,11 @@ from utils import LocalStorage
 @AgentServer.custom_action("input_node_success_num")
 class input_node_success_num(CustomAction):
     """
-   统计节点成功次数
+    统计节点成功次数（多实例已隔离）。
+
+    计数的读写经由 utils.LocalStorage 完成；LocalStorage 已按 MaaFramework
+    Project Interface v2.5.0 的 PI_CONTROLLER 环境变量为每个实例生成独立的存储作用域
+    （如 adb::127.0.0.1:16416::node_success），多开模拟器时各实例的计数互不干扰。
     """
     def run(
         self,
