@@ -1,0 +1,87 @@
+name: Build Win x64 to Release
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/build-win-release.yml"
+      - "agent/**"
+      - "assets/**"
+      - "config/config.json"
+      - "tools/install.py"
+      - "**.py"
+    branches:
+      - "**"
+
+permissions:
+  contents: write
+
+env:
+  MAA_FRAMEWORK_VERSION: "v5.12.2"
+  MFAA_VERSION: "v2.16.0"
+
+jobs:
+  build-win-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Download MaaFramework
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: MaaXYZ/MaaFramework
+          fileName: "MAA-win-x86_64*"
+          tag: ${{ env.MAA_FRAMEWORK_VERSION }}
+          out-file-path: "deps"
+          extract: true
+
+      - name: Download MFAAvalonia
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: MaaXYZ/MFAAvalonia
+          fileName: "MFAAvalonia-*-win-x64*"
+          tag: ${{ env.MFAA_VERSION }}
+          out-file-path: "MFA"
+          extract: true
+
+      - name: Clean up MFAAvalonia archive
+        shell: bash
+        run: |
+          rm -f MFA/*.7z MFA/*.zip 2>/dev/null || true
+          echo "Cleaned up archives"
+
+      - name: Install
+        shell: bash
+        run: |
+          ./install/python/python.exe ./tools/install.py v0.1.0 win-x64
+          cp -rpvn tools/registry/. install/
+          if [ -d "MFA" ]; then
+            mkdir -p install
+            cp -rpvn MFA/. install/
+            if [ -f "install/MFAAvalonia.exe" ]; then
+              mv -f install/MFAAvalonia.exe install/Maa_MHXY_MG.exe
+            fi
+          fi
+          # 用户自定义图标
+          if [ -f "Maa_MHXY_MG.ico" ]; then
+            cp Maa_MHXY_MG.ico install/logo.ico
+          fi
+
+      - name: Package and upload to Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          REL_TAG="v0.1.0"
+          # 用 python 打包 (Windows runner 无 zip)
+          python -c "import zipfile,os; z=zipfile.ZipFile('Maa_MHXY_MG-win-x86_64-MFAA.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(r,f), os.path.relpath(os.path.join(r,f),'install')) for r,_,fs in os.walk('install') for f in fs]; z.close()"
+          echo "Packed: $(ls -lh Maa_MHXY_MG-win-x86_64-MFAA.zip | awk '{print $5}')"
+          # 上传到 Release v0.1.0 (不走 Actions artifact 配额)
+          gh release upload "$REL_TAG" "Maa_MHXY_MG-win-x86_64-MFAA.zip" \
+            --repo "${{ github.repository }}" --clobber
+          echo "✅ Uploaded to $REL_TAG"
+          gh release view "$REL_TAG" --repo "${{ github.repository }}" --json assets \
+            --jq '.assets[]|{name,size}'
