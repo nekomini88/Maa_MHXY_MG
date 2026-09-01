@@ -261,15 +261,26 @@ jobs:
             cp Maa_MHXY_MG.ico install-mxu/logo.ico
           fi
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Maa_MHXY_MG-win-${{ matrix.arch }}-${{ needs.meta.outputs.tag }}-MFAA
-          path: "install"
+      - name: Package and upload win-${{ matrix.arch }} to GitHub Release (bypass Actions artifact quota)
+        if: matrix.arch == 'x86_64'
+        shell: bash
+        run: |
+          set -e
+          TAG="${{ needs.meta.outputs.tag }}"
+          # 打包 MFAA 主版本
+          pushd install
+          zip -qr "../Maa_MHXY_MG-win-x86_64-MFAA.zip" .
+          popd
+          echo "Packed MFAA zip:"
+          ls -lh Maa_MHXY_MG-win-x86_64-MFAA.zip
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Maa_MHXY_MG-win-${{ matrix.arch }}-${{ needs.meta.outputs.tag }}-MXU
-          path: "install-mxu"
+          # 上传到 GitHub Release（Release 资产不走 Actions artifact 配额）。
+          # Actions 中 gh 已自动用 GITHUB_TOKEN 认证（contents:write 权限）。
+          gh release upload "$TAG" "Maa_MHXY_MG-win-x86_64-MFAA.zip" \
+            --repo "${{ github.repository }}" --clobber
+          echo "✅ Release 上传完成: $TAG"
+          gh release view "$TAG" --repo "${{ github.repository }}" --json assets \
+            --jq '.assets[]|{name,size}' | head
 
   linux:
     needs: meta
