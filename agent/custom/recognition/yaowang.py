@@ -170,7 +170,18 @@ class Yaowang(CustomRecognition):
         context: Context,
         argv: CustomRecognition.AnalyzeArg,
     ) -> CustomRecognition.AnalyzeResult:
-        param: dict = json.loads(argv.custom_recognition_param or "{}")
+        # 健壮解析 custom_recognition_param：防 None/非字符串/非法JSON。
+        # 日志曾报 'NoneType' object has no attribute 'get'（param=None），
+        # 此处兜底确保 param 必定是 dict，任何异常都不会让 analyze 崩溃。
+        raw = getattr(argv, "custom_recognition_param", None) or "{}"
+        if not isinstance(raw, str):
+            raw = "{}"
+        try:
+            param = json.loads(raw)
+        except Exception:
+            param = {}
+        if not isinstance(param, dict):
+            param = {}
 
         enabled = param.get("yaowang_enabled", True)
         rx = float(param.get("yaowang_chat_ratio_x", DEFAULT_CHAT_RATIO_X))
