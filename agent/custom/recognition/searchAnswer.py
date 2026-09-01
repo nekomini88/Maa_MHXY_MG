@@ -75,7 +75,8 @@ def search_answer(question_bank, query, threshold=70):
 
     for q in question_bank:
         if nq == normalize_text(q):
-            return format_answer(question_bank[q]), 100, "精确匹配"
+            # 返回答案列表（供 OCR expected 逐个匹配），而非拼好的字符串
+            return list(question_bank[q]), 100, "精确匹配"
 
     best_match = None
     best_confidence = 0
@@ -86,8 +87,8 @@ def search_answer(question_bank, query, threshold=70):
             best_confidence = similarity
             best_match = q
     if best_match and best_confidence >= threshold:
-        return format_answer(question_bank[best_match]), best_confidence, "相似度匹配"
-    return "未找到匹配的问题", 0, "低于阈值"
+        return list(question_bank[best_match]), best_confidence, "相似度匹配"
+    return [], 0, "低于阈值"
 
 def format_answer(answers):
     """
@@ -166,4 +167,4 @@ def SearchQuestions(query):
 # if __name__ == "__main__":
 #     main()
 
-__all__ = ['SearchQuestions']
+__all__ = ['SearchQuestions', 'format_answer']

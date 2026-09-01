@@ -9,7 +9,7 @@ from utils import SendJinSan
 import time
 import re
 
-from .searchAnswer import SearchQuestions
+from .searchAnswer import SearchQuestions, format_answer
 
 @AgentServer.custom_recognition("reco2")
 class reco2_sjqy(CustomRecognition):
@@ -21,131 +21,7 @@ class reco2_sjqy(CustomRecognition):
         logger.info("进入reco2_sjqy")
         return CustomRecognition.AnalyzeResult(box=(6,134,57,46),detail="福利")
 
- 
 
-@AgentServer.custom_recognition("sjqy_tiku_V2")
-class sjqy_tiku_V2(CustomRecognition):
-
-    def analyze(
-         self,
-         context: Context,
-         argv: CustomRecognition.AnalyzeArg,
-     ) -> CustomRecognition.AnalyzeResult:
-        logger.info("进入三界奇缘答题agent_V2")
-
-            # 根据位置排序OCR结果
-        def sort_ocr_results_by_position(ocr_results):
-            # 定义行高阈值，如果两个框的y坐标差距小于这个值，认为它们在同一行
-            row_height_threshold = 20
-            
-            # 按y坐标分组（将接近的y坐标视为同一行）
-            rows = {}
-            for result in ocr_results:
-                y = result.box[1]  # y坐标
-                assigned = False
-                
-                # 检查是否可以分配到现有行
-                for row_y in rows.keys():
-                    if abs(y - row_y) < row_height_threshold:
-                        rows[row_y].append(result)
-                        assigned = True
-                        break
-                
-                # 如果不能分配到现有行，创建新行
-                if not assigned:
-                    rows[y] = [result]
-            
-            # 对每一行内的元素按x坐标排序
-            for row_y in rows:
-                rows[row_y].sort(key=lambda r: r.box[0])
-            
-            # 按y坐标对行进行排序，并将所有结果合并到一个列表中
-            sorted_results = []
-            for row_y in sorted(rows.keys()):
-                sorted_results.extend(rows[row_y])
-            
-            return sorted_results
-
-        i = 0
-        # 未找到答案次数
-        NotAnswerCount = 0
-        while i < 30:
-            i = i+1
-            # logger.info(f"第{i}次识别三界奇缘题目")
-            #识别三界奇缘题目
-            image1 = context.tasker.controller.post_screencap().wait().get()
-            reco_detail = context.run_recognition(
-                "三界奇缘题目",
-                image1,
-                pipeline_override={"三界奇缘题目": {"roi" : [447,40,673,94],
-                                                    "expected":[""],
-                                                    "recognition": "OCR"
-                                                    }
-                                    }
-                )
-            #识别题目返回值
-            # logger.info("reco_detail为：{reco_detail}")
-            
-            # logger.info(reco_detail.box)
-            # 没有识别到题目
-            if not reco_detail or not reco_detail.hit:
-                # logger.info("没有识别到题目")
-                logger.info(f"未在题库中搜索到答案次数:{NotAnswerCount}，请反馈开发者填充题库。")
-                return CustomRecognition.AnalyzeResult(box=(0,0,0,0),detail="答题结束")
-            all_results= reco_detail.all_results
-            #按照box进行排序
-            sorted_results= sort_ocr_results_by_position(all_results)
-            #整合题目
-            ext=''
-            for item in sorted_results:
-                if item.text!='':
-                    ext+=item.text
-            pattern = r'第\d+题：|[（(]\d+/\d+[）)]'
-            def clean_string(s):
-                return re.sub(pattern, '', s).strip()
-            text = clean_string(ext)
-            # 获取答案list[]
-            results_value, confidence ,match_type = SearchQuestions(text)
-            # 如果可信度为零，点击第一个答案
-            if confidence == 0:
-                # logger.info(f"题库中未找到答案，问题为:{text}.请反馈开发者填充题库")
-                NotAnswerCount = NotAnswerCount + 1
-                time.sleep(2)
-                context.tasker.controller.post_click(500, 344).wait()
-                time.sleep(3)
-                continue
-        
-            # 识别答案位置
-            # new_context = context.clone()
-            # image2 = context.tasker.controller.post_screencap().wait().get()
-            new_reco_detail = context.run_recognition(
-                            "三界奇缘答案位置",
-                            image1,
-                            pipeline_override={"三界奇缘答案位置": {"roi" : [439,218,678,212],
-                                                                "expected":results_value,
-                                                                "recognition": "OCR"
-                                                                }
-                                                }
-                            )
-            # logger.info("new_reco_detail为：{new_reco_detail}")
-            # logger.info(new_reco_detail.box)
-            # 点击答案
-            if new_reco_detail and new_reco_detail.hit:
-                box = new_reco_detail.box  # 假设box为(x, y, w, h)
-                center_x = box[0] + box[2] // 2
-                center_y = box[1] + box[3] // 2 
-                time.sleep(2)
-                click_job = context.tasker.controller.post_click(center_x, center_y)
-                click_job.wait()  # 等待点击操作完成
-            
-                time.sleep(2)
-            else:#没找到答案，点击的一个
-                time.sleep(2)
-                context.tasker.controller.post_click(500, 344).wait()
-                time.sleep(1)
-
-        logger.info(f"未在题库中搜索到答案次数:{NotAnswerCount}，请反馈开发者填充题库。")
-        return CustomRecognition.AnalyzeResult(box=(0,0,0,0),detail="答题结束")
 
 @AgentServer.custom_recognition("sjqy_tiku_V3")
 class sjqy_tiku_V3(CustomRecognition):
@@ -236,8 +112,10 @@ class sjqy_tiku_V3(CustomRecognition):
         def clean_string(s):
             return re.sub(pattern, '', s).strip()
         text = clean_string(ext)
-        # 获取答案list[]
-        results_value, confidence ,match_type = SearchQuestions(text)
+        # 获取答案列表（供 OCR expected 逐个匹配）
+        answer_list, confidence, match_type = SearchQuestions(text)
+        # 展示用字符串（日志 / 金山文档），不用于 OCR expected
+        results_value = format_answer(answer_list)
         # 获取时间并格式化
         formatted = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         # 如果可信度为零，点击第一个答案
@@ -272,7 +150,7 @@ class sjqy_tiku_V3(CustomRecognition):
                         "三界奇缘答案位置",
                         image1,
                         pipeline_override={"三界奇缘答案位置": {"roi" : [439,218,678,212],
-                                                            "expected":results_value,
+                                                            "expected":[re.escape(a) for a in answer_list],
                                                             "recognition": "OCR"
                                                             }
                                             }
@@ -285,8 +163,8 @@ class sjqy_tiku_V3(CustomRecognition):
             center_x = box[0] + box[2] // 2
             center_y = box[1] + box[3] // 2 
             time.sleep(2)
-            click_job = context.tasker.controller.post_click(center_x, center_y)
-            click_job.wait()  # 等待点击操作完成
+            context.tasker.controller.post_click(center_x, center_y).wait()
+            # 等待点击操作完成
             # image2 = context.tasker.controller.post_screencap().wait().get()
             # logger.info(image2)
             logger.info(f"[color:blue]正确点击答案。[/color]识别题目：{text}。题库答案：{results_value}。匹配度：{confidence}。")
