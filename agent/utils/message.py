@@ -57,10 +57,21 @@ def __get_or_read_config() -> None:
 def __enabled_types() -> list:
     """返回启用通知通道列表，如 ["Telegram"]。"""
     __get_or_read_config()
+    if not config:
+        # 显式提示：即使已尝试读取，config 仍是空
+        logger.warning(
+            "[message] config 为空（可能是 config/config.json 缺失或未填 ExternalNotificationEnabled）。外部通知未启用。"
+        )
+        return []
     en = config.get("ExternalNotificationEnabled", False)
     if not en:
+        logger.warning(
+            "[message] config 中 ExternalNotificationEnabled 为空/未配置，外部通知未启用。"
+        )
         return []
-    return [t.strip() for t in str(en).split(",") if t.strip()]
+    types = [t.strip() for t in str(en).split(",") if t.strip()]
+    logger.info(f"[message] 启用的通知通道: {types}")
+    return types
 
 
 def send_telegram(text: str) -> bool:
@@ -75,7 +86,9 @@ def send_telegram(text: str) -> bool:
     chat_id = config.get("ExternalNotificationTelegramChatId", "").strip()
 
     if not bot_token or not chat_id:
-        logger.warning("Telegram bot_token 或 chat_id 未配置，无法发送。")
+        logger.warning(
+            f"[message] Telegram bot_token 或 chat_id 未配置（token='{bot_token[:4]}...' chat_id='{chat_id}'），无法发送。"
+        )
         return False
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
@@ -84,10 +97,12 @@ def send_telegram(text: str) -> bool:
         if resp.status_code == 200:
             logger.info("Telegram 消息推送成功。")
             return True
-        logger.error(f"Telegram 消息推送失败，状态码：{resp.status_code}")
+        logger.error(
+            f"[message] Telegram 消息推送失败，状态码：{resp.status_code}，响应：{resp.text[:200]}"
+        )
         return False
     except Exception as e:
-        logger.error(f"发送 Telegram 消息失败：{e}")
+        logger.error(f"[message] 发送 Telegram 消息失败：{e}")
         return False
 
 
