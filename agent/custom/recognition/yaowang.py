@@ -118,9 +118,21 @@ class Yaowang(CustomRecognition):
         expected: list = param.get("yaowang_expected", DEFAULT_EXPECTED)
         exclude: list = param.get("yaowang_exclude", DEFAULT_EXCLUDE)
 
+        logger.info(
+            "[yaowang] ===== 蹲妖王识别轮开始 ===== 参数: "
+            f"enabled={enabled} rx={rx} ry={ry} cooldown={cooldown}s "
+            f"interval={frame_interval}s diff_thr={frame_diff_thr} "
+            f"expected={expected} exclude={exclude}"
+        )
+
+        if not enabled:
+            logger.info("[yaowang] yaowang_enabled=false，跳过蹲妖王识别。")
+            return CustomRecognition.AnalyzeResult(box=None, detail="已禁用蹲妖王")
+
         custom_rois = param.get("yaowang_rois")
         if custom_rois:
             rois = custom_rois
+            logger.info(f"[yaowang] 使用自定义 ROI: {rois}")
         else:
             # 先截图获取尺寸
             image0 = context.tasker.controller.post_screencap().wait().get()
@@ -130,20 +142,22 @@ class Yaowang(CustomRecognition):
                 logger.error("[yaowang] 无法获取截图尺寸，跳过。")
                 return CustomRecognition.AnalyzeResult(box=None, detail="截图异常")
             rois = self._chat_rois(h, w, rx, ry)
-
-        logger.debug(f"[yaowang] 系统公告栏 ROI: {rois}")
+            logger.info(f"[yaowang] 截图尺寸 {w}x{h}，系统公告栏 ROI: {rois}")
 
         # 高扫描次数上限，避免单次 analyze 无限循环占死
         max_scan = int(param.get("yaowang_max_scan", 200))
+        logger.info(f"[yaowang] 本轮最大扫描 {max_scan} 次，进入监测循环。")
 
         for scan in range(max_scan):
             image = context.tasker.controller.post_screencap().wait().get()
             changed = False
             change_roi = rois[0]
+            last_diff = 0.0
             # 帧差：对每个 ROI 检测是否变化
             for roi in rois:
                 cur = self._roi_gray(image, roi)
                 diff = self._frame_diff(self._LAST_FRAME, cur)
+                last_diff = diff
                 if diff > frame_diff_thr:
                     changed = True
                     change_roi = roi
@@ -153,8 +167,12 @@ class Yaowang(CustomRecognition):
             self._LAST_FRAME = self._roi_gray(image, rois[0])
 
             if not changed:
+                if scan % 20 == 0:
+                    logger.debug(f"[yaowang] 第{scan}次扫描：公告栏无变化 diff={last_diff:.0f}，继续监测")
                 time.sleep(frame_interval)
                 continue
+
+            logger.info(f"[yaowang] 检测到公告栏变化 diff={last_diff:.0f}>阈{frame_diff_thr}，触发 OCR 确认")
 
             # 有变化 → OCR 确认
             hit_box = None
@@ -175,27 +193,43 @@ class Yaowang(CustomRecognition):
             if reco and reco.hit and reco.all_results:
                 texts = [r.text for r in reco.all_results if r.text]
                 full_text = " ".join(texts)
+                logger.info(f"[yaowang] OCR 命中 {len(texts)} 条文本: {full_text[:80]}")
                 for r in reco.all_results:
-                    if r.text and self._should_notify(r.text, expected, exclude):
+                    if not r.text:
+                        continue
+                    notify = self._should_notify(r.text, expected, exclude)
+                    if notify:
                         if hit_box is None:
                             hit_box = r.box
                             hit_word = r.text
+                        logger.info(f"[yaowang]   内容含妖王特征且非战胜 → 应通知: {r.text[:50]}")
+                    else:
+                        logger.debug(f"[yaowang]   已过滤(非妖王或战胜): {r.text[:50]}")
+            elif reco is None or not reco.hit:
+                logger.info("[yaowang] OCR 未命中任何关键词（此轮公告栏变化但无妖王文本）")
 
             if hit_box:
-                logger.info(f"[yaowang] 识别到妖王出现公告：{hit_word}")
+                logger.info(f"[yaowang] ✅ 识别到妖王出现公告：{hit_word}")
                 now = time.time()
+                elapsed = now - self._LAST_NOTIFY_TS
+                logger.info(f"[yaowang] 距上次通知 {elapsed:.1f}s（冷却要求 {cooldown}s）")
                 # 冷却：仅在满足间隔且发送实际成功时才更新通知时间戳。
                 # 若发送失败（网络/配置问题），不更新 _LAST_NOTIFY_TS，下次命中仍会重试，
                 # 避免"妖王出现却被静默吞掉"。
                 if now - self._LAST_NOTIFY_TS >= cooldown:
                     content = hit_word or full_text or "妖王出现"
+                    logger.info(f"[yaowang] 满足冷却，发送通知: {content[:60]}")
                     ok = send_message("妖王出现", content)
+                    logger.info(f"[yaowang] 通知发送结果: {'成功 ✅' if ok else '失败 ❌（send_message返回False）'}")
                     if ok:
                         self._LAST_NOTIFY_TS = now
+                else:
+                    logger.info(f"[yaowang] ❌ 仍在冷却期内，静默跳过本次通知（避免刷屏）")
                 return CustomRecognition.AnalyzeResult(
                     box=hit_box, detail=f"识别到妖王出现：{hit_word}"
                 )
 
             time.sleep(frame_interval)
 
+        logger.warning("[yaowang] 本轮达到扫描上限，未识别到妖王（会由外部再次调度）")
         return CustomRecognition.AnalyzeResult(box=None, detail="本轮未识别到妖王（已达扫描上限）")
