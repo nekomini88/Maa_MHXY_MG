@@ -428,7 +428,37 @@
             "识别拓印-子1",
             "识别拓印-子2",
             "识别拓印-子3"
+        ],
+        "next": [
+            "关闭拓印界面"
         ]
+    },
+    "关闭拓印界面": {
+        "focus": {
+            "Node.Recognition.Succeeded": "关闭拓印界面"
+        },
+        "recognition": "TemplateMatch",
+        "template": [
+            "zonghe/guanbi6.png",
+            "zonghe/guanbi7.png"
+        ],
+        "roi": [
+            967,
+            35,
+            79,
+            83
+        ],
+        "action": "Click",
+        "next": [
+            "停止所有任务"
+        ]
+    },
+    "停止所有任务": {
+        "focus": {
+            "Node.Recognition.Succeeded": "停止所有任务"
+        },
+        "action": "Custom",
+        "custom_action": "tayin_TZ"
     },
     "识别拓印": {
         "recognition": "Or",
@@ -438,8 +468,29 @@
             "识别拓印-子3"
         ],
         "next": [
+            "拓印保底-3次",
             "拓印完成",
             "[JumpBack]拓印滑动"
+        ]
+    },
+    "拓印保底-3次": {
+        "focus": {
+            "Node.Recognition.Succeeded": "拓印触发保底机制"
+        },
+        "recognition": "OCR",
+        "expected": [
+            "3",
+            "2",
+            "1"
+        ],
+        "roi": [
+            726,
+            160,
+            19,
+            29
+        ],
+        "next": [
+            "关闭拓印界面"
         ]
     },
     "识别拓印-子1": {
@@ -493,7 +544,7 @@
     },
     "拓印完成": {
         "focus": {
-            "Node.Recognition.Succeeded": "拓印完成"
+            "Node.Recognition.Succeeded": "拓印通过完成"
         },
         "recognition": "And",
         "all_of": [
@@ -534,5 +585,23 @@
             166,
             51
         ]
+    },
+    "连续滑动测试": {
+        "action": "Swipe",
+        "begin": [
+            281,
+            463
+        ],
+        "end": [
+            [
+                293,
+                273
+            ],
+            [
+                281,
+                463
+            ]
+        ],
+        "duration": 500
     }
 }
