@@ -297,6 +297,11 @@
             ]
         },
         {
+            "name": "擂台匹配(自动点开始匹配)",
+            "entry": "leitai_pipei",
+            "description": "./docs/description/leitai_pipei.md"
+        },
+        {
             "name": "蹲妖王(监测+通知)",
             "entry": "yaowang_pipe",
             "description": "./docs/description/yaowang_pipe.md"
