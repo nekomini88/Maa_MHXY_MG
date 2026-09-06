@@ -1,0 +1,23 @@
+{
+  "leitai_pipei": {
+    "next": [
+      "擂台匹配-等待按钮",
+      "[JumpBack]panduan_zhujiemian"
+    ]
+  },
+  "擂台匹配-等待按钮": {
+    "recognition": "Custom",
+    "custom_recognition": "leitai_pipei",
+    "custom_recognition_param": {
+      "leitai_enabled": true
+    },
+    "action": "Click",
+    "post_delay": 2000,
+    "next": [
+      "[JumpBack]panduan_zhujiemian"
+    ],
+    "on_error": [
+      "[JumpBack]擂台匹配-等待按钮"
+    ]
+  }
+}

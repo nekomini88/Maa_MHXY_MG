@@ -295,6 +295,11 @@
             "option": [
                 "捉鬼混队"
             ]
+        },
+        {
+            "name": "擂台匹配(自动点开始匹配)",
+            "entry": "leitai_pipei",
+            "description": "./docs/description/leitai_pipei.md"
         }
     ],
     "option": {
