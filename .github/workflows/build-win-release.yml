@@ -19,69 +19,91 @@ permissions:
 env:
   MAA_FRAMEWORK_VERSION: "v5.12.2"
   MFAA_VERSION: "v2.16.0"
+  PYTHON_VERSION: "3.12.10"
+  REL_TAG: "v0.1.0"
 
 jobs:
   build-win-x64:
-    runs-on: windows-latest
+    # 全流程只做文件拷贝/下载，不执行 Windows 二进制，
+    # 跑在 ubuntu 上（1x 分钟，windows 2x），产物与本地验证一致。
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Download MaaFramework
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: MaaXYZ/MaaFramework
-          fileName: "MAA-win-x86_64*"
-          tag: ${{ env.MAA_FRAMEWORK_VERSION }}
-          out-file-path: "deps"
-          extract: true
-
-      - name: Download MFAAvalonia
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: MaaXYZ/MFAAvalonia
-          fileName: "MFAAvalonia-*-win-x64*"
-          tag: ${{ env.MFAA_VERSION }}
-          out-file-path: "MFA"
-          extract: true
-
-      - name: Clean up MFAAvalonia archive
-        shell: bash
+      - name: Download MaaFramework (win-x64)
         run: |
-          rm -f MFA/*.7z MFA/*.zip 2>/dev/null || true
-          echo "Cleaned up archives"
+          mkdir -p deps
+          curl -sL --retry 3 -o /tmp/maa.zip \
+            "https://github.com/MaaXYZ/MaaFramework/releases/download/${{ env.MAA_FRAMEWORK_VERSION }}/MAA-win-x86_64-${{ env.MAA_FRAMEWORK_VERSION }}.zip"
+          unzip -qo /tmp/maa.zip -d deps
+
+      - name: Download MFAAvalonia (win-x64)
+        run: |
+          mkdir -p MFA
+          curl -sL --retry 3 -o /tmp/mfa.zip \
+            "https://github.com/MaaXYZ/MFAAvalonia/releases/download/${{ env.MFAA_VERSION }}/MFAAvalonia-${{ env.MFAA_VERSION }}-win-x64.zip"
+          unzip -qo /tmp/mfa.zip -d MFA
+          rm -f MFA/*.7z MFA/*.zip
+
+      - name: Setup Windows embed Python
+        run: |
+          mkdir -p install/python
+          curl -sL --retry 3 -o /tmp/emb.zip \
+            "https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/python-${{ env.PYTHON_VERSION }}-embed-amd64.zip"
+          unzip -qo /tmp/emb.zip -d install/python
+          python3 - <<'EOF'
+          import glob
+          p = glob.glob('install/python/python3*._pth')[0]
+          t = open(p).read().replace('#import site', 'import site')
+          for line in ['.', 'Lib', 'Lib\\site-packages', 'DLLs']:
+              if line not in t.splitlines():
+                  t += '\n' + line
+          open(p, 'w').write(t)
+          print('pth OK:', p)
+          EOF
+
+      - name: Download Windows wheels
+        run: |
+          mkdir -p install/deps
+          grep -v "opencv-python-headless" requirements.txt > /tmp/req.txt
+          python3 -m pip download -q -r /tmp/req.txt -d install/deps \
+            --only-binary=:all: --platform win_amd64 --python-version 312
+          curl -sL --retry 3 -o install/deps/opencv_python_headless-4.10.0.84-cp312-abi3-win_amd64.whl \
+            "https://files.pythonhosted.org/packages/30/c0/66f88d58500e990a9a0a5c06f98862edf1d0a3a430781218a8c193948438/opencv_python_headless-4.10.0.84-cp37-abi3-win_amd64.whl"
+          ls install/deps | wc -l
 
       - name: Install
-        shell: bash
         run: |
-          ./install/python/python.exe ./tools/install.py v0.1.0 win-x64
-          cp -rpvn tools/registry/. install/
+          python3 ./tools/install.py ${{ env.REL_TAG }} win-x64
+          cp -rn tools/registry/. install/
           if [ -d "MFA" ]; then
-            mkdir -p install
-            cp -rpvn MFA/. install/
+            cp -rn MFA/. install/
             if [ -f "install/MFAAvalonia.exe" ]; then
               mv -f install/MFAAvalonia.exe install/Maa_MHXY_MG.exe
             fi
           fi
-          # 用户自定义图标
           if [ -f "Maa_MHXY_MG.ico" ]; then
             cp Maa_MHXY_MG.ico install/logo.ico
           fi
+          # install.py 在 linux 下写 child_exec=python3，改回 Windows 内嵌路径
+          python3 -c "
+          import json
+          p='install/interface.json'; d=json.load(open(p,encoding='utf-8'))
+          d['agent']['child_exec']='./python/python.exe'
+          json.dump(d,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=4)
+          print('child_exec:', d['agent']['child_exec'], '| tasks:', len(d['task']))"
 
       - name: Package and upload to Release
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
-          REL_TAG="v0.1.0"
-          # 用 python 打包 (Windows runner 无 zip)
-          python -c "import zipfile,os; z=zipfile.ZipFile('Maa_MHXY_MG-win-x86_64-MFAA.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(r,f), os.path.relpath(os.path.join(r,f),'install')) for r,_,fs in os.walk('install') for f in fs]; z.close()"
+          python3 -c "import zipfile,os; z=zipfile.ZipFile('Maa_MHXY_MG-win-x86_64-MFAA.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(r,f), os.path.relpath(os.path.join(r,f),'install')) for r,_,fs in os.walk('install') for f in fs]; z.close()"
           echo "Packed: $(ls -lh Maa_MHXY_MG-win-x86_64-MFAA.zip | awk '{print $5}')"
-          # 上传到 Release v0.1.0 (不走 Actions artifact 配额)
-          gh release upload "$REL_TAG" "Maa_MHXY_MG-win-x86_64-MFAA.zip" \
+          gh release upload "${{ env.REL_TAG }}" "Maa_MHXY_MG-win-x86_64-MFAA.zip" \
             --repo "${{ github.repository }}" --clobber
-          echo "✅ Uploaded to $REL_TAG"
-          gh release view "$REL_TAG" --repo "${{ github.repository }}" --json assets \
+          echo "Uploaded to ${{ env.REL_TAG }}"
+          gh release view "${{ env.REL_TAG }}" --repo "${{ github.repository }}" --json assets \
             --jq '.assets[]|{name,size}'
