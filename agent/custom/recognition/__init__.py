@@ -8,4 +8,4 @@ from .shimen_renwu import *
 from .zhuogui_hundui import *
 from .yaowang import *
 from .leitai_pipei import *
-from .jingjichang import *
+from .jingjichang import *from .jianhui_pipei import *

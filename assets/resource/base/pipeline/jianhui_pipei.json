@@ -1,0 +1,18 @@
+{
+  "jianhui_pipei": {
+    "next": [
+      "剑会-开始匹配",
+      "[JumpBack]panduan_zhujiemian"
+    ]
+  },
+  "剑会-开始匹配": {
+    "recognition": "Custom",
+    "custom_recognition": "jianhui_pipei",
+    "custom_recognition_param": {
+      "jianhui_enabled": true
+    },
+    "action": "Click",
+    "post_delay": 1500,
+    "timeout": 300000
+  }
+}
