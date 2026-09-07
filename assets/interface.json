@@ -302,6 +302,11 @@
             "description": "./docs/description/leitai_pipei.md"
         },
         {
+            "name": "竞技场挂机(自动点开始匹配)",
+            "entry": "jingjichang",
+            "description": "./docs/description/jingjichang.md"
+        },
+        {
             "name": "蹲妖王(监测+通知)",
             "entry": "yaowang_pipe",
             "description": "./docs/description/yaowang_pipe.md"
