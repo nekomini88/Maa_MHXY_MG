@@ -453,3 +453,9 @@ debug
 
 # 答题日志文件
 agent/custom/recognition/search_log.txt
+# 本地打包产物
+*.zip
+install/
+deps/
+MFA/
+install-mxu/

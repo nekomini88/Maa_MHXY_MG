@@ -9,11 +9,11 @@ class SendJinSan:
     """
     # ==================== 需要你替换的配置信息 ====================
     # 1. 你的文件ID
-    FILE_ID = "ckOJEmJSBOV2"  
+    FILE_ID = "YOUR_FILE_ID"
     # 2. 你的脚本ID
-    SCRIPT_ID = "V2-4UDa6jFazOjnoZXrEdDSoO" 
+    SCRIPT_ID = "YOUR_SCRIPT_ID"
     # 3. 你的脚本令牌 (APIToken)
-    AIRSCRIPT_TOKEN = "2lWtlV0OKniOKjg5XHieJq" 
+    AIRSCRIPT_TOKEN = "YOUR_AIRSCRIPT_TOKEN"
     # 4. 目标工作表名
     TARGET_SHEET_NAME = "工作表1"   
     # ===========================================================

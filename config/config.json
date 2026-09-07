@@ -1,7 +1,7 @@
 {
     "ExternalNotificationEnabled": "Telegram",
-    "ExternalNotificationTelegramBotToken": "",
-    "ExternalNotificationTelegramChatId": "",
+    "ExternalNotificationTelegramBotToken": "YOUR_BOT_TOKEN",
+    "ExternalNotificationTelegramChatId": "YOUR_CHAT_ID",
     "yaowang_enabled": true,
     "yaowang_chat_ratio_x": 0.45,
     "yaowang_chat_ratio_y": 0.18,
