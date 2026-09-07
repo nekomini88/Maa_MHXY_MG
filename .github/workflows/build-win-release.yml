@@ -37,14 +37,14 @@ jobs:
           mkdir -p deps
           curl -sL --retry 3 -o /tmp/maa.zip \
             "https://github.com/MaaXYZ/MaaFramework/releases/download/${{ env.MAA_FRAMEWORK_VERSION }}/MAA-win-x86_64-${{ env.MAA_FRAMEWORK_VERSION }}.zip"
-          unzip -qo /tmp/maa.zip -d deps
+          unzip -qo /tmp/maa.zip -d deps || test $? -le 1  # unzip warning(中文文件名)返回1也放行
 
       - name: Download MFAAvalonia (win-x64)
         run: |
           mkdir -p MFA
           curl -sL --retry 3 -o /tmp/mfa.zip \
             "https://github.com/MaaXYZ/MFAAvalonia/releases/download/${{ env.MFAA_VERSION }}/MFAAvalonia-${{ env.MFAA_VERSION }}-win-x64.zip"
-          unzip -qo /tmp/mfa.zip -d MFA
+          unzip -qo /tmp/mfa.zip -d MFA || test $? -le 1  # 同上
           rm -f MFA/*.7z MFA/*.zip 2>/dev/null || true
 
       - name: Setup Windows embed Python
@@ -52,7 +52,7 @@ jobs:
           mkdir -p install/python
           curl -sL --retry 3 -o /tmp/emb.zip \
             "https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/python-${{ env.PYTHON_VERSION }}-embed-amd64.zip"
-          unzip -qo /tmp/emb.zip -d install/python
+          unzip -qo /tmp/emb.zip -d install/python || test $? -le 1  # 同上
           python3 - <<'EOF'
           import glob
           p = glob.glob('install/python/python3*._pth')[0]
