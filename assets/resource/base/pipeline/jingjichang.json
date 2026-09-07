@@ -1,0 +1,23 @@
+{
+  "jingjichang": {
+    "next": [
+      "竞技场-等待开始匹配",
+      "[JumpBack]panduan_zhujiemian"
+    ]
+  },
+  "竞技场-等待开始匹配": {
+    "recognition": "Custom",
+    "custom_recognition": "jingjichang",
+    "custom_recognition_param": {
+      "jjc_enabled": true
+    },
+    "action": "Click",
+    "post_delay": 5000,
+    "next": [
+      "[JumpBack]竞技场-等待开始匹配"
+    ],
+    "on_error": [
+      "[JumpBack]竞技场-等待开始匹配"
+    ]
+  }
+}
