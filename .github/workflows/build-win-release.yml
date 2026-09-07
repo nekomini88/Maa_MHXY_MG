@@ -74,6 +74,19 @@ jobs:
             "https://files.pythonhosted.org/packages/30/c0/66f88d58500e990a9a0a5c06f98862edf1d0a3a430781218a8c193948438/opencv_python_headless-4.10.0.84-cp37-abi3-win_amd64.whl"
           ls install/deps | wc -l
 
+      - name: Pre-install wheels into embed Python (offline, no pip at runtime)
+        run: |
+          python3 -m pip install -q --no-index --find-links install/deps \
+            --platform win_amd64 --python-version 312 --implementation cp --abi cp312 \
+            --target install/python/Lib/site-packages --only-binary=:all: \
+            -r /tmp/req.txt \
+            "opencv-python-headless==4.10.0.84"
+          rm -rf install/python/Lib/site-packages/bin
+          # 给嵌入式 python 补 pip 包体(不运行 exe,只解包,供 Windows 端 python -m pip 使用)
+          curl -sL --retry 3 -o /tmp/pip.whl "$(python3 -c "import urllib.request,json; print(json.load(urllib.request.urlopen('https://pypi.org/pypi/pip/json'))['urls'][0]['url'])")"
+          python3 -c "import zipfile; zipfile.ZipFile('/tmp/pip.whl').extractall('install/python/Lib/site-packages')"
+          ls install/python/Lib/site-packages | grep -E "^(numpy|cv2|PIL|pip)" | head
+
       - name: Install
         run: |
           python3 ./tools/install.py ${{ env.REL_TAG }} win-x64
