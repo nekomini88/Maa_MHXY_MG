@@ -45,7 +45,7 @@ jobs:
           curl -sL --retry 3 -o /tmp/mfa.zip \
             "https://github.com/MaaXYZ/MFAAvalonia/releases/download/${{ env.MFAA_VERSION }}/MFAAvalonia-${{ env.MFAA_VERSION }}-win-x64.zip"
           unzip -qo /tmp/mfa.zip -d MFA
-          rm -f MFA/*.7z MFA/*.zip
+          rm -f MFA/*.7z MFA/*.zip 2>/dev/null || true
 
       - name: Setup Windows embed Python
         run: |
