@@ -59,4 +59,5 @@
 
 - 收不到通知：先双击包内「检查通知配置.bat」，它会直接告诉你卡在哪一步（日志里 `404` → token 无效；`400` → chat_id 不对或还没私聊过该 bot）。
 - 日志提示「读到的是 MFAAvalonia 加密的密文，本机 DPAPI 解不开」：说明配置是别的电脑写的，把明文填进 `config/notify.json` 即可。
+- 排查用日志在 `debug/custom/`：妖王日志 `yaowang.log` 单文件超过 20 MB 自动轮转、轮转后压成 zip、只保留 7 天；日期日志保留 2 周。整套目录不会无限增长。
 - 想更快收到：降低 `yaowang_cooldown_seconds`。

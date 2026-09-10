@@ -91,6 +91,7 @@ class VerifyPackageTests(unittest.TestCase):
             "agent/main.py",
             "agent/utils/notify_config.py",
             "agent/utils/mfa_crypto.py",
+            "agent/utils/log_policy.py",
             "tools/check_notify.py",
             "config/pip_config.json",
             "config/notify.json",

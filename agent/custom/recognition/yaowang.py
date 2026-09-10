@@ -47,6 +47,7 @@ from maa.custom_recognition import CustomRecognition
 from maa.context import Context
 
 from utils import logger
+from utils import log_policy
 from utils import send_message
 
 # 妖王专用日志：单独一个文件，只收 [yaowang] 消息，方便整份发给维护者排查。
@@ -57,6 +58,8 @@ from utils import send_message
 # _ylog.info() 会把同一条消息写两遍。这里只在现有 logger 上追加一个带 filter
 # 的 sink，全部日志仍由 utils.logger 统一出口。
 _YAOWANG_LOG_PATH = os.path.join("debug", "custom", "yaowang.log")
+# 单文件超过 20 MB 轮转、轮转后压缩、只保留 7 天（口径统一在 utils/log_policy.py）
+_YAOWANG_LOG_SINK = log_policy.sink_kwargs()
 
 
 def _install_yaowang_sink() -> bool:
@@ -65,8 +68,7 @@ def _install_yaowang_sink() -> bool:
         os.makedirs(os.path.dirname(_YAOWANG_LOG_PATH), exist_ok=True)
         logger.add(
             _YAOWANG_LOG_PATH,
-            rotation="1 day",
-            retention="3 days",
+            **_YAOWANG_LOG_SINK,
             level="DEBUG",
             format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {message}",
             encoding="utf-8",
