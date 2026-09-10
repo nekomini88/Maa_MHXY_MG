@@ -7,7 +7,13 @@ import subprocess
 from pathlib import Path
 
 # utf-8
-sys.stdout.reconfigure(encoding="utf-8")
+# pythonw.exe / 被重定向或包装过的 stdout-stderr 可能没有 reconfigure，
+# 不能因为设不了编码就崩在启动阶段（agent 会直接起不来）。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
 
 # 获取当前main.py路径并设置上级目录为工作目录
 current_file_path = os.path.abspath(__file__)

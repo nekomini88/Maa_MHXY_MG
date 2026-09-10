@@ -10,6 +10,7 @@
 import importlib.util
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import types
@@ -252,6 +253,24 @@ class InstallPipConfigTemplateTests(unittest.TestCase):
 
         self.assertFalse(written["enable_pip_install"], "包内默认必须关闭运行时 pip 安装")
         self.assertTrue(written["mirror"])
+
+
+class ImportRobustnessTests(unittest.TestCase):
+    """pythonw / 被重定向的 stdout 没有 reconfigure，导入 agent/main.py 不能崩。"""
+
+    def test_import_survives_stream_without_reconfigure(self):
+        code = (
+            "import io, runpy, sys\n"
+            "sys.stdout = io.StringIO()\n"
+            "sys.stderr = io.StringIO()\n"
+            f"runpy.run_path({str(REPO_ROOT / 'agent' / 'main.py')!r}, run_name='agent_main_probe')\n"
+            "sys.__stdout__.write('IMPORT_OK\\n')\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code], capture_output=True, text=True, timeout=60
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("IMPORT_OK", result.stdout)
 
 
 if __name__ == "__main__":
