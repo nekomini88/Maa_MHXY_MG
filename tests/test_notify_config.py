@@ -25,6 +25,9 @@ LOGIN_TOKEN = "AQAAAN" + "x" * 346
 
 
 def load_notify_config():
+    # notify_config 会相对导入 mfa_crypto（解密链）；按文件路径加载时靠这条 sys.path 兜底
+    if str(AGENT_UTILS) not in sys.path:
+        sys.path.insert(0, str(AGENT_UTILS))
     spec = importlib.util.spec_from_file_location("notify_config_under_test", NOTIFY_CONFIG_PATH)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -317,6 +320,65 @@ class MfaCiphertextTests(unittest.TestCase):
             self.assertIn(self.nc.NOTIFY_FILE, hint)
 
 
+class MfaCryptoAesTests(unittest.TestCase):
+    """AES 设备密钥分支：MFA 的 DPAPI 主子失败时的退路。
+
+    参照 MaaGumballs（不思议迷宫小助手）agent/utils/simpleEncryption.py 的实现，
+    密钥 = sha256("{稳定系统描述}_{架构}_{设备UUID}_{机器名}")[:32]，AES-256-ECB + PKCS7。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.nc = load_notify_config()
+        cls.mc = sys.modules[cls.nc.mfa_crypto.__name__]
+
+    def _need_crypto(self):
+        try:
+            import cryptography  # noqa: F401
+        except ImportError:
+            self.skipTest("本机没有 cryptography，AES 分支不参与（Windows 主线走 DPAPI）")
+
+    def test_device_fingerprint_is_stable_and_hex64(self):
+        fp = self.mc.generate()
+        self.assertEqual(len(fp), 64)
+        self.assertEqual(fp, self.mc.generate(), "同一台机器上设备指纹必须稳定")
+        self.assertEqual(fp, fp.upper())
+
+    def test_aes_roundtrip_with_device_key(self):
+        self._need_crypto()
+        cipher = self.mc.aes_encrypt(VALID_TOKEN, self.mc.generate()[:32])
+        self.assertIsNotNone(cipher)
+        self.assertEqual(self.mc.decrypt(cipher), VALID_TOKEN)
+
+    def test_aes_roundtrip_with_legacy_key(self):
+        self._need_crypto()
+        cipher = self.mc.aes_encrypt(VALID_CHAT_ID, self.mc.generate_legacy()[:32])
+        self.assertIsNotNone(cipher)
+        self.assertEqual(self.mc.decrypt(cipher), VALID_CHAT_ID)
+
+    def test_config_layer_decrypts_aes_ciphertext(self):
+        """整条链：config 里的 AES 密文 → normalize_value 得到明文 bot token。"""
+        self._need_crypto()
+        cipher = self.mc.aes_encrypt(VALID_TOKEN, self.mc.generate()[:32])
+        value, src = self.nc.normalize_value(cipher)
+        self.assertEqual(value, VALID_TOKEN)
+        self.assertEqual(src, self.nc.SOURCE_MFA_DECRYPTED)
+        self.assertEqual(self.nc.mfa_hint(cipher, ""), "")
+
+    def test_decrypt_of_garbage_returns_none(self):
+        self.assertIsNone(self.mc.decrypt(""))
+        self.assertIsNone(self.mc.decrypt("not-base64-!!!"))
+        self.assertIsNone(self.mc.decrypt("aGVsbG8="))
+
+    def test_dpapi_returns_none_off_windows(self):
+        import base64
+
+        if sys.platform == "win32":
+            self.skipTest("Windows 上这里会真的尝试 DPAPI")
+        blob = base64.b64encode(self.nc.DPAPI_MAGIC + b"\x44" * 200).decode()
+        self.assertIsNone(self.mc.dpapi_decrypt(blob))
+
+
 class SendGuardMfaTests(SendGuardTests):
     """密文解不开时必须拦在发请求之前，并说明根因与出路。"""
 
@@ -425,6 +487,7 @@ class CheckNotifyScriptTests(unittest.TestCase):
         (root / "agent" / "utils").mkdir(parents=True)
         shutil.copy2(REPO_ROOT / "tools" / "check_notify.py", root / "tools" / "check_notify.py")
         shutil.copy2(NOTIFY_CONFIG_PATH, root / "agent" / "utils" / "notify_config.py")
+        shutil.copy2(AGENT_UTILS / "mfa_crypto.py", root / "agent" / "utils" / "mfa_crypto.py")
         with open(root / "config" / "config.json", "w", encoding="utf-8") as f:
             json.dump(config_obj, f, ensure_ascii=False)
         if notify_obj is not None:

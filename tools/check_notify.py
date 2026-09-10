@@ -8,7 +8,7 @@ Windows 也可以直接双击包内「检查通知配置.bat」。
 
 它做三件事，逐步给出结论：
   1. 读 config/config.json（+ 叠加 config/notify.json），检查 token / chat_id；
-     若发现是 MFAAvalonia 加密的密文，会先尝试用本机 DPAPI 解出明文；
+     若发现是 MFAAvalonia 加密的密文，会先按 DPAPI → AES 设备密钥的链解出明文；
   2. 调 getMe 确认 Telegram 认识这个 bot（token 是否有效）；
   3. 真发一条测试消息，把 HTTP 状态码翻译成可执行的原因。
 
@@ -26,6 +26,9 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(HERE)
+# notify_config 会相对导入 mfa_crypto（解密链）；按文件路径加载时靠这条 sys.path 兜底
+if os.path.join(PROJECT_ROOT, "agent", "utils") not in sys.path:
+    sys.path.insert(0, os.path.join(PROJECT_ROOT, "agent", "utils"))
 CONFIG_PATH = os.path.join(PROJECT_ROOT, "config", "config.json")
 NOTIFY_OVERRIDE_PATH = os.path.join(PROJECT_ROOT, "config", "notify.json")
 NOTIFY_CONFIG_PATH = os.path.join(PROJECT_ROOT, "agent", "utils", "notify_config.py")

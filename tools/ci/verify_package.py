@@ -20,6 +20,7 @@ REQUIRED_PREFIXES = (
     "python/python.exe",
     "agent/main.py",
     "agent/utils/notify_config.py",
+    "agent/utils/mfa_crypto.py",
     "tools/check_notify.py",
     "config/pip_config.json",
     "config/notify.json",

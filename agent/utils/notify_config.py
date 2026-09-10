@@ -8,14 +8,19 @@
    用户在 MFA「设置 → 外部通知 → Telegram」里填的 token / chat_id 会被
    ``SimpleEncryptionHelper.Encrypt`` 加密后写回这个文件：
    DPAPI(CurrentUser) 保护后再 base64，形如 ``AQAAANCMnd8BFdERjHoAwE/Cl+sB...``。
-   直接拿去发消息必然 404，所以这里先尝试用本机 DPAPI 解回明文。
+   直接拿去发消息必然 404，所以这里先解密：DPAPI → AES 设备密钥
+   （与 MaaGumballs 不思议迷宫小助手的 ``simpleEncryption`` 同一条链，见 ``mfa_crypto.py``）。
 2. **格式**要能一眼看出错在哪，而不是笼统报「为空」。
 3. **错误码**要翻译成人话（404/400/429 各自含义完全不同）。
 """
 
 import base64
 import re
-import sys
+
+try:
+    from . import mfa_crypto
+except ImportError:  # 直接按文件路径加载时（自检脚本）
+    import mfa_crypto
 
 ENABLED_KEY = "ExternalNotificationEnabled"
 TOKEN_KEY = "ExternalNotificationTelegramBotToken"
@@ -63,62 +68,42 @@ def is_mfa_ciphertext(value) -> bool:
     return raw.startswith(DPAPI_MAGIC)
 
 
-def decrypt_mfa_value(value):
-    """用 Windows DPAPI 解出 MFA 加密的明文；非 Windows / 失败返回 None。
+def looks_encrypted(value) -> bool:
+    """值是否可能是密文：base64 字符集且足够长（DPAPI blob 或 AES 密文都是 base64）。
 
-    MFA 调用的是 ``ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser)``，
-    即普通 DPAPI、无附加熵，所以本机同用户的 CryptUnprotectData 可以直接解开
-    （MFA 自己也注明「解密仅当前设备可用」——换机器必然失败）。
+    明文 bot token 带 ``:``、chat_id 是纯数字，都过不了 base64 字符集这一关。
     """
-    if sys.platform != "win32":
-        return None
     text = str(value or "").strip()
-    if not text:
-        return None
-    try:
-        raw = base64.b64decode(text, validate=True)
-    except Exception:
-        return None
+    if is_mfa_ciphertext(text):
+        return True
+    return len(text) >= 24 and bool(re.fullmatch(r"[A-Za-z0-9+/]+={0,2}", text))
 
-    try:
-        import ctypes
-        from ctypes import wintypes
 
-        class DATA_BLOB(ctypes.Structure):
-            _fields_ = [
-                ("cbData", wintypes.DWORD),
-                ("pbData", ctypes.POINTER(ctypes.c_char)),
-            ]
+def decrypt_mfa_value(value):
+    """解出 MFAAvalonia 加密的明文；解不开返回 None。
 
-        buf = ctypes.create_string_buffer(raw, len(raw))
-        blob_in = DATA_BLOB(len(raw), ctypes.cast(buf, ctypes.POINTER(ctypes.c_char)))
-        blob_out = DATA_BLOB()
-        ok = ctypes.windll.crypt32.CryptUnprotectData(
-            ctypes.byref(blob_in), None, None, None, None, 0, ctypes.byref(blob_out)
-        )
-        if not ok:
-            return None
-        try:
-            plain = ctypes.string_at(blob_out.pbData, blob_out.cbData)
-        finally:
-            ctypes.windll.kernel32.LocalFree(blob_out.pbData)
-        text_out = plain.decode("utf-8", "replace").strip()
-        return text_out or None
-    except Exception:
-        return None
+    解密链与 MaaGumballs（不思议迷宫小助手）一致，见 ``utils/mfa_crypto.py``：
+    Windows DPAPI → AES(设备密钥) → AES(legacy 设备密钥)。MFA 的
+    ``SimpleEncryptionHelper`` 加密时用无附加熵的 CurrentUser DPAPI，所以同机同用户必解；
+    DPAPI 抛异常时它退回 AES 设备密钥，这里也照做。
+    """
+    return mfa_crypto.decrypt(value)
 
 
 def normalize_value(value):
-    """返回 ``(可用值, 来源说明)``：密文就尝试解密，明文原样返回。"""
+    """返回 ``(可用值, 来源说明)``：是密文就尝试解密，已是合法明文则原样返回。"""
     text = str(value or "").strip()
     if not text:
         return "", SOURCE_PLAINTEXT
-    if not is_mfa_ciphertext(text):
+    # 已经是合法形态（bot token / chat_id）就直接用，别做无谓的解密尝试
+    if BOT_TOKEN_RE.match(text) or CHAT_ID_RE.match(text):
         return text, SOURCE_PLAINTEXT
-    plain = decrypt_mfa_value(text)
-    if plain is None:
+    if looks_encrypted(text):
+        plain = decrypt_mfa_value(text)
+        if plain:
+            return plain.strip(), SOURCE_MFA_DECRYPTED
         return text, SOURCE_MFA_LOCKED
-    return plain, SOURCE_MFA_DECRYPTED
+    return text, SOURCE_PLAINTEXT
 
 
 def validate(bot_token: str, chat_id: str) -> list:
@@ -156,8 +141,6 @@ def validate(bot_token: str, chat_id: str) -> list:
 
 def mfa_hint(bot_token: str, chat_id: str) -> str:
     """如果是「MFA 密文但本机解不开」，给出根因和出路。"""
-    if not (is_mfa_ciphertext(bot_token) or is_mfa_ciphertext(chat_id)):
-        return ""
     _, token_src = normalize_value(bot_token)
     _, chat_src = normalize_value(chat_id)
     if SOURCE_MFA_LOCKED not in (token_src, chat_src):

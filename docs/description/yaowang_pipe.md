@@ -13,7 +13,8 @@
 
    > 原理：`config/config.json` 就是 MFA 的 "Default" 配置本体（MFA 内部 Default → 文件名 `config`），
    > 用户在 MFA 界面填的 token / chat_id 会被 MFA 用 Windows DPAPI 加密后写回该文件
-   > （`AQAAANCMnd8BFdERjHoAwE/Cl+sB...` 这种 300+ 字符的 base64）。agent 会用本机 DPAPI 解回明文再发送。
+   > （`AQAAANCMnd8BFdERjHoAwE/Cl+sB...` 这种 300+ 字符的 base64）。agent 会按
+   > DPAPI → AES 设备密钥的顺序解回明文再发送（与 MaaGumballs 不思议迷宫小助手的实现同一套解密链）。
 
 2. **明文写进 `config/notify.json`**（MFA 不管理这个文件，永不被加密/覆盖）：
 
