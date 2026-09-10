@@ -89,6 +89,8 @@ class VerifyPackageTests(unittest.TestCase):
             "python/Lib/site-packages/maa/__init__.py",
             "python/Lib/site-packages/PIL/__init__.py",
             "agent/main.py",
+            "agent/utils/notify_config.py",
+            "tools/check_notify.py",
             "config/pip_config.json",
             "interface.json",
         ]

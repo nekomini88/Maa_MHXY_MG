@@ -16,6 +16,11 @@ import requests
 
 from utils import logger
 
+try:
+    from . import notify_config
+except ImportError:  # 直接按文件路径加载时（自检脚本）
+    import notify_config
+
 config: dict = {}
 
 
@@ -82,13 +87,13 @@ def send_telegram(text: str) -> bool:
     Returns:
         发送成功返回 True，否则 False。
     """
-    bot_token = config.get("ExternalNotificationTelegramBotToken", "").strip()
-    chat_id = config.get("ExternalNotificationTelegramChatId", "").strip()
+    bot_token = str(config.get(notify_config.TOKEN_KEY, "") or "").strip()
+    chat_id = str(config.get(notify_config.CHAT_ID_KEY, "") or "").strip()
 
-    if not bot_token or not chat_id:
-        logger.warning(
-            f"[message] Telegram bot_token 或 chat_id 未配置（token='{bot_token[:4]}...' chat_id='{chat_id}'），无法发送。"
-        )
+    # 先校验格式：字段「非空但填错」是最常见的情况，笼统报“未配置”会把人带偏。
+    problems = notify_config.validate(bot_token, chat_id)
+    if problems:
+        logger.error(notify_config.describe(problems))
         return False
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
@@ -99,6 +104,9 @@ def send_telegram(text: str) -> bool:
             return True
         logger.error(
             f"[message] Telegram 消息推送失败，状态码：{resp.status_code}，响应：{resp.text[:200]}"
+        )
+        logger.error(
+            "[message] 原因解读：" + notify_config.explain_http_error(resp.status_code, resp.text)
         )
         return False
     except Exception as e:

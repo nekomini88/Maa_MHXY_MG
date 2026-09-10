@@ -49,17 +49,22 @@ from maa.context import Context
 from utils import logger
 from utils import send_message
 
-# 独立的小体积妖王调试日志（只写 yaowang 相关行，方便直接发送排查，
-# 避免 app.log 过大无法上传）。若无 loguru 则降级为仅 console。
-try:
-    from loguru import logger as _ylogger
+# 妖王专用日志：单独一个文件，只收 [yaowang] 消息，方便整份发给维护者排查。
+#
+# 不要再写 `from loguru import logger as _ylogger; _ylogger.remove()`：
+# loguru 是单例，remove() 会把 utils/logger.py 配好的 console / 每日日志 sink
+# 一并干掉（之后整个项目的日志都只落进 yaowang.log），而且 helpers 里再调一次
+# _ylog.info() 会把同一条消息写两遍。这里只在现有 logger 上追加一个带 filter
+# 的 sink，全部日志仍由 utils.logger 统一出口。
+_YAOWANG_LOG_PATH = os.path.join("debug", "custom", "yaowang.log")
 
-    _ylog_path = os.path.join(os.getcwd(), "debug", "custom", "yaowang.log")
+
+def _install_yaowang_sink() -> bool:
+    """给全局 logger 追加一个只收 '[yaowang]' 消息的文件 sink。"""
     try:
-        os.makedirs(os.path.dirname(_ylog_path), exist_ok=True)
-        _ylogger.remove()
-        _ylogger.add(
-            _ylog_path,
+        os.makedirs(os.path.dirname(_YAOWANG_LOG_PATH), exist_ok=True)
+        logger.add(
+            _YAOWANG_LOG_PATH,
             rotation="1 day",
             retention="3 days",
             level="DEBUG",
@@ -68,48 +73,36 @@ try:
             enqueue=True,
             backtrace=True,
             diagnose=True,
+            filter=lambda record: "[yaowang]" in record["message"],
         )
-        _ylog = _ylogger
-    except Exception:
-        _ylog = None
-except ImportError:
-    _ylog = None
+        return True
+    except Exception:  # loguru 缺失或目录不可写时，退化为只走主日志
+        return False
+
+
+_YAOWANG_SINK_OK = _install_yaowang_sink()
+
+
+def _ylog_fmt(msg) -> str:
+    """统一补 [yaowang] 前缀，且只补一次（调用方有的带前缀、有的不带）。"""
+    text = str(msg)
+    return text if text.startswith("[yaowang]") else f"[yaowang] {text}"
 
 
 def _ylog_info(msg: str):
-    logger.info(f"[yaowang] {msg}")
-    if _ylog is not None:
-        try:
-            _ylog.info(msg)
-        except Exception:
-            pass
+    logger.info(_ylog_fmt(msg))
 
 
 def _ylog_warn(msg: str):
-    logger.warning(f"[yaowang] {msg}")
-    if _ylog is not None:
-        try:
-            _ylog.warning(msg)
-        except Exception:
-            pass
+    logger.warning(_ylog_fmt(msg))
 
 
 def _ylog_err(msg: str):
-    logger.error(f"[yaowang] {msg}")
-    if _ylog is not None:
-        try:
-            _ylog.error(msg)
-        except Exception:
-            pass
+    logger.error(_ylog_fmt(msg))
 
 
 def _ylog_debug(msg: str):
-    logger.debug(f"[yaowang] {msg}")
-    if _ylog is not None:
-        try:
-            _ylog.debug(msg)
-        except Exception:
-            pass
+    logger.debug(_ylog_fmt(msg))
 
 # 系统公告栏 ROI 默认参数（比例，随截图尺寸换算）
 DEFAULT_CHAT_RATIO_X = 0.45   # 聊天栏宽度占全图宽
@@ -337,13 +330,25 @@ class Yaowang(CustomRecognition):
                             _msg_mod.read_config()
                             _cfg = _msg_mod.config or {}
                             _en = _cfg.get("ExternalNotificationEnabled", "")
-                            _tk = str(_cfg.get("ExternalNotificationTelegramBotToken", ""))
-                            _ci = str(_cfg.get("ExternalNotificationTelegramChatId", ""))
+                            _tk = str(_cfg.get("ExternalNotificationTelegramBotToken", "") or "")
+                            _ci = str(_cfg.get("ExternalNotificationTelegramChatId", "") or "")
+                            try:
+                                from utils import notify_config as _nc
+                            except ImportError:  # 兜底：按包路径导入
+                                import utils.notify_config as _nc  # type: ignore
+
                             _ylog_err(
                                 "[yaowang] 发送失败诊断: ExternalNotificationEnabled="
-                                f"{_en} | token_len={len(_tk)} | chatid='{_ci[:6]}...' "
-                                f"(token为空或chat_id为空 → 需要填写 config/config.json)"
+                                f"{_en} | token={_nc.mask(_tk)} | chat_id={_nc.mask(_ci)}"
                             )
+                            _problems = _nc.validate(_tk, _ci)
+                            for _i, _p in enumerate(_problems, 1):
+                                _ylog_err(f"[yaowang] 配置问题 {_i}: {_p}")
+                            if not _problems:
+                                _ylog_err(
+                                    "[yaowang] 配置格式没问题 → 失败原因在网络或 Telegram 侧，"
+                                    "请看上一行 [message] 的状态码与原因解读。"
+                                )
                         except Exception as _e:
                             _ylog_err(f"[yaowang] 读取诊断信息失败: {_e}")
                     if ok:

@@ -8,10 +8,10 @@
 #                  --only-binary=:all: --platform win_amd64 --python-version 312
 #                  --implementation cp --abi cp312）
 #
-# 用法: bash tools/ci/build_local_win.sh [版本号]   默认 v0.1.2
+# 用法: bash tools/ci/build_local_win.sh [版本号]   默认 v0.1.3
 set -euo pipefail
 
-VERSION="${1:-v0.1.2}"
+VERSION="${1:-v0.1.3}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 

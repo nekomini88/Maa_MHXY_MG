@@ -176,6 +176,34 @@ def install_pip_config():
     print(f"[install] Installed pip config to {dst}")
 
 
+def install_notify_checker():
+    """把 Telegram 通知自检脚本与一键 bat 放进包内。
+
+    用户填完 config/config.json 后不必启动游戏，双击 bat 即可知道配置对不对。
+    """
+    src = working_dir / "tools" / "check_notify.py"
+    if not src.exists():
+        print("[install] tools/check_notify.py not found, skip notify checker.")
+        return
+    dst_dir = install_path / "tools"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst_dir / "check_notify.py")
+
+    bat = install_path / "检查通知配置.bat"
+    bat.write_text(
+        "@echo off\r\n"
+        "chcp 65001 >nul\r\n"
+        'cd /d "%~dp0"\r\n'
+        "echo === Telegram 通知配置自检 ===\r\n"
+        "echo.\r\n"
+        "python\\python.exe tools\\check_notify.py\r\n"
+        "echo.\r\n"
+        "pause\r\n",
+        encoding="utf-8",
+    )
+    print(f"[install] Installed notify checker to {dst_dir} and {bat.name}")
+
+
 if __name__ == "__main__":
     install_deps(platform_tag)
     install_resource()
@@ -183,5 +211,6 @@ if __name__ == "__main__":
     install_agent()
     install_config()
     install_pip_config()
+    install_notify_checker()
 
     print(f"Install to {install_path} successfully.")

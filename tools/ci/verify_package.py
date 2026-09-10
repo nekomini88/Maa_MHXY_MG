@@ -19,6 +19,8 @@ REQUIRED_PREFIXES = (
     "python/Lib/site-packages/PIL/",
     "python/python.exe",
     "agent/main.py",
+    "agent/utils/notify_config.py",
+    "tools/check_notify.py",
     "config/pip_config.json",
     "interface.json",
 )
