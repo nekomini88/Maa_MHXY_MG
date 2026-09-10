@@ -36,6 +36,29 @@ except ImportError:
 VENV_NAME = ".venv"  # 虚拟环境目录的名称
 VENV_DIR = Path(project_root_dir) / VENV_NAME
 
+# requirements.txt 的顶层发行包名。用于判断依赖是否已随包预装：
+# 齐全时完全不调用 pip，离线/被墙的机器也不会再刷“镜像源不可用”的假故障。
+REQUIRED_DISTRIBUTIONS = (
+    "colorama",
+    "levenshtein",
+    "loguru",
+    "maaagentbinary",
+    "maafw",
+    "numpy",
+    "pillow",
+    "python-levenshtein",
+    "rapidfuzz",
+    "strenum",
+    "requests",
+    "pydantic-core",
+    "opencv-python-headless",
+    "scikit-image",
+    "zai-sdk",
+)
+
+# 包内离线 wheel 目录（按优先级查找，命中即用 --no-index 安装，不联网）
+LOCAL_WHEEL_DIRS = ("deps", "install/deps", "wheels")
+
 
 def _is_running_in_our_venv():
     """检查脚本是否在此脚本管理的特定venv中运行。"""
@@ -101,7 +124,10 @@ def ensure_linux_venv_and_relaunch_if_needed():
 
 
 def read_pip_config() -> dict:
-    config_dir = Path("./config")  # 相对于project_root_dir
+    # 必须锚定项目根目录：原来用 "./config"（跟随 CWD），而
+    # update_pip_config_last_version 用的是 project_root_dir/config，
+    # 两者不一致时会读写到两个不同的 pip_config.json。
+    config_dir = Path(project_root_dir) / "config"
     config_dir.mkdir(exist_ok=True)
     config_path = config_dir / "pip_config.json"
     default_config = {
@@ -126,37 +152,79 @@ def read_pip_config() -> dict:
         return default_config
 
 
+def installed_distributions() -> set:
+    """当前解释器里已安装的发行包名（已规范化）。"""
+    try:
+        from importlib import metadata as importlib_metadata
+    except ImportError:  # pragma: no cover
+        return set()
+
+    names = set()
+    for dist in importlib_metadata.distributions():
+        try:
+            name = dist.metadata["Name"]
+        except Exception:
+            continue
+        if name:
+            names.add(_normalize_dist_name(name))
+    return names
+
+
+def _normalize_dist_name(name: str) -> str:
+    return name.strip().lower().replace("_", "-")
+
+
+def missing_requirements(installed=None) -> list:
+    """返回 requirements.txt 中尚未安装的发行包（空列表 = 依赖齐全）。"""
+    have = installed_distributions() if installed is None else {
+        _normalize_dist_name(x) for x in installed
+    }
+    return [d for d in REQUIRED_DISTRIBUTIONS if _normalize_dist_name(d) not in have]
+
+
+def find_local_wheel_dir():
+    """查找包内随附的离线 wheel 目录，找不到返回 None。"""
+    for rel in LOCAL_WHEEL_DIRS:
+        candidate = Path(project_root_dir) / rel
+        try:
+            if candidate.is_dir() and any(candidate.glob("*.whl")):
+                return candidate
+        except OSError:
+            continue
+    return None
+
+
+def check_mirror_reachable(mirror: str, timeout: int = 8) -> bool:
+    """用 HTTP 请求探测镜像源是否可达。
+
+    原来用 `python -m pip list -i <mirror>` 探测：pip 缺失/损坏时直接
+    返回非零码，会把可用镜像误判为不可用（用户日志里的“镜像源返回错误(代码: 1)”
+    就是这么来的）。这里改成标准库 HTTP 探测，不依赖 pip 行为。
+    """
+    import urllib.error
+    import urllib.request
+
+    url = mirror.rstrip("/") + "/"
+    request = urllib.request.Request(
+        url, method="GET", headers={"User-Agent": "Maa_MHXY_MG-agent/1.0"}
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            status = getattr(response, "status", None) or response.getcode()
+            return 200 <= int(status) < 400
+    except Exception as exc:
+        logger.warning(f"镜像源不可用 {mirror}: {exc}")
+        return False
+
+
 def get_available_mirror(pip_config: dict) -> str:
     mirrors = [pip_config.get("mirror")] + pip_config.get("backup_mirrors", [])
-    python_exe_to_use = sys.executable  # 在Linux上重新启动后将是venv的Python
 
     for mirror in filter(None, mirrors):  # 过滤掉None或空字符串
-        try:
-            logger.info(f"尝试连接镜像源: {mirror}")
-            subprocess.run(
-                [
-                    python_exe_to_use,
-                    "-m",
-                    "pip",
-                    "list",
-                    "--local",
-                    "--format=json",
-                    "-i",
-                    mirror,
-                ],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=10,  # 检查超时时间
-                check=True,  # 对非零退出码抛出CalledProcessError
-            )
-            logger.info(f"当前镜像源可用")
+        logger.info(f"尝试连接镜像源: {mirror}")
+        if check_mirror_reachable(mirror):
+            logger.info("当前镜像源可用")
             return mirror
-        except subprocess.TimeoutExpired:
-            logger.warning(f"当前镜像源连接超时")
-        except subprocess.CalledProcessError as e:
-            logger.warning(f"镜像源返回错误 (代码: {e.returncode}): {mirror}")
-        except Exception as e:  # 捕获其他潜在错误，如pip的FileNotFoundError
-            logger.warning(f"检查镜像源时发生未知错误 {mirror}: {e}")
     logger.error("所有镜像源都不可用")
     return None
 
@@ -199,7 +267,29 @@ def install_requirements(req_file="requirements.txt", pip_config=None) -> bool:
         logger.error(f"{req_file} 文件不存在于 {req_path.resolve()}")
         return False
 
-    mirror = get_available_mirror(pip_config)
+    # 优先级 1：包内离线 wheel。命中时用 --no-index，全程不联网，
+    # 离线机器/被墙机器也能把依赖补齐（用户端不再依赖镜像源可达）。
+    wheel_dir = find_local_wheel_dir()
+    if wheel_dir:
+        offline_cmd = [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-U",
+            "--no-index",
+            "--find-links",
+            str(wheel_dir),
+            "--no-warn-script-location",
+            "-r",
+            str(req_path),
+        ]
+        if _run_pip_command(offline_cmd, f"从本地离线包 {wheel_dir} 安装依赖"):
+            return True
+        logger.warning("本地离线包安装失败，回退到在线镜像源")
+
+    # 优先级 2：在线镜像源（仅在无离线包或离线安装失败时使用）
+    mirror = get_available_mirror(pip_config or {})
     if not mirror:
         logger.error("没有可用的镜像源，安装依赖失败")
         return False
@@ -232,19 +322,26 @@ def check_and_install_dependencies():
     logger.info(f"启用 pip 安装依赖: {enable_pip_install}")
     logger.info(f"当前资源版本: {current_version}, 上次运行版本: {last_version}")
 
-    if enable_pip_install and (
-        current_version != last_version or last_version == "unknown"
-    ):
-        logger.info("版本不匹配或上次版本未知，开始安装/更新依赖。")
-        if install_requirements(pip_config=pip_config):
+    # 依赖已随包预装且齐全时直接跳过：完全不调用 pip，
+    # 离线/被墙环境也不会再出现“镜像源不可用”的假故障。
+    missing = missing_requirements()
+    if not missing:
+        logger.info("依赖已随包预装且完整，跳过依赖安装。")
+        if current_version and current_version != last_version:
             update_pip_config_last_version(current_version)
-            logger.info("依赖检查和安装完成。")
-        else:
-            logger.warning("依赖安装失败，程序可能无法正常运行。")
-    elif not enable_pip_install:
-        logger.info("Pip 依赖安装已禁用。")
+        return
+
+    logger.warning(f"缺少依赖: {', '.join(missing)}")
+    if not enable_pip_install:
+        logger.warning("Pip 依赖安装已禁用，缺少的依赖不会被自动安装。")
+        return
+
+    logger.info("开始安装/更新依赖。")
+    if install_requirements(pip_config=pip_config):
+        update_pip_config_last_version(current_version)
+        logger.info("依赖检查和安装完成。")
     else:
-        logger.info(f"版本匹配，跳过依赖安装。")
+        logger.warning("依赖安装失败，程序可能无法正常运行。")
 
 
 def read_interface_version(interface_file_name="./interface.json") -> str:

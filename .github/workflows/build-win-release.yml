@@ -20,7 +20,7 @@ env:
   MAA_FRAMEWORK_VERSION: "v5.12.2"
   MFAA_VERSION: "v2.16.0"
   PYTHON_VERSION: "3.12.10"
-  REL_TAG: "v0.1.0"
+  REL_TAG: "v0.1.1"
 
 jobs:
   build-win-x64:
@@ -67,25 +67,28 @@ jobs:
       - name: Download Windows wheels
         run: |
           mkdir -p install/deps
-          grep -v "opencv-python-headless" requirements.txt > /tmp/req.txt
-          python3 -m pip download -q -r /tmp/req.txt -d install/deps \
-            --only-binary=:all: --platform win_amd64 --python-version 312
-          curl -sL --retry 3 -o install/deps/opencv_python_headless-4.10.0.84-cp312-abi3-win_amd64.whl \
-            "https://files.pythonhosted.org/packages/30/c0/66f88d58500e990a9a0a5c06f98862edf1d0a3a430781218a8c193948438/opencv_python_headless-4.10.0.84-cp37-abi3-win_amd64.whl"
-          ls install/deps | wc -l
+          # 全部依赖（含 opencv）统一走 pip download。
+          # 不要手写 files.pythonhosted.org 直链：URL 变更/被拦时只会落下一个
+          # 几百字节的错误页，被当成 wheel 后离线安装整步失败（历史事故根因）。
+          python3 -m pip download -q -r requirements.txt -d install/deps \
+            --only-binary=:all: --platform win_amd64 --python-version 312 \
+            --implementation cp --abi cp312
+          ls install/deps/*.whl | wc -l
+          ls -la install/deps | head -5
 
       - name: Pre-install wheels into embed Python (offline, no pip at runtime)
         run: |
           python3 -m pip install -q --no-index --find-links install/deps \
             --platform win_amd64 --python-version 312 --implementation cp --abi cp312 \
             --target install/python/Lib/site-packages --only-binary=:all: \
-            -r /tmp/req.txt \
-            "opencv-python-headless==4.10.0.84"
+            -r requirements.txt
           rm -rf install/python/Lib/site-packages/bin
           # 给嵌入式 python 补 pip 包体(不运行 exe,只解包,供 Windows 端 python -m pip 使用)
           curl -sL --retry 3 -o /tmp/pip.whl "$(python3 -c "import urllib.request,json; print(json.load(urllib.request.urlopen('https://pypi.org/pypi/pip/json'))['urls'][0]['url'])")"
           python3 -c "import zipfile; zipfile.ZipFile('/tmp/pip.whl').extractall('install/python/Lib/site-packages')"
-          ls install/python/Lib/site-packages | grep -E "^(numpy|cv2|PIL|pip)" | head
+
+      - name: Verify pre-installed dependencies (gate)
+        run: python3 tools/ci/verify_embed_deps.py install/python/Lib/site-packages
 
       - name: Install
         run: |
@@ -113,8 +116,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
-          python3 -c "import zipfile,os; z=zipfile.ZipFile('Maa_MHXY_MG-win-x86_64-MFAA.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(r,f), os.path.relpath(os.path.join(r,f),'install')) for r,_,fs in os.walk('install') for f in fs]; z.close()"
-          echo "Packed: $(ls -lh Maa_MHXY_MG-win-x86_64-MFAA.zip | awk '{print $5}')"
+          python3 tools/ci/package.py install Maa_MHXY_MG-win-x86_64-MFAA.zip
+          # 上传前先验包：产物必须真的带预装依赖，否则宁可让 CI 红，
+          # 也不要用坏包覆盖 Release 上已有的好包。
+          python3 tools/ci/verify_package.py Maa_MHXY_MG-win-x86_64-MFAA.zip
           gh release upload "${{ env.REL_TAG }}" "Maa_MHXY_MG-win-x86_64-MFAA.zip" \
             --repo "${{ github.repository }}" --clobber
           echo "Uploaded to ${{ env.REL_TAG }}"

@@ -148,11 +148,40 @@ def install_config():
     print(f"[install] Installed config template to {dst}")
 
 
+def install_pip_config():
+    """预置 config/pip_config.json，默认关闭运行时 pip 安装。
+
+    包内已随附全部 Windows wheel 并预装进 embed python，运行时不需要联网装依赖。
+    默认关闭可避免离线/被墙的机器在启动时刷「镜像源不可用」并误报依赖安装失败。
+    用户若想恢复自动安装，把 enable_pip_install 改成 true 即可。
+    """
+    dst_dir = install_path / "config"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / "pip_config.json"
+    if dst.exists():
+        print("[install] config/pip_config.json already exists, keep user config.")
+        return
+    config = {
+        "enable_pip_install": False,
+        "last_version": version,
+        "mirror": "https://mirrors.ustc.edu.cn/pypi/simple",
+        "backup_mirrors": [
+            "https://pypi.tuna.tsinghua.edu.cn/simple",
+            "https://mirrors.cloud.tencent.com/pypi/simple/",
+            "https://pypi.org/simple",
+        ],
+    }
+    with open(dst, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4, ensure_ascii=False)
+    print(f"[install] Installed pip config to {dst}")
+
+
 if __name__ == "__main__":
     install_deps(platform_tag)
     install_resource()
     install_chores()
     install_agent()
     install_config()
+    install_pip_config()
 
     print(f"Install to {install_path} successfully.")
