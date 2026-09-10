@@ -262,5 +262,201 @@ class YaowangLoggingTests(unittest.TestCase):
                 )
 
 
+class MfaCiphertextTests(unittest.TestCase):
+    """回归：config/config.json 是 MFAAvalonia 的 Default 配置本体，
+    用户在 MFA 界面填的 token / chat_id 会被 DPAPI 加密后写回该文件。
+    agent 必须能识别这种密文并尝试本机解密，而不是拿密文去发消息（必然 404）。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import base64
+
+        cls.nc = load_notify_config()
+        # 构造一个结构合法的 DPAPI blob（仅头部相同，内容是随机的）
+        blob = cls.nc.DPAPI_MAGIC + b"\x11" * 200
+        cls.cipher = base64.b64encode(blob).decode()
+
+    def test_detects_dpapi_ciphertext(self):
+        self.assertTrue(self.nc.is_mfa_ciphertext(self.cipher))
+        self.assertTrue(self.cipher.startswith("AQAAAN"), self.cipher[:8])
+
+    def test_plaintext_values_are_not_ciphertext(self):
+        self.assertFalse(self.nc.is_mfa_ciphertext(VALID_TOKEN))
+        self.assertFalse(self.nc.is_mfa_ciphertext(VALID_CHAT_ID))
+        self.assertFalse(self.nc.is_mfa_ciphertext(""))
+        self.assertFalse(self.nc.is_mfa_ciphertext("not-base64-!!!"))
+
+    def test_base64_without_dpapi_header_is_not_ciphertext(self):
+        import base64
+
+        self.assertFalse(self.nc.is_mfa_ciphertext(base64.b64encode(b"z" * 300).decode()))
+
+    def test_decrypt_returns_none_off_windows_without_raising(self):
+        """Linux/macOS 上必须安全返回 None（只有 Windows 才有 DPAPI）。"""
+        if sys.platform == "win32":
+            self.skipTest("在 Windows 上无法验证“非 Windows 返回 None”")
+        self.assertIsNone(self.nc.decrypt_mfa_value(self.cipher))
+
+    def test_normalize_keeps_plaintext(self):
+        value, src = self.nc.normalize_value(VALID_TOKEN)
+        self.assertEqual(value, VALID_TOKEN)
+        self.assertEqual(src, self.nc.SOURCE_PLAINTEXT)
+
+    def test_normalize_marks_locked_ciphertext(self):
+        value, src = self.nc.normalize_value(self.cipher)
+        if sys.platform == "win32":
+            self.skipTest("Windows 上会用真实 DPAPI 解密，另见集成验证")
+        self.assertEqual(value, self.cipher)
+        self.assertEqual(src, self.nc.SOURCE_MFA_LOCKED)
+
+    def test_hint_only_for_locked_ciphertext(self):
+        self.assertEqual(self.nc.mfa_hint(VALID_TOKEN, VALID_CHAT_ID), "")
+        hint = self.nc.mfa_hint(self.cipher, self.cipher)
+        if sys.platform != "win32":
+            self.assertIn(self.nc.NOTIFY_FILE, hint)
+
+
+class SendGuardMfaTests(SendGuardTests):
+    """密文解不开时必须拦在发请求之前，并说明根因与出路。"""
+
+    def test_locked_ciphertext_blocks_request_with_hint(self):
+        import base64
+
+        import requests
+
+        cipher = base64.b64encode(self.nc.DPAPI_MAGIC + b"\x22" * 200).decode()
+        if sys.platform == "win32":
+            self.skipTest("Windows 上无法构造“解不开的密文”")
+
+        calls = []
+        original_post = requests.post
+        requests.post = lambda *a, **k: calls.append((a, k))
+        try:
+            self.message.config = {
+                self.nc.TOKEN_KEY: cipher,
+                self.nc.CHAT_ID_KEY: cipher,
+                self.nc.ENABLED_KEY: "Telegram",
+            }
+            ok = self.message.send_telegram("测试")
+        finally:
+            requests.post = original_post
+
+        self.assertFalse(ok)
+        self.assertEqual(calls, [], "密文解不开时不应向 Telegram 发请求")
+        text = self.logger.text()
+        self.assertIn("MFAAvalonia", text)
+        self.assertIn("notify.json", text)
+
+
+class NotifyOverrideTests(unittest.TestCase):
+    """config/notify.json（MFA 不管理）的非空值优先于 config/config.json。"""
+
+    def setUp(self):
+        self.nc = load_notify_config()
+        self.logger = _CapturingLogger()
+        fake_utils = types.ModuleType("utils")
+        fake_utils.logger = self.logger
+        sys.modules["utils"] = fake_utils
+        sys.path.insert(0, str(AGENT_UTILS))
+        spec = importlib.util.spec_from_file_location("message_override_under_test", MESSAGE_PATH)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        self.message = module
+
+    def tearDown(self):
+        sys.modules.pop("utils", None)
+
+    def _project(self, raw_config: dict, notify: dict = None):
+        import json
+        import tempfile
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+        (root / "config").mkdir(parents=True)
+        with open(root / "config" / "config.json", "w", encoding="utf-8") as f:
+            json.dump(raw_config, f, ensure_ascii=False)
+        if notify is not None:
+            with open(root / "config" / "notify.json", "w", encoding="utf-8") as f:
+                json.dump(notify, f, ensure_ascii=False)
+        self.message._project_root = lambda: root
+        return root
+
+    def test_notify_json_overrides_non_empty_values(self):
+        self._project(
+            {self.nc.TOKEN_KEY: "old", self.nc.CHAT_ID_KEY: "old", self.nc.ENABLED_KEY: "Telegram"},
+            {self.nc.TOKEN_KEY: VALID_TOKEN, self.nc.CHAT_ID_KEY: VALID_CHAT_ID},
+        )
+        self.assertTrue(self.message.read_config())
+        self.assertEqual(self.message.config[self.nc.TOKEN_KEY], VALID_TOKEN)
+        self.assertEqual(self.message.config[self.nc.CHAT_ID_KEY], VALID_CHAT_ID)
+
+    def test_empty_override_does_not_win(self):
+        self._project(
+            {self.nc.TOKEN_KEY: "keep-me", self.nc.CHAT_ID_KEY: "keep-me-too"},
+            {"ExternalNotificationTelegramBotToken": "", "_说明": ["x"]},
+        )
+        self.assertTrue(self.message.read_config())
+        self.assertEqual(self.message.config[self.nc.TOKEN_KEY], "keep-me")
+        self.assertEqual(self.message.config[self.nc.CHAT_ID_KEY], "keep-me-too")
+
+    def test_missing_notify_json_is_fine(self):
+        self._project({self.nc.TOKEN_KEY: VALID_TOKEN, self.nc.CHAT_ID_KEY: VALID_CHAT_ID})
+        self.assertTrue(self.message.read_config())
+        self.assertEqual(self.message.config[self.nc.TOKEN_KEY], VALID_TOKEN)
+
+
+class CheckNotifyScriptTests(unittest.TestCase):
+    """自检脚本对密文要给出正确解释（离线可判定，不用联网）。"""
+
+    def _run(self, config_obj, notify_obj=None):
+        import json
+        import shutil
+        import subprocess
+        import tempfile
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+        (root / "config").mkdir(parents=True)
+        (root / "tools").mkdir()
+        (root / "agent" / "utils").mkdir(parents=True)
+        shutil.copy2(REPO_ROOT / "tools" / "check_notify.py", root / "tools" / "check_notify.py")
+        shutil.copy2(NOTIFY_CONFIG_PATH, root / "agent" / "utils" / "notify_config.py")
+        with open(root / "config" / "config.json", "w", encoding="utf-8") as f:
+            json.dump(config_obj, f, ensure_ascii=False)
+        if notify_obj is not None:
+            with open(root / "config" / "notify.json", "w", encoding="utf-8") as f:
+                json.dump(notify_obj, f, ensure_ascii=False)
+        proc = subprocess.run(
+            [sys.executable, str(root / "tools" / "check_notify.py")],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        return proc
+
+    def test_reports_mfa_ciphertext_without_network(self):
+        import base64
+
+        nc = load_notify_config()
+        cipher = base64.b64encode(nc.DPAPI_MAGIC + b"\x33" * 200).decode()
+        proc = self._run({nc.TOKEN_KEY: cipher, nc.CHAT_ID_KEY: cipher, nc.ENABLED_KEY: "Telegram"})
+        out = proc.stdout + proc.stderr
+        self.assertIn("MFAAvalonia", out)
+        self.assertIn("notify.json", out)
+        self.assertEqual(proc.returncode, 1)
+        self.assertNotIn("AQAAAN" + "Q" * 100, out, "不应打印完整密文")
+
+    def test_plaintext_bad_token_still_reports_format_problem(self):
+        nc = load_notify_config()
+        proc = self._run({nc.TOKEN_KEY: "YOUR_BOT_TOKEN", nc.CHAT_ID_KEY: "YOUR_CHAT_ID"})
+        out = proc.stdout + proc.stderr
+        self.assertIn("格式非法", out)
+        self.assertEqual(proc.returncode, 1)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

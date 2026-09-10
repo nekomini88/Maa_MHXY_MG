@@ -7,7 +7,8 @@
 Windows 也可以直接双击包内「检查通知配置.bat」。
 
 它做三件事，逐步给出结论：
-  1. 读 config/config.json，检查 token / chat_id 是否填了且格式合法；
+  1. 读 config/config.json（+ 叠加 config/notify.json），检查 token / chat_id；
+     若发现是 MFAAvalonia 加密的密文，会先尝试用本机 DPAPI 解出明文；
   2. 调 getMe 确认 Telegram 认识这个 bot（token 是否有效）；
   3. 真发一条测试消息，把 HTTP 状态码翻译成可执行的原因。
 
@@ -26,6 +27,7 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(HERE)
 CONFIG_PATH = os.path.join(PROJECT_ROOT, "config", "config.json")
+NOTIFY_OVERRIDE_PATH = os.path.join(PROJECT_ROOT, "config", "notify.json")
 NOTIFY_CONFIG_PATH = os.path.join(PROJECT_ROOT, "agent", "utils", "notify_config.py")
 
 
@@ -79,22 +81,56 @@ def _as_dict(raw: bytes) -> dict:
     return parsed if isinstance(parsed, dict) else {"raw": parsed}
 
 
+def load_overrides() -> dict:
+    """config/notify.json：MFA 不管理的明文通知配置（非空值优先）。"""
+    if not os.path.exists(NOTIFY_OVERRIDE_PATH):
+        return {}
+    try:
+        with open(NOTIFY_OVERRIDE_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"[WARN] 读取 {NOTIFY_OVERRIDE_PATH} 失败：{e}")
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {k: v for k, v in data.items() if not str(k).startswith("_") and str(v or "").strip()}
+
+
 def main() -> int:
     nc = load_notify_config()
     config = load_config()
+    overrides = load_overrides()
 
-    enabled = config.get(nc.ENABLED_KEY, "")
-    token = str(config.get(nc.TOKEN_KEY, "") or "").strip()
-    chat_id = str(config.get(nc.CHAT_ID_KEY, "") or "").strip()
+    # agent 运行时的实际取值规则：config.json 打底，notify.json 的非空值覆盖
+    effective = dict(config)
+    effective.update(overrides)
+
+    enabled = effective.get(nc.ENABLED_KEY, "")
+    token_raw = str(effective.get(nc.TOKEN_KEY, "") or "").strip()
+    chat_id_raw = str(effective.get(nc.CHAT_ID_KEY, "") or "").strip()
+    token, token_src = nc.normalize_value(token_raw)
+    chat_id, chat_src = nc.normalize_value(chat_id_raw)
 
     print("=" * 64)
     print("Telegram 通知配置自检")
     print("=" * 64)
     print(f"配置文件        : {CONFIG_PATH}")
+    print(f"明文覆盖文件    : {NOTIFY_OVERRIDE_PATH}（{'有，%d 项生效' % len(overrides) if overrides else '无'}）")
     print(f"{nc.ENABLED_KEY} : {enabled!r}")
-    print(f"{nc.TOKEN_KEY}   : {nc.mask(token)}")
-    print(f"{nc.CHAT_ID_KEY} : {nc.mask(chat_id)}")
+    print(f"{nc.TOKEN_KEY}   : {nc.mask(token)}  [{token_src}]")
+    print(f"{nc.CHAT_ID_KEY} : {nc.mask(chat_id)}  [{chat_src}]")
     print("-" * 64)
+
+    # 密文（MFA 界面里填的值）优先解释清楚，否则用户看到的长度信息会误导排查
+    if nc.is_mfa_ciphertext(token_raw) or nc.is_mfa_ciphertext(chat_id_raw):
+        print("注意：配置里是 MFAAvalonia 加密后的密文（MFA 把界面里填的值 DPAPI 加密后")
+        print("      写回 config/config.json，只有填值那台机器+那个 Windows 用户能解开）。")
+        hint = nc.mfa_hint(token_raw, chat_id_raw)
+        if hint:
+            print("      " + hint)
+        else:
+            print("      本机已成功解密 → 能用，继续往下测。")
+        print("-" * 64)
 
     print("[1/3] 检查配置格式 ...")
     problems = nc.validate(token, chat_id)

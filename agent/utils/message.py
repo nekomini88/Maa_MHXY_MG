@@ -24,16 +24,39 @@ except ImportError:  # 直接按文件路径加载时（自检脚本）
 config: dict = {}
 
 
+def _project_root() -> Path:
+    """agent/utils/message.py -> 项目根 = 上三级。"""
+    return Path(__file__).resolve().parent.parent.parent
+
+
+def _load_notify_overrides(project_root: Path) -> dict:
+    """读取我们自己的明文通知配置 ``config/notify.json``（MFA 不管理该文件）。
+
+    非空值优先于 config/config.json：MFA 会把用户在它界面里填的 token / chat_id
+    加密后写回 config/config.json，用户手写的明文在那里随时可能被覆盖，
+    所以另留一个 MFA 不碰的文件作为可靠的明文来源。
+    """
+    path = project_root / "config" / "notify.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return {k: v for k, v in data.items() if not str(k).startswith("_") and str(v or "").strip()}
+    except Exception:
+        logger.exception(f"读取 {path} 失败，已忽略该文件。")
+    return {}
+
+
 def read_config() -> bool:
-    """读取并解析 config/config.json 里的外部通知配置。
+    """读取并解析 config/config.json 里的外部通知配置（再叠加 config/notify.json）。
 
     config.json 位于项目根目录的 ``config/`` 下（与 agent/ 同级）。优先按模块文件
     位置反推项目根，避免依赖进程 cwd，使任何调用方式都能稳定读到配置。
     """
     global config
-    # agent/utils/message.py -> 项目根 = 上两级
-    here = Path(__file__).resolve()          # <root>/agent/utils/message.py
-    project_root = here.parent.parent.parent  # <root>
+    project_root = _project_root()
     config_path = project_root / "config" / "config.json"
     if not config_path.exists():
         # 兜底：按 cwd 再试一次（老用法）
@@ -45,6 +68,12 @@ def read_config() -> bool:
     try:
         with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
+        overrides = _load_notify_overrides(project_root)
+        if overrides:
+            config.update(overrides)
+            logger.info(
+                f"[message] 已应用 {notify_config.NOTIFY_FILE} 的明文通知配置（{len(overrides)} 项）。"
+            )
         logger.debug(f"外部通知配置读取成功：{config_path}")
         return True
     except Exception:
@@ -87,13 +116,26 @@ def send_telegram(text: str) -> bool:
     Returns:
         发送成功返回 True，否则 False。
     """
-    bot_token = str(config.get(notify_config.TOKEN_KEY, "") or "").strip()
-    chat_id = str(config.get(notify_config.CHAT_ID_KEY, "") or "").strip()
+    raw_token = str(config.get(notify_config.TOKEN_KEY, "") or "").strip()
+    raw_chat_id = str(config.get(notify_config.CHAT_ID_KEY, "") or "").strip()
 
-    # 先校验格式：字段「非空但填错」是最常见的情况，笼统报“未配置”会把人带偏。
+    # MFAAvalonia 会把用户在它界面里填的这两项 DPAPI 加密后写进 config/config.json，
+    # 密文直接发必然 404，所以这里先判断/解密，拿到真正的明文再校验。
+    bot_token, token_src = notify_config.normalize_value(raw_token)
+    chat_id, chat_src = notify_config.normalize_value(raw_chat_id)
+    if notify_config.SOURCE_MFA_DECRYPTED in (token_src, chat_src):
+        logger.info(
+            "[message] 通知配置是 MFAAvalonia 加密值，已在本机解密："
+            f"token={notify_config.mask(bot_token)} | chat_id={chat_id}"
+        )
+
+    # 校验格式：字段「非空但填错」（或密文解不开）是最常见的情况，笼统报“未配置”会把人带偏。
     problems = notify_config.validate(bot_token, chat_id)
     if problems:
         logger.error(notify_config.describe(problems))
+        hint = notify_config.mfa_hint(raw_token, raw_chat_id)
+        if hint:
+            logger.error(f"[message] {hint}")
         return False
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"

@@ -176,6 +176,37 @@ def install_pip_config():
     print(f"[install] Installed pip config to {dst}")
 
 
+def install_notify_override():
+    """预置 config/notify.json（我们自己的明文通知配置，MFA 不管理它）。
+
+    为什么需要它：config/config.json 是 MFAAvalonia 的 "Default" 配置本体
+    （MFA 源码 ConfigurationManager：Default → 文件名 config），用户在 MFA
+    「设置 → 外部通知 → Telegram」里填的 token/chat_id 会被 MFA 用 DPAPI 加密
+    后写回那个文件，只有填值那台机器能解开。agent 会尝试自动解密；解不开时，
+    把明文写进这个 MFA 不碰的文件即可（非空值优先）。
+    """
+    dst_dir = install_path / "config"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / "notify.json"
+    if dst.exists():
+        print("[install] config/notify.json already exists, keep user config.")
+        return
+    config = {
+        "_说明": [
+            "Agent 的明文 Telegram 通知配置，MFAAvalonia 不管理这个文件。",
+            "留空则使用 config/config.json 里的值（MFA 加密值会被 agent 自动解密）。",
+            "只有自动解密失败时（例如配置是从别的电脑拷来的）才需要在这里填明文。",
+            "ExternalNotificationTelegramBotToken：BotFather 给的 token，形如 123456789:AAH...",
+            "ExternalNotificationTelegramChatId：接收通知的数字 ID（自己的用户 ID 为正数）",
+        ],
+        "ExternalNotificationTelegramBotToken": "",
+        "ExternalNotificationTelegramChatId": "",
+    }
+    with open(dst, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4, ensure_ascii=False)
+    print(f"[install] Installed notify override template to {dst}")
+
+
 def install_notify_checker():
     """把 Telegram 通知自检脚本与一键 bat 放进包内。
 
@@ -211,6 +242,7 @@ if __name__ == "__main__":
     install_agent()
     install_config()
     install_pip_config()
+    install_notify_override()
     install_notify_checker()
 
     print(f"Install to {install_path} successfully.")

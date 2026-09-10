@@ -1,22 +1,42 @@
 # -*- coding: utf-8 -*-
-"""Telegram 通知配置的校验规则（无第三方依赖，agent 与自检脚本共用）。
+"""Telegram 通知配置的读取、校验与解密（无第三方依赖，agent 与自检脚本共用）。
 
-为什么单独抽出来：历史上配置填错时（把 Telegram 登录链接的 token 粘进
-bot token / chat_id 字段），代码只回一句「token 为空或 chat_id 为空」，
-排查方向完全跑偏。这里把「格式是否合法」的判定集中到一处，
-agent 运行时和工具脚本给出的是同一套、可执行的结论。
+这个模块存在的三个理由：
+
+1. **配置值可能是密文**。``config/config.json`` 是 MFAAvalonia 的 "Default"
+   配置本体（MFA 源码 ``ConfigurationManager``：Default → 文件名 ``config``），
+   用户在 MFA「设置 → 外部通知 → Telegram」里填的 token / chat_id 会被
+   ``SimpleEncryptionHelper.Encrypt`` 加密后写回这个文件：
+   DPAPI(CurrentUser) 保护后再 base64，形如 ``AQAAANCMnd8BFdERjHoAwE/Cl+sB...``。
+   直接拿去发消息必然 404，所以这里先尝试用本机 DPAPI 解回明文。
+2. **格式**要能一眼看出错在哪，而不是笼统报「为空」。
+3. **错误码**要翻译成人话（404/400/429 各自含义完全不同）。
 """
 
+import base64
 import re
+import sys
 
 ENABLED_KEY = "ExternalNotificationEnabled"
 TOKEN_KEY = "ExternalNotificationTelegramBotToken"
 CHAT_ID_KEY = "ExternalNotificationTelegramChatId"
 
+# 我们自己的明文通知配置（MFA 不管理这个文件，永远不会被加密/覆盖）
+NOTIFY_FILE = "config/notify.json"
+# MFA 的 Default 配置文件（= agent 传统上读的文件，值可能是密文）
+MFA_CONFIG_FILE = "config/config.json"
+
 # BotFather 发的 token：<bot_id 数字>:<35 位左右的随机串>，总长约 46 字符
 BOT_TOKEN_RE = re.compile(r"^\d{6,}:[A-Za-z0-9_-]{30,}$")
 # chat_id：个人是正数，群组/频道是 -100... 开头
 CHAT_ID_RE = re.compile(r"^-?\d+$")
+
+# DPAPI blob 头部（CryptProtectData 的标志性前缀），base64 后正是 "AQAAANCMnd8BFdERjHoAwE/Cl+sB..."
+DPAPI_MAGIC = bytes.fromhex("01000000d08c9ddf0115d1118c7a00c04fc297eb")
+
+SOURCE_PLAINTEXT = "明文"
+SOURCE_MFA_DECRYPTED = "MFAAvalonia 加密值（已在本机解密）"
+SOURCE_MFA_LOCKED = "MFAAvalonia 加密值（本机解密失败）"
 
 
 def mask(value: str, keep: int = 4) -> str:
@@ -27,6 +47,80 @@ def mask(value: str, keep: int = 4) -> str:
     return f"{value[:keep]}…{value[-keep:]}（长度{len(value)}）"
 
 
+def is_mfa_ciphertext(value) -> bool:
+    """判断是不是 MFAAvalonia 加密后的密文（DPAPI blob 的 base64）。
+
+    只做结构判断：能 base64 解码 + 以 DPAPI 头开头。明文 token 带 ``:``，
+    永远不可能被 base64 合法解码成这个前缀，所以不会误判。
+    """
+    text = str(value or "").strip()
+    if len(text) < 60 or not re.fullmatch(r"[A-Za-z0-9+/]+={0,2}", text):
+        return False
+    try:
+        raw = base64.b64decode(text, validate=True)
+    except Exception:
+        return False
+    return raw.startswith(DPAPI_MAGIC)
+
+
+def decrypt_mfa_value(value):
+    """用 Windows DPAPI 解出 MFA 加密的明文；非 Windows / 失败返回 None。
+
+    MFA 调用的是 ``ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser)``，
+    即普通 DPAPI、无附加熵，所以本机同用户的 CryptUnprotectData 可以直接解开
+    （MFA 自己也注明「解密仅当前设备可用」——换机器必然失败）。
+    """
+    if sys.platform != "win32":
+        return None
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        raw = base64.b64decode(text, validate=True)
+    except Exception:
+        return None
+
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class DATA_BLOB(ctypes.Structure):
+            _fields_ = [
+                ("cbData", wintypes.DWORD),
+                ("pbData", ctypes.POINTER(ctypes.c_char)),
+            ]
+
+        buf = ctypes.create_string_buffer(raw, len(raw))
+        blob_in = DATA_BLOB(len(raw), ctypes.cast(buf, ctypes.POINTER(ctypes.c_char)))
+        blob_out = DATA_BLOB()
+        ok = ctypes.windll.crypt32.CryptUnprotectData(
+            ctypes.byref(blob_in), None, None, None, None, 0, ctypes.byref(blob_out)
+        )
+        if not ok:
+            return None
+        try:
+            plain = ctypes.string_at(blob_out.pbData, blob_out.cbData)
+        finally:
+            ctypes.windll.kernel32.LocalFree(blob_out.pbData)
+        text_out = plain.decode("utf-8", "replace").strip()
+        return text_out or None
+    except Exception:
+        return None
+
+
+def normalize_value(value):
+    """返回 ``(可用值, 来源说明)``：密文就尝试解密，明文原样返回。"""
+    text = str(value or "").strip()
+    if not text:
+        return "", SOURCE_PLAINTEXT
+    if not is_mfa_ciphertext(text):
+        return text, SOURCE_PLAINTEXT
+    plain = decrypt_mfa_value(text)
+    if plain is None:
+        return text, SOURCE_MFA_LOCKED
+    return plain, SOURCE_MFA_DECRYPTED
+
+
 def validate(bot_token: str, chat_id: str) -> list:
     """返回问题清单（空列表 = 配置可用）。每条都是可直接照做的结论。"""
     bot_token = (bot_token or "").strip()
@@ -35,14 +129,15 @@ def validate(bot_token: str, chat_id: str) -> list:
 
     if not bot_token:
         problems.append(
-            f"{TOKEN_KEY} 为空：需要在 config/config.json 里填 BotFather 给的 bot token。"
+            f"{TOKEN_KEY} 为空：需要在 MFA「设置 → 外部通知 → Telegram」里填写，"
+            f"或直接写进 {NOTIFY_FILE}。"
         )
     elif not BOT_TOKEN_RE.match(bot_token):
         problems.append(
             f"{TOKEN_KEY} 格式非法（当前 {mask(bot_token)}）。"
             "正确形态是「数字ID:35位随机串」共约 46 字符，例如 123456789:AAH...；"
-            "常见错误是把 Telegram 登录链接 token（AQAAAN… 那类 300+ 字符的串）"
-            "或别的内容粘了进来。"
+            "常见错误是把 Telegram 登录链接 token、或 MFA 加密后的密文（AQAAAN… 那类 "
+            "300+ 字符的串）粘了进来。"
         )
 
     if not chat_id:
@@ -53,10 +148,26 @@ def validate(bot_token: str, chat_id: str) -> list:
     elif not CHAT_ID_RE.match(chat_id):
         problems.append(
             f"{CHAT_ID_KEY} 必须是纯数字（当前 {mask(chat_id, keep=6)}）。"
-            "常见错误是把 bot token 或登录 token 粘到了这一栏。"
+            "常见错误是把 bot token 或密文粘到了这一栏。"
         )
 
     return problems
+
+
+def mfa_hint(bot_token: str, chat_id: str) -> str:
+    """如果是「MFA 密文但本机解不开」，给出根因和出路。"""
+    if not (is_mfa_ciphertext(bot_token) or is_mfa_ciphertext(chat_id)):
+        return ""
+    _, token_src = normalize_value(bot_token)
+    _, chat_src = normalize_value(chat_id)
+    if SOURCE_MFA_LOCKED not in (token_src, chat_src):
+        return ""
+    return (
+        f"读到的是 MFAAvalonia 加密的密文，本机 DPAPI 解不开（换机器/换 Windows 用户"
+        f"就会这样）。解决：在 {NOTIFY_FILE} 里填明文，"
+        f"例如 {{\"{TOKEN_KEY}\": \"123456789:AAH...\", \"{CHAT_ID_KEY}\": \"7200170648\"}}。"
+        "这个文件 MFA 不管，不会被重新加密。"
+    )
 
 
 def describe(problems: list) -> str:

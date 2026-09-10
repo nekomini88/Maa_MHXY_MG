@@ -92,6 +92,7 @@ class VerifyPackageTests(unittest.TestCase):
             "agent/utils/notify_config.py",
             "tools/check_notify.py",
             "config/pip_config.json",
+            "config/notify.json",
             "interface.json",
         ]
 

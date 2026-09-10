@@ -330,20 +330,29 @@ class Yaowang(CustomRecognition):
                             _msg_mod.read_config()
                             _cfg = _msg_mod.config or {}
                             _en = _cfg.get("ExternalNotificationEnabled", "")
-                            _tk = str(_cfg.get("ExternalNotificationTelegramBotToken", "") or "")
-                            _ci = str(_cfg.get("ExternalNotificationTelegramChatId", "") or "")
+                            _tk_raw = str(_cfg.get("ExternalNotificationTelegramBotToken", "") or "")
+                            _ci_raw = str(_cfg.get("ExternalNotificationTelegramChatId", "") or "")
                             try:
                                 from utils import notify_config as _nc
                             except ImportError:  # 兜底：按包路径导入
                                 import utils.notify_config as _nc  # type: ignore
 
+                            # config/config.json 是 MFAAvalonia 的 Default 配置本体，
+                            # 里面的 token/chat_id 可能是 MFA 加密值 → 这里按实际
+                            # 生效值（能解密就解密）来判断，而不是拿密文长度误导排查。
+                            _tk, _tk_src = _nc.normalize_value(_tk_raw)
+                            _ci, _ci_src = _nc.normalize_value(_ci_raw)
                             _ylog_err(
                                 "[yaowang] 发送失败诊断: ExternalNotificationEnabled="
-                                f"{_en} | token={_nc.mask(_tk)} | chat_id={_nc.mask(_ci)}"
+                                f"{_en} | token={_nc.mask(_tk)} [{_tk_src}]"
+                                f" | chat_id={_nc.mask(_ci)} [{_ci_src}]"
                             )
                             _problems = _nc.validate(_tk, _ci)
                             for _i, _p in enumerate(_problems, 1):
                                 _ylog_err(f"[yaowang] 配置问题 {_i}: {_p}")
+                            _hint = _nc.mfa_hint(_tk_raw, _ci_raw)
+                            if _hint:
+                                _ylog_err(f"[yaowang] {_hint}")
                             if not _problems:
                                 _ylog_err(
                                     "[yaowang] 配置格式没问题 → 失败原因在网络或 Telegram 侧，"
