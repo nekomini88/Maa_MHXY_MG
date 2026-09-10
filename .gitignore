@@ -459,3 +459,7 @@ install/
 deps/
 MFA/
 install-mxu/
+
+# LocalStorage 运行时文件（多实例互斥锁 / 损坏文件备份）
+agent/data/mnma_storage.lock
+agent/data/mnma_storage.json.corrupt.*
