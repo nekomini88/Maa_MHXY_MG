@@ -31,6 +31,20 @@ from maa.tasker import Tasker
 W, H = 1280, 720
 FRAME, BUTTON = jhe2e.build_frame(W, H, True)
 
+_arg_image = None
+for _i, _a in enumerate(sys.argv):
+    if _a == "--image" and _i + 1 < len(sys.argv):
+        _arg_image = sys.argv[_i + 1]
+if _arg_image:
+    from PIL import Image as _Image
+    import numpy as _np
+
+    _rgb = _np.asarray(_Image.open(_arg_image).convert("RGB"))
+    FRAME = _rgb[:, :, ::-1].copy()
+    H, W = FRAME.shape[:2]
+    BUTTON = None
+    print(f"用真实截图：{_arg_image} ({W}x{H})")
+
 
 def dump(tag, reco):
     print(f"\n--- {tag} hit={reco.hit} box={reco.box} best={reco.best_result}")
@@ -61,7 +75,10 @@ class Probe(CustomRecognition):
                 },
             )
             dump(tag, reco)
-        print(f"\n按钮矩形={BUTTON}（中心=({BUTTON[0]+BUTTON[2]//2},{BUTTON[1]+BUTTON[3]//2})）")
+        if BUTTON:
+            print(f"\n按钮矩形={BUTTON}（中心=({BUTTON[0]+BUTTON[2]//2},{BUTTON[1]+BUTTON[3]//2})）")
+        else:
+            print("\n（真实截图，无已知按钮矩形；看上面被选中的框落在哪段文字上）")
         return CustomRecognition.AnalyzeResult(box=None, detail="probe done")
 
 
