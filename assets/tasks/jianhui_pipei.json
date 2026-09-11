@@ -1,0 +1,10 @@
+{
+    "task": [
+        {
+            "name": "剑会匹配(自动点开始匹配)",
+            "entry": "jianhui_pipei",
+            "description": "./docs/description/jianhui_pipei.md"
+        }
+    ],
+    "option": {}
+}

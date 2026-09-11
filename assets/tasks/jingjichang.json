@@ -1,0 +1,10 @@
+{
+    "task": [
+        {
+            "name": "竞技场挂机(自动点开始匹配)",
+            "entry": "jingjichang",
+            "description": "./docs/description/jingjichang.md"
+        }
+    ],
+    "option": {}
+}

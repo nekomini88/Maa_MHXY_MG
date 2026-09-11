@@ -1,0 +1,10 @@
+{
+    "task": [
+        {
+            "name": "蹲妖王(监测+通知)",
+            "entry": "yaowang_pipe",
+            "description": "./docs/description/yaowang_pipe.md"
+        }
+    ],
+    "option": {}
+}
