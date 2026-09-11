@@ -303,6 +303,15 @@ class NormalScanTest(YaowangLoopTestCase):
         self.assertEqual(result.detail, "任务已停止")
         self.assertEqual(ctx.tasker.controller.count, 0)  # 一次截图都不做
 
+    def test_running_false_alone_does_not_abort_monitoring(self):
+        """只看 stopping：万一某版本在识别回调里把 running 报成 False，也绝不能停摆监测。"""
+        ctx = FakeContext()
+        ctx.tasker.running = False
+        ctx.tasker.controller.frames = [frame(0), frame(200), frame(0), frame(200)]
+        result = self.analyze(ctx, yaowang_max_scan=4)
+        self.assertIn("扫描上限", result.detail)
+        self.assertGreater(ctx.tasker.controller.count, 0)
+
 
 class FrozenLinkTest(YaowangLoopTestCase):
     def test_frozen_screen_alerts_and_ends_round_early(self):

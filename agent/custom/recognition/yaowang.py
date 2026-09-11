@@ -149,11 +149,11 @@ def _tasker_stopping(context: Context) -> bool:
 
     没有这个检查时，停止请求要等本轮扫描上限才生效 —— 正常约 1 分钟，
     断链时可能拖到几十分钟。老版本 MaaFramework 没有 stopping 属性 → getattr 兜底。
+
+    只看 stopping 标志，不看 tasker.running：万一某个版本在识别回调里把 running
+    报成 False，按 running 判断会让每一轮都立刻"正常收尾"，监测静默停摆（比不检查更糟）。
     """
-    tasker = getattr(context, "tasker", None)
-    if getattr(tasker, "stopping", False):
-        return True
-    return getattr(tasker, "running", None) is False
+    return bool(getattr(getattr(context, "tasker", None), "stopping", False))
 
 
 # 系统公告栏 ROI 默认参数（比例，随截图尺寸换算）
