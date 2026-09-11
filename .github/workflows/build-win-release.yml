@@ -20,7 +20,7 @@ env:
   MAA_FRAMEWORK_VERSION: "v5.12.2"
   MFAA_VERSION: "v2.16.0"
   PYTHON_VERSION: "3.12.10"
-  REL_TAG: "v0.1.8"
+  REL_TAG: "v0.1.9"
 
 jobs:
   build-win-x64:

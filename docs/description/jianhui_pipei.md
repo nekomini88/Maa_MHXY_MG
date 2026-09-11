@@ -3,9 +3,22 @@
 用途：剑会组队房间内，所有人准备后弹出「请及时开始匹配」确认框时，
 自动点击右侧「开始匹配」按钮（左侧「我再等等」不点）。
 
-识别器 `jianhui_pipei`：对中央弹窗区 ROI 做 OCR（关键词「开始匹配」），ROI
-默认按屏幕比例计算（兼容不同模拟器分辨率），单轮最多守候 300 秒，
-轮询间隔 1 秒。命中后由 pipeline 节点 Click 点击。
+识别器 `jianhui_pipei`：对**全屏**做 OCR，只认整段文本就是「开始匹配」的框，
+单轮最多守候 300 秒，轮询间隔 1 秒。命中后由 pipeline 节点 Click 点击。
+
+## 为什么不是「关键词包含」+ 固定 ROI（v0.1.8 的真机问题）
+
+v0.1.8 及之前用 `expected: ["开始匹配","开始匹","始匹配"]` + 固定比例 ROI，
+真机上出现「识别日志命中、按钮却一次没点到」。根因在 MaaFramework 的 OCR：
+
+- `expected` 走的是 **boost::regex_search 子串匹配**，`"开始匹配"` 会同时命中
+  弹窗标题「请及时开始**匹配**」和说明行「点击**开始匹配**进入对局」；
+- `cherry_pick()` 默认 `order_by=Horizontal`，取**最靠左**的结果 —— 标题在
+  按钮左边，于是框架选中的命中框是标题文字，Click 点在了标题上。
+
+现在的做法：`expected` 用锚定正则 `^\s*开始匹配\s*$`，再对 OCR 候选框逐个复查
+（整段文本去空白/标点后必须等于「开始匹配」，含「请及时/等等/取消/关闭/等待」
+的一律丢弃），ROI 默认全屏、与分辨率和横竖屏无关。
 
 ## 任务不会自己结束
 
@@ -29,10 +42,23 @@ pipeline 里 `剑会-保持匹配` 节点的 `next` 与 `on_error` 都自跳回�
 pipeline 节点 `custom_recognition_param` 可覆盖：
 
 - `jianhui_enabled`：是否启用（默认 `true`）
-- `jianhui_roi`：自定义 ROI `[x,y,w,h]` 绝对像素（默认按屏幕比例算）
-- `jianhui_roi_ratio`：默认 ROI 比例（默认 `[0.27,0.18,0.48,0.50]`）
-- `jianhui_expected`：OCR 关键词（默认 `["开始匹配","开始匹","始匹配"]`）
+- `jianhui_expected`：OCR 关键词（默认 `["^\s*开始匹配\s*$"]`，**必须锚定**）
+- `jianhui_roi`：自定义 ROI `[x,y,w,h]` 绝对像素（默认全屏 `[0,0,0,0]`）
+- `jianhui_roi_ratio`：按屏幕比例算 ROI `[x,y,w,h]`，显式给出才生效
+- `jianhui_threshold`：OCR 置信度阈值（默认 `0.6`）
 - `jianhui_max_wait`：单轮最长守候秒数（默认 `300`）
 - `jianhui_interval`：轮询截图间隔秒（默认 `1.0`）
 - `jianhui_click_cooldown`：两次命中之间的最小间隔秒（默认 `2.0`，防连点）
 - `jianhui_notify`：命中是否发通知（默认 `false`）
+
+## 本地验证（不需要真机）
+
+`tools/dev/jianhui_e2e_check.py` 用合成截图 + MaaFw 的 `CustomController`
+冒充设备，把仓库真实的 pipeline 与识别器跑一遍，检查 Click 是否落在按钮矩形内：
+
+```bash
+/root/.venv-maacheck/bin/python tools/dev/jianhui_e2e_check.py --wait 12
+```
+
+三个场景：横屏 1280x720 含按钮、竖屏 720x1280 含按钮、只有诱饵标题（不该点）。
+`tools/dev/jianhui_probe.py` 是排查用探针，打印框架 OCR 的候选框与最终选中框。

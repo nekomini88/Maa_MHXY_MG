@@ -56,17 +56,48 @@ class FakeJob:
         return self.value
 
 
+class FakeRect:
+    """maafw 绑定里的 ``Rect`` dataclass（x, y, w, h）——不是 tuple，别按下标取。"""
+
+    def __init__(self, x, y, w, h):
+        self.x, self.y, self.w, self.h = x, y, w, h
+
+
 class FakeOcrItem:
-    def __init__(self, text, box=(10, 10, 100, 20)):
+    def __init__(self, text, box=(10, 10, 100, 20), score=0.9):
         self.text = text
         self.box = box
+        self.score = score
 
 
 class FakeReco:
-    def __init__(self, items):
+    """假的 ``RecognitionDetail``（字段名与 maafw 绑定一致）。"""
+
+    def __init__(self, items=None, raw_only=False):
+        items = items or []
+        self.all_results = [] if raw_only else list(items)
+        self.filtered_results = [] if raw_only else list(items)
+        self.best_result = None if raw_only or not items else items[0]
         self.hit = bool(items)
-        self.box = FakeOcrItem(items[0]).box if items else None
-        self.all_results = [FakeOcrItem(t) for t in items]
+        self.box = items[0].box if items else None
+        if raw_only:
+            # 老版本绑定：只有 raw_detail 里的 JSON，没有解析好的 dataclass。
+            self.raw_detail = {
+                "filtered": [
+                    {"text": it.text, "box": _as_box_list(it.box), "score": it.score}
+                    for it in items
+                ],
+                "all": [],
+                "best": None,
+            }
+        else:
+            self.raw_detail = {}
+
+
+def _as_box_list(box):
+    if isinstance(box, FakeRect):
+        return [box.x, box.y, box.w, box.h]
+    return list(box)
 
 
 class FakeController:
@@ -94,18 +125,34 @@ class FakeTasker:
         self.stopping = False
 
 
+def _mk_ocr_items(raw):
+    """把测试里的简写（str / (text, box) / (text, box, score)）统一成候选对象。"""
+    items = []
+    for it in raw or []:
+        if isinstance(it, FakeOcrItem):
+            items.append(it)
+        elif isinstance(it, str):
+            items.append(FakeOcrItem(it))
+        else:
+            items.append(FakeOcrItem(*it))
+    return items
+
+
 class FakeContext:
-    def __init__(self, ocr_items=None, reco_error=None):
+    def __init__(self, ocr_items=None, reco_error=None, raw_only=False):
         self.tasker = FakeTasker()
         self.ocr_items = ocr_items
         self.reco_error = reco_error
+        self.raw_only = raw_only
         self.recognition_calls = 0
+        self.last_override = None
 
     def run_recognition(self, name, image, pipeline_override=None):
         self.recognition_calls += 1
+        self.last_override = pipeline_override
         if self.reco_error is not None:
             raise self.reco_error
-        return FakeReco(self.ocr_items or [])
+        return FakeReco(_mk_ocr_items(self.ocr_items), raw_only=self.raw_only)
 
 
 class AnalyzeArgStub:
@@ -261,7 +308,17 @@ class JianhuiPipeiBehaviorTest(unittest.TestCase):
         ctx = FakeContext(ocr_items=["开始匹配"])
         result = self.analyze(ctx)
         self.assertIsNotNone(result.box)
-        self.assertIn("识别到开始匹配按钮", result.detail)
+        self.assertEqual(result.box, [10, 10, 100, 20])
+        self.assertIn("命中按钮", result.detail)
+
+    def test_default_scan_is_whole_screen_with_anchored_pattern(self):
+        # 分辨率/横竖屏无关 + 关键词必须锚定：这两条是「点不到按钮」的根治点。
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        self.analyze(ctx, jianhui_roi=None)
+        override = (ctx.last_override or {})[jianhui_mod.JianhuiPipei._ROC_NAME]
+        self.assertEqual(override["roi"], [0, 0, 0, 0])
+        self.assertEqual(jianhui_mod.DEFAULT_EXPECTED, [r"^\s*开始匹配\s*$"])
+        self.assertEqual(override["expected"], [r"^\s*开始匹配\s*$"])
 
     def test_round_timeout_keeps_polling_and_does_not_raise(self):
         ctx = FakeContext(ocr_items=[])
@@ -322,12 +379,87 @@ class JianhuiPipeiBehaviorTest(unittest.TestCase):
         self.assertIn("继续守候", result.detail)
 
     def test_initial_screencap_failure_returns_none(self):
-        ctx = FakeContext(ocr_items=["开始匹配"])
+        # 只有显式要求按比例算 ROI 时才需要先截图；截图失败按轮询继续，不炸任务。
+        ctx = FakeContext(ocr_items=["开始匹配"], reco_error=None)
         ctx.tasker.controller.error = RuntimeError("adb 掉线")
-        arg = make_arg()
+        arg = make_arg(jianhui_roi_ratio=[0.27, 0.18, 0.48, 0.50], jianhui_max_wait=0.005)
         result = jianhui_mod.JianhuiPipei().analyze(ctx, arg)
         self.assertIsNone(result.box)
-        self.assertIn("初始截图异常", result.detail)
+        self.assertIn("继续守候", result.detail)
+
+    # ---- 回归：v0.1.8 真机上「识别命中却点不到按钮」的根因 ----
+    # 框架 OCR 的 expected 是子串正则、cherry_pick 默认取最靠左的框，
+    # 于是弹窗标题「请及时开始匹配」/说明行「点击开始匹配进入对局」都会胜出，
+    # Click 点在文字上，按钮一次都没被点到。
+
+    DECOY_ITEMS = [
+        ("请及时开始匹配", FakeRect(381, 205, 224, 26), 0.99),
+        ("点击开始匹配进入对局", FakeRect(392, 243, 300, 24), 0.98),
+        ("开始匹配", FakeRect(789, 412, 108, 38), 0.95),
+    ]
+
+    def test_picks_button_not_decoy_title(self):
+        ctx = FakeContext(ocr_items=list(self.DECOY_ITEMS))
+        result = self.analyze(ctx)
+        self.assertEqual(result.box, [789, 412, 108, 38])
+        self.assertIn("开始匹配", result.detail)
+
+    def test_decoy_title_alone_never_clicked(self):
+        items = [it for it in self.DECOY_ITEMS if it[0] != "开始匹配"]
+        ctx = FakeContext(ocr_items=items)
+        result = self.analyze(ctx, jianhui_max_wait=0.005)
+        self.assertIsNone(result.box)
+        self.assertNotIn("命中按钮", result.detail)
+
+    def test_blocklisted_text_with_keyword_is_skipped(self):
+        # 「我再等等」这类含黑名单字样的文本即使拿到候选也不点。
+        ctx = FakeContext(
+            ocr_items=[("请及时开始匹配，也可点击我再等等", FakeRect(300, 400, 400, 30), 0.99)]
+        )
+        result = self.analyze(ctx, jianhui_max_wait=0.005)
+        self.assertIsNone(result.box)
+
+    def test_rect_dataclass_candidates_are_parsed(self):
+        # 绑定给的是 Rect(x, y, w, h) dataclass，不是 tuple，不能按下标取。
+        ctx = FakeContext(ocr_items=[("开始匹配", FakeRect(11, 22, 33, 44), 0.9)])
+        result = self.analyze(ctx)
+        self.assertEqual(result.box, [11, 22, 33, 44])
+
+    def test_button_text_with_spacing_or_punctuation_still_matches(self):
+        for text in ("开始 匹配", "开始匹配·", " 开始匹配 "):
+            with self.subTest(text=text):
+                ctx = FakeContext(ocr_items=[(text, (1, 2, 3, 4), 0.9)])
+                self.assertEqual(self.analyze(ctx).box, [1, 2, 3, 4])
+
+    def test_candidates_present_but_not_button_never_falls_back(self):
+        # 有候选却一个都不是按钮时不能退回 reco.box —— 那正是把标题当按钮点的坑。
+        # FakeReco.box 此时正是诱饵标题的框，兜底一旦生效就会返回它。
+        ctx = FakeContext(ocr_items=[("请及时开始匹配", FakeRect(381, 205, 224, 26), 0.99)])
+        result = self.analyze(ctx, jianhui_max_wait=0.005)
+        self.assertIsNone(result.box)
+
+    def test_raw_detail_json_fallback_for_older_binding(self):
+        # 老版本绑定没有 filtered_results，只有 raw_detail 里的 JSON。
+        ctx = FakeContext(ocr_items=list(self.DECOY_ITEMS), raw_only=True)
+        result = self.analyze(ctx)
+        self.assertEqual(result.box, [789, 412, 108, 38])
+
+    def test_falls_back_to_framework_box_when_no_candidate_detail(self):
+        # 绑定没给候选明细时退回 reco.box —— 此时锚定正则已保证框架侧的
+        # best 不会是标题，兜底是安全的。
+        reco = FakeReco(items=None)
+        reco.hit = True
+        reco.box = FakeRect(5, 6, 7, 8)
+        box, why = jianhui_mod.pick_button_box(reco)
+        self.assertEqual(box, [5, 6, 7, 8])
+        self.assertIn("兜底", why)
+
+    def test_no_candidate_and_no_box_yields_nothing(self):
+        reco = FakeReco(items=None)
+        reco.hit = True
+        box, why = jianhui_mod.pick_button_box(reco)
+        self.assertIsNone(box)
+        self.assertIn("无候选框", why)
 
     def test_disabled_short_circuits(self):
         ctx = FakeContext(ocr_items=["开始匹配"])
