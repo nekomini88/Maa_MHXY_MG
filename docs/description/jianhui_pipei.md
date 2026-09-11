@@ -53,12 +53,14 @@ pipeline 节点 `custom_recognition_param` 可覆盖：
 
 ## 本地验证（不需要真机）
 
-`tools/dev/jianhui_e2e_check.py` 用合成截图 + MaaFw 的 `CustomController`
-冒充设备，把仓库真实的 pipeline 与识别器跑一遍，检查 Click 是否落在按钮矩形内：
+`tools/dev/button_e2e_check.py` 用合成截图 + MaaFw 的 `CustomController`
+冒充设备，把仓库真实的 pipeline 与识别器跑一遍，检查 Click 是否落在按钮矩形内
+（擂台 / 竞技场 / 剑会三个任务共用这个脚本，`--task` 选任务）：
 
 ```bash
-/root/.venv-maacheck/bin/python tools/dev/jianhui_e2e_check.py --wait 12
+/root/.venv-maacheck/bin/python tools/dev/button_e2e_check.py --task jianhui --wait 12
 ```
 
 三个场景：横屏 1280x720 含按钮、竖屏 720x1280 含按钮、只有诱饵标题（不该点）。
+`--recognition /path/to/old.py` 可把识别器换成旧实现，复现「点在文字上」。
 `tools/dev/jianhui_probe.py` 是排查用探针，打印框架 OCR 的候选框与最终选中框。

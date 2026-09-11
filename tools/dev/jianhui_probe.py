@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """探针：直接问框架「带诱饵标题时 OCR 到底选哪个框」。
 
-复用 jianhui_e2e_check 的合成截图与假设备，注册一个只 dump 不点击的识别器，
+复用 button_e2e_check 的合成截图与假设备，注册一个只 dump 不点击的识别器，
 分别用【旧关键词 非锚定】和【新关键词 锚定】各跑一次 OCR，打印：
   * RecognitionDetail.box（框架最终选中的框，pipeline Click 用的就是它）
   * filtered_results / best_result / all_results 的文本与框
@@ -17,11 +17,11 @@ import importlib.util
 
 REPO = "/root/Maa_MHXY_MG"
 spec = importlib.util.spec_from_file_location(
-    "jhe2e", os.path.join(REPO, "tools", "dev", "jianhui_e2e_check.py")
+    "bte2e", os.path.join(REPO, "tools", "dev", "button_e2e_check.py")
 )
-jhe2e = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(jhe2e)
-jhe2e._install_agent_server_stub()
+bte2e = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(bte2e)
+bte2e._install_agent_server_stub()
 
 from maa.controller import CustomController
 from maa.custom_recognition import CustomRecognition
@@ -29,7 +29,7 @@ from maa.resource import Resource
 from maa.tasker import Tasker
 
 W, H = 1280, 720
-FRAME, BUTTON = jhe2e.build_frame(W, H, True)
+FRAME, BUTTON = bte2e.build_jianhui_frame(W, H, True)
 
 _arg_image = None
 for _i, _a in enumerate(sys.argv):
