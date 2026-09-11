@@ -34,11 +34,26 @@
     yaowang_cooldown_seconds: 两次通知最小间隔秒数（默认 60）
     yaowang_expected:         出现类匹配词（默认含"妖王""远古妖王""妖魔冲到了"）
     yaowang_exclude:          结束类排除词（默认含"战胜""已被击败""剿灭""被击杀"）
+    yaowang_max_scan:         单轮最大扫描次数（默认 200；达到后本轮干净收尾，交由管线续跑）
+    yaowang_freeze_seconds:   画面连续静止多少秒判定截图链路失效（默认 180）
+    yaowang_screencap_fail_limit: 连续截图失败多少次判定链路失效（默认 30）
+    yaowang_link_alert_cooldown:  同类链路故障的最小告警间隔秒（默认 1800）
+
+链路失效处理（"总是跑一段时间就失败、不能一直监控"的修复）：
+  模拟器/ADB 掉线后 MaaFramework 会丢弃新的截图请求，画面会一直停在最后一帧。
+  旧实现对此毫无反应 —— 单轮盲跑 49 分钟才到扫描上限，随后管线去执行"必须新截图"
+  的收尾节点，超时 → 整条任务被判 ``Tasker.Task.Failed``，监测就此停摆。
+  现在：控制器报告断连（``MaaControllerConnected=false``，另有截图失败/画面静止旁证）、
+  画面冻结 ``yaowang_freeze_seconds`` 秒、或截图连续失败
+  ``yaowang_screencap_fail_limit`` 次 → 发一条 Telegram 告警 + 主动尝试重连，
+  并立刻结束本轮（不再空跑），下一轮重新取帧；画面恢复后再补一条"已恢复"。
+  Telegram 文字发不出去时不阻塞监测（只在日志里记一笔）。
 """
 
 import json
 import time
 import os
+from typing import Any
 
 import numpy as np
 
@@ -48,6 +63,7 @@ from maa.context import Context
 
 from utils import logger
 from utils import log_policy
+from utils import link_guard
 from utils import send_message
 
 # 妖王专用日志：单独一个文件，只收 [yaowang] 消息，方便整份发给维护者排查。
@@ -103,8 +119,42 @@ def _ylog_err(msg: str):
     logger.error(_ylog_fmt(msg))
 
 
+def _controller_connected(context: Context) -> Any:
+    """控制器是否已连接（拿不到该属性时返回 None，调用方按"未知"处理）。"""
+    controller = getattr(getattr(context, "tasker", None), "controller", None)
+    connected = getattr(controller, "connected", None)
+    return connected if isinstance(connected, bool) else None
+
+
+def _link_state(context: Context, now: float) -> str:
+    """本轮当前链路判定：控制器断连证据 + 守卫状态（截图连续失败 / 画面冻结）。"""
+    return link_guard.classify(
+        guard_state=_LINK_GUARD.state(now),
+        connected=_controller_connected(context),
+        screencap_fails=_LINK_GUARD.screencap_fails,
+        frozen_seconds=_LINK_GUARD.frozen_seconds(now),
+    )
+
+
 def _ylog_debug(msg: str):
     logger.debug(_ylog_fmt(msg))
+
+
+# 截图链路守卫：轮内计数每轮清空，告警控频状态跨轮保留（否则每轮都会重发告警）。
+_LINK_GUARD = link_guard.LinkGuard()
+
+
+def _tasker_stopping(context: Context) -> bool:
+    """任务是否已被请求停止（MFA 点停止 / 切换任务）。
+
+    没有这个检查时，停止请求要等本轮扫描上限才生效 —— 正常约 1 分钟，
+    断链时可能拖到几十分钟。老版本 MaaFramework 没有 stopping 属性 → getattr 兜底。
+    """
+    tasker = getattr(context, "tasker", None)
+    if getattr(tasker, "stopping", False):
+        return True
+    return getattr(tasker, "running", None) is False
+
 
 # 系统公告栏 ROI 默认参数（比例，随截图尺寸换算）
 DEFAULT_CHAT_RATIO_X = 0.45   # 聊天栏宽度占全图宽
@@ -116,6 +166,10 @@ DEFAULT_FRAME_DIFF = 3000     # 判定"变化"的像素差阈值
 DEFAULT_EXPECTED = ["妖王", "远古妖王", "妖魔冲到了", "妖玉", "妖互"]
 # 结束类排除词（含"战胜"等明确结束标志；注意不能含"击败"——"去击败妖王啊"是出现号召）
 DEFAULT_EXCLUDE = ["战胜", "已被击败", "已击败", "剿灭", "被击杀", "被击败"]
+# 截图链路失效判定与告警控频（口径集中在 utils/link_guard.py）
+DEFAULT_FREEZE_SECONDS = link_guard.DEFAULT_FREEZE_SECONDS
+DEFAULT_SCREENCAP_FAIL_LIMIT = link_guard.DEFAULT_SCREENCAP_FAIL_LIMIT
+DEFAULT_LINK_ALERT_COOLDOWN = link_guard.DEFAULT_ALERT_COOLDOWN_SECONDS
 
 
 @AgentServer.custom_recognition("yaowang")
@@ -160,6 +214,70 @@ class Yaowang(CustomRecognition):
             return False
         return True
 
+    @staticmethod
+    def _try_reconnect(context: Context, tag: str) -> bool:
+        """链路失效时主动请求控制器重连（拿不到 API / 失败都只记日志，不影响监测）。"""
+        controller = getattr(getattr(context, "tasker", None), "controller", None)
+        post_connection: Any = getattr(controller, "post_connection", None)
+        if not callable(post_connection):
+            return False
+        try:
+            post_connection().wait()
+            _ylog_warn(f"[yaowang] {tag}：已请求控制器重连（post_connection）。")
+            return True
+        except Exception as e:
+            _ylog_warn(f"[yaowang] {tag}：控制器重连请求失败（{e}），继续等待下一轮重试。")
+            return False
+
+    def _alert_link_loss(self, context: Context, state: str, *,
+                         frozen_seconds: float = 0.0, screencap_fails: int = 0,
+                         last_error: str = "") -> None:
+        """链路失效：控频发 TG 告警 + 尝试重连。
+
+        告警是否发得出去都不阻塞监测；发送结果只记日志（配置缺失时 send_message
+        自己会打出 [message] 层的原因）。
+        """
+        now = time.time()
+        if _LINK_GUARD.should_alert(state, now):
+            ok = send_message(
+                link_guard.ALERT_TITLE,
+                link_guard.alert_text(
+                    state,
+                    frozen_seconds=frozen_seconds,
+                    screencap_fails=screencap_fails,
+                    last_error=last_error,
+                ),
+            )
+            _LINK_GUARD.mark_alerted(state, now, frozen_seconds)
+            _ylog_warn(
+                f"[yaowang] 链路失效告警（{link_guard.state_text(state)}）发送结果: "
+                f"{'成功 ✅' if ok else '失败 ❌（监测继续，详见 [message] 日志）'}"
+            )
+        else:
+            _ylog_debug(
+                f"[yaowang] 链路仍然失效（{link_guard.state_text(state)}），"
+                f"处于告警冷却期（{_LINK_GUARD.alert_cooldown:.0f}s），不重复发送。"
+            )
+        self._try_reconnect(context, link_guard.state_text(state))
+
+    def _notice_recovered(self, context: Context, state: str) -> None:
+        """之前告警过、现在画面又刷新了 → 补一条"已恢复"，避免用户以为还在告警。"""
+        if not _LINK_GUARD.needs_recovery_notice(state):
+            return
+        alerted_state = _LINK_GUARD.last_alert_state
+        ok = send_message(
+            link_guard.RECOVERY_TITLE,
+            link_guard.recovery_text(
+                frozen_seconds=_LINK_GUARD.frozen_total,
+                alerted_state=alerted_state,
+            ),
+        )
+        _LINK_GUARD.mark_recovered()
+        _ylog_info(
+            f"[yaowang] 截图链路已恢复（此前 {link_guard.state_text(alerted_state)}），"
+            f"恢复通知发送结果: {'成功 ✅' if ok else '失败 ❌'}"
+        )
+
     def analyze(
         self,
         context: Context,
@@ -186,11 +304,26 @@ class Yaowang(CustomRecognition):
         frame_diff_thr = float(param.get("yaowang_frame_diff", DEFAULT_FRAME_DIFF))
         expected: list = param.get("yaowang_expected", DEFAULT_EXPECTED)
         exclude: list = param.get("yaowang_exclude", DEFAULT_EXCLUDE)
+        # 截图链路守卫参数（防"跑一段时间就失败"）：画面冻结 / 截图连续失败 → 告警 + 提前收尾
+        freeze_seconds = float(param.get("yaowang_freeze_seconds", DEFAULT_FREEZE_SECONDS))
+        screencap_fail_limit = int(
+            param.get("yaowang_screencap_fail_limit", DEFAULT_SCREENCAP_FAIL_LIMIT)
+        )
+        link_alert_cooldown = float(
+            param.get("yaowang_link_alert_cooldown", DEFAULT_LINK_ALERT_COOLDOWN)
+        )
+        _LINK_GUARD.configure(
+            freeze_seconds=freeze_seconds,
+            screencap_fail_limit=screencap_fail_limit,
+            alert_cooldown=link_alert_cooldown,
+        )
 
         _ylog_info(
             "[yaowang] ===== 蹲妖王识别轮开始 ===== 参数: "
             f"enabled={enabled} rx={rx} ry={ry} cooldown={cooldown}s "
             f"interval={frame_interval}s diff_thr={frame_diff_thr} "
+            f"freeze={freeze_seconds:.0f}s cap_fail={screencap_fail_limit} "
+            f"link_alert_cooldown={link_alert_cooldown:.0f}s "
             f"expected={expected} exclude={exclude}"
         )
 
@@ -213,29 +346,56 @@ class Yaowang(CustomRecognition):
             rois = self._chat_rois(h, w, rx, ry)
             _ylog_info(f"[yaowang] 截图尺寸 {w}x{h}，系统公告栏 ROI: {rois}")
 
-        # 高扫描次数上限，避免单次 analyze 无限循环占死
+        # 单轮扫描上限：到点就干净收尾（返回未命中），由流水线 next 立刻续下一轮，监测不中断。
         max_scan = int(param.get("yaowang_max_scan", 200))
         # 兜底 OCR 周期：连续多少帧无变化才强制 OCR 一次，确保"静止的妖王公告"也能被识别。
         # 帧差方案对"滚动消息"有效，但若妖王公告静止停留、_LAST_FRAME 已缓存含妖王帧，
         # 帧差会一直是 0 永不再触发 OCR → 漏检。加周期兜底可解决。
         force_ocr_every = int(param.get("yaowang_force_ocr_every", 6))
         _ylog_info(
-            f"[yaowang] 本轮最大扫描 {max_scan} 次，无变化每 {force_ocr_every} 帧强制 OCR 一次（兜底防漏静止公告）。"
+            f"[yaowang] 本轮最大扫描 {max_scan} 次，无变化每 {force_ocr_every} 帧强制 OCR 一次（兜底防漏静止公告）；"
+            f"画面连续静止 {freeze_seconds:.0f}s 或截图连续失败 {screencap_fail_limit} 次即告警并提前收尾。"
         )
 
         no_change_count = 0  # 连续无变化的帧计数
+        # 新的一轮：只清轮内计数，告警控频（冷却时间戳）跨轮保留，避免每轮重复告警。
+        _LINK_GUARD.reset_round()
         for scan in range(max_scan):
+            # 任务已请求停止（MFA 点停止/切任务）→ 立即干净退出，不等扫描上限。
+            if _tasker_stopping(context):
+                _ylog_info(f"[yaowang] 任务已请求停止，第{scan}次扫描时结束本轮。")
+                return CustomRecognition.AnalyzeResult(box=None, detail="任务已停止")
+
             # 截图可能因多开切换/模拟器最小化而失败(脱钩)。此处捕获, 短暂等待重试,
             # 避免整个 analyze 抛异常导致 MaaFramework 判"任务失败"。
+            now = time.time()
             try:
                 image = context.tasker.controller.post_screencap().wait().get()
                 if image is None:
                     raise RuntimeError("post_screencap 返回 None")
             except Exception as e:
-                if scan % 5 == 0:
-                    _ylog_warn(f"[yaowang] 第{scan}次截图失败（{e}），重试中...")
+                _LINK_GUARD.on_screencap_fail(now)
+                cap_fails = _LINK_GUARD.screencap_fails
+                link_state = _link_state(context, now)
+                if scan % 5 == 0 or link_state:
+                    _ylog_warn(
+                        f"[yaowang] 第{scan}次截图失败（{e}），已连续失败 {cap_fails} 次，重试中..."
+                    )
+                if link_state:
+                    _ylog_warn(
+                        f"[yaowang] 判定截图链路失效（{link_guard.state_text(link_state)}："
+                        f"连续截图失败 {cap_fails} 次 / 上限 {screencap_fail_limit}）→ "
+                        f"告警并提前收尾；下一轮会重新取帧，链路恢复后监测自动继续。"
+                    )
+                    self._alert_link_loss(
+                        context, link_state, screencap_fails=cap_fails, last_error=str(e)
+                    )
+                    return CustomRecognition.AnalyzeResult(
+                        box=None, detail="截图链路失效，本轮告警收尾"
+                    )
                 time.sleep(frame_interval)
                 continue
+            _LINK_GUARD.on_screencap_ok(now)
 
             changed = False
             change_roi = rois[0]
@@ -252,6 +412,25 @@ class Yaowang(CustomRecognition):
 
             # 更新基准帧（只保存第一个 ROI 的灰度，降低内存）
             self._LAST_FRAME = self._roi_gray(image, rois[0])
+
+            # 链路守卫：连续静止累计到阈值 → 判定"截图链路失效"（画面冻结），
+            # 告警 + 提前收尾，不再像旧版那样盲跑到扫描上限（实测盲跑过 49 分钟）。
+            _LINK_GUARD.on_frame(changed, now)
+            link_state = _link_state(context, now)
+            if link_state:
+                frozen = _LINK_GUARD.frozen_seconds(now)
+                _ylog_warn(
+                    f"[yaowang] 判定截图链路失效（{link_guard.state_text(link_state)}："
+                    f"画面已连续静止 {frozen:.0f}s / 阈值 {freeze_seconds:.0f}s，"
+                    f"连续 {no_change_count} 帧 diff={last_diff:.0f}）→ "
+                    f"告警并提前收尾；下一轮重新取帧，链路恢复后监测自动继续。"
+                )
+                self._alert_link_loss(context, link_state, frozen_seconds=frozen)
+                return CustomRecognition.AnalyzeResult(
+                    box=None, detail="画面冻结，本轮告警收尾"
+                )
+            # 之前告警过、现在画面又刷新了 → 补一条"已恢复"，避免用户以为还在告警。
+            self._notice_recovered(context, link_state)
 
             # 触发条件：区域变化（加速）OR 连续无变化达周期（兜底静止公告）
             if changed:
@@ -372,5 +551,7 @@ class Yaowang(CustomRecognition):
 
             time.sleep(frame_interval)
 
-        _ylog_warn("[yaowang] 本轮达到扫描上限，未识别到妖王（会由外部再次调度）")
+        _ylog_info(
+            "[yaowang] 本轮达到扫描上限，未识别到妖王，正常收尾（管线 next 会立刻续下一轮，监测不中断）"
+        )
         return CustomRecognition.AnalyzeResult(box=None, detail="本轮未识别到妖王（已达扫描上限）")

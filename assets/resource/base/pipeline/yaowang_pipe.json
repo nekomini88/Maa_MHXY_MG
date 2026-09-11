@@ -1,18 +1,19 @@
 {
-  "yaowang_pipe": {
-    "next": [
-      "蹲妖王-监测循环",
-      "[JumpBack]panduan_zhujiemian"
-    ]
-  },
-  "蹲妖王-监测循环": {
-    "recognition": "Custom",
-    "custom_recognition": "yaowang",
-    "next": [
-      "[JumpBack]蹲妖王-监测循环"
-    ],
-    "on_error": [
-      "[JumpBack]蹲妖王-监测循环"
-    ]
-  }
+    "yaowang_pipe": {
+        "timeout": -1,
+        "next": [
+            "蹲妖王-监测循环"
+        ]
+    },
+    "蹲妖王-监测循环": {
+        "recognition": "Custom",
+        "custom_recognition": "yaowang",
+        "timeout": -1,
+        "next": [
+            "[JumpBack]蹲妖王-监测循环"
+        ],
+        "on_error": [
+            "[JumpBack]蹲妖王-监测循环"
+        ]
+    }
 }
