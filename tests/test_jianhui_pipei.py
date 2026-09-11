@@ -10,242 +10,30 @@ MFA 打出「任务已全部完成！」——而用户要的是点完继续守�
    （引用了不存在的节点会让 pipeline 静默结束）。
 2. 识别器行为：命中返回框、等不到按钮不抛异常并按间隔轮询、请求停止时
    立刻退出、两次命中之间留冷却、截图异常不炸任务。
+
+假 maa / utils 与假设备在 `tests/maa_stubs.py`（擂台、竞技场两个同源识别器
+也用同一套桩件）。
 """
 
-import importlib.util
-import json
-import sys
-import types
 import unittest
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-PIPELINE_PATH = (
-    REPO_ROOT / "assets" / "resource" / "base" / "pipeline" / "jianhui_pipei.json"
+from maa_stubs import (
+    FakeContext,
+    FakeRect,
+    FakeReco,
+    FakeTime,
+    all_pipeline_nodes,
+    load_pipeline,
+    load_recognizer,
+    make_arg,
+    node_refs,
 )
-JIANHUI_PATH = REPO_ROOT / "agent" / "custom" / "recognition" / "jianhui_pipei.py"
 
+PIPELINE = "jianhui_pipei.json"
 ENTRY_NODE = "jianhui_pipei"
 KEEP_NODE = "剑会-保持匹配"
 
-
-class FakeTime:
-    """可推进的假时钟：sleep 直接推进 now，避免测试真的等。"""
-
-    def __init__(self, start=1000.0):
-        self.now = start
-
-    def time(self):
-        return self.now
-
-    def sleep(self, seconds):
-        self.now += max(float(seconds), 0.0)
-
-
-class FakeJob:
-    def __init__(self, value=None, error=None):
-        self.value = value
-        self.error = error
-
-    def wait(self):
-        return self
-
-    def get(self):
-        if self.error:
-            raise self.error
-        return self.value
-
-
-class FakeRect:
-    """maafw 绑定里的 ``Rect`` dataclass（x, y, w, h）——不是 tuple，别按下标取。"""
-
-    def __init__(self, x, y, w, h):
-        self.x, self.y, self.w, self.h = x, y, w, h
-
-
-class FakeOcrItem:
-    def __init__(self, text, box=(10, 10, 100, 20), score=0.9):
-        self.text = text
-        self.box = box
-        self.score = score
-
-
-class FakeReco:
-    """假的 ``RecognitionDetail``（字段名与 maafw 绑定一致）。"""
-
-    def __init__(self, items=None, raw_only=False):
-        items = items or []
-        self.all_results = [] if raw_only else list(items)
-        self.filtered_results = [] if raw_only else list(items)
-        self.best_result = None if raw_only or not items else items[0]
-        self.hit = bool(items)
-        self.box = items[0].box if items else None
-        if raw_only:
-            # 老版本绑定：只有 raw_detail 里的 JSON，没有解析好的 dataclass。
-            self.raw_detail = {
-                "filtered": [
-                    {"text": it.text, "box": _as_box_list(it.box), "score": it.score}
-                    for it in items
-                ],
-                "all": [],
-                "best": None,
-            }
-        else:
-            self.raw_detail = {}
-
-
-def _as_box_list(box):
-    if isinstance(box, FakeRect):
-        return [box.x, box.y, box.w, box.h]
-    return list(box)
-
-
-class FakeController:
-    def __init__(self):
-        self.error = None
-        self.count = 0
-        self.shape_image = _FakeImage()
-
-    def post_screencap(self):
-        self.count += 1
-        if self.error is not None:
-            return FakeJob(error=self.error)
-        return FakeJob(value=self.shape_image)
-
-
-class _FakeImage:
-    """只提供 shape 的假帧（构造 ROI 用）。"""
-
-    shape = (607, 1080, 3)
-
-
-class FakeTasker:
-    def __init__(self):
-        self.controller = FakeController()
-        self.stopping = False
-
-
-def _mk_ocr_items(raw):
-    """把测试里的简写（str / (text, box) / (text, box, score)）统一成候选对象。"""
-    items = []
-    for it in raw or []:
-        if isinstance(it, FakeOcrItem):
-            items.append(it)
-        elif isinstance(it, str):
-            items.append(FakeOcrItem(it))
-        else:
-            items.append(FakeOcrItem(*it))
-    return items
-
-
-class FakeContext:
-    def __init__(self, ocr_items=None, reco_error=None, raw_only=False):
-        self.tasker = FakeTasker()
-        self.ocr_items = ocr_items
-        self.reco_error = reco_error
-        self.raw_only = raw_only
-        self.recognition_calls = 0
-        self.last_override = None
-
-    def run_recognition(self, name, image, pipeline_override=None):
-        self.recognition_calls += 1
-        self.last_override = pipeline_override
-        if self.reco_error is not None:
-            raise self.reco_error
-        return FakeReco(_mk_ocr_items(self.ocr_items), raw_only=self.raw_only)
-
-
-class AnalyzeArgStub:
-    custom_recognition_param = "{}"
-
-
-def _install_stubs():
-    """注册 maa / utils 桩模块；同进程里已被别的测试装过就直接复用。"""
-    utils = sys.modules.get("utils")
-    if utils is not None and hasattr(utils, "logger") and hasattr(utils, "send_message"):
-        return utils
-
-    maa = types.ModuleType("maa")
-    maa.__path__ = []
-    maa_agent = types.ModuleType("maa.agent")
-    maa_agent.__path__ = []
-    agent_server = types.ModuleType("maa.agent.agent_server")
-
-    class _AgentServer:
-        @staticmethod
-        def custom_recognition(name):
-            def deco(cls):
-                cls.__recognition_name__ = name
-                return cls
-
-            return deco
-
-    agent_server.AgentServer = _AgentServer
-
-    custom_recognition = types.ModuleType("maa.custom_recognition")
-
-    class _CustomRecognition:
-        AnalyzeResult = _Result
-        AnalyzeArg = AnalyzeArgStub
-
-        def analyze(self, context, argv):  # pragma: no cover - 抽象方法
-            raise NotImplementedError
-
-    custom_recognition.CustomRecognition = _CustomRecognition
-    context_mod = types.ModuleType("maa.context")
-    context_mod.Context = object
-
-    for name, mod in (
-        ("maa", maa),
-        ("maa.agent", maa_agent),
-        ("maa.agent.agent_server", agent_server),
-        ("maa.custom_recognition", custom_recognition),
-        ("maa.context", context_mod),
-    ):
-        sys.modules[name] = mod
-
-    class _Logger:
-        def info(self, msg):
-            return None
-
-        def warning(self, msg):
-            return None
-
-    utils = types.ModuleType("utils")
-    utils.__path__ = []
-    utils.logger = _Logger()
-    utils.send_message = lambda *a, **k: True
-    sys.modules["utils"] = utils
-    return utils
-
-
-class _Result:
-    def __init__(self, box=None, detail=""):
-        self.box = box
-        self.detail = detail
-
-
-def load_jianhui():
-    _install_stubs()
-    module_name = "jianhui_pipei_under_test"
-    if module_name in sys.modules:
-        module = sys.modules[module_name]
-    else:
-        spec = importlib.util.spec_from_file_location(module_name, JIANHUI_PATH)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-    module.time = FakeTime()
-    return module
-
-
-jianhui_mod = load_jianhui()
-
-
-def make_arg(**params):
-    arg = AnalyzeArgStub()
-    arg.custom_recognition_param = json.dumps(params, ensure_ascii=False)
-    return arg
+jianhui_mod = load_recognizer("jianhui_pipei.py")
 
 
 class PipelineStructureTest(unittest.TestCase):
@@ -253,7 +41,8 @@ class PipelineStructureTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.pipe = json.loads(PIPELINE_PATH.read_text(encoding="utf-8"))
+        cls.pipe = load_pipeline(PIPELINE)
+        cls.all_nodes = all_pipeline_nodes()
 
     def test_only_entry_and_keep_node_exist(self):
         # 多余节点 = 没人引用的死代码，用户对残留零容忍。
@@ -282,12 +71,9 @@ class PipelineStructureTest(unittest.TestCase):
 
     def test_no_dangling_node_reference(self):
         # 引用不存在的节点会让 pipeline 静默结束——正是这次要修的毛病。
-        for name, node in self.pipe.items():
-            for key in ("next", "on_error", "interrupt"):
-                for ref in node.get(key, []):
-                    target = ref.replace("[JumpBack]", "").replace("[Anchor]", "")
-                    with self.subTest(node=name, key=key, ref=ref):
-                        self.assertIn(target, self.pipe)
+        for name, key, target in node_refs(self.pipe):
+            with self.subTest(node=name, key=key, ref=target):
+                self.assertIn(target, self.all_nodes)
 
     def test_keep_node_is_reachable(self):
         self.assertIn(KEEP_NODE, self.pipe[ENTRY_NODE]["next"])
