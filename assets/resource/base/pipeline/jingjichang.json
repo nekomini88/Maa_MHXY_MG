@@ -2,23 +2,23 @@
   "jingjichang": {
     "timeout": -1,
     "next": [
-      "竞技场-开始挂机"
+      "竞技场-保持匹配"
     ]
   },
-  "竞技场-开始挂机": {
+  "竞技场-保持匹配": {
     "recognition": "Custom",
     "custom_recognition": "jingjichang",
     "custom_recognition_param": {
-      "jjc_enabled": true,
-      "jjc_max_clicks": 10
+      "jjc_enabled": true
     },
-    "post_delay": 1000,
+    "action": "Click",
+    "post_delay": 2000,
     "timeout": -1,
     "next": [
-      "[JumpBack]panduan_zhujiemian"
+      "[JumpBack]竞技场-保持匹配"
     ],
     "on_error": [
-      "[JumpBack]竞技场-开始挂机"
+      "[JumpBack]竞技场-保持匹配"
     ]
   }
 }

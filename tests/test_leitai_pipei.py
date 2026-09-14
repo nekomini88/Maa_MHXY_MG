@@ -94,8 +94,12 @@ class LeitaiPipeiBehaviorTest(unittest.TestCase):
         self.analyze(ctx, leitai_roi=None)
         override = (ctx.last_override or {})[leitai_mod.LeitaiPipei._ROC_NAME]
         self.assertEqual(override["roi"], [0, 0, 0, 0])
-        self.assertEqual(leitai_mod.DEFAULT_EXPECTED, [r"^\s*开始匹配\s*$"])
-        self.assertEqual(override["expected"], [r"^\s*开始匹配\s*$"])
+        # 整段锚定 + 拆行半行锚定：真机按钮文字排两行时，整段正则一个都不命中。
+        self.assertEqual(
+            leitai_mod.DEFAULT_EXPECTED,
+            [r"^\s*开始匹配\s*$", r"^\s*开始\s*$", r"^\s*匹配\s*$"],
+        )
+        self.assertEqual(override["expected"], leitai_mod.DEFAULT_EXPECTED)
 
     def test_round_timeout_keeps_polling_and_does_not_raise(self):
         ctx = FakeContext(ocr_items=[])

@@ -108,6 +108,21 @@ class ButtonClickE2ETest(unittest.TestCase):
             with self.subTest(task=task):
                 self._assert_case_ok(task, "竖屏 720x1280 · 含按钮", expect_clicks=True)
 
+    def test_two_line_button_clicks_inside_button(self):
+        # 真机竞技场的形态：按钮文字排两行，OCR 拆成两个框。
+        for task in self.TASKS:
+            with self.subTest(task=task):
+                self._assert_case_ok(
+                    task, "横屏 1280x720 · 按钮文字两行（真机竞技场）", expect_clicks=True
+                )
+
+    def test_two_line_portrait_clicks_inside_button(self):
+        for task in self.TASKS:
+            with self.subTest(task=task):
+                self._assert_case_ok(
+                    task, "竖屏 720x1280 · 按钮文字两行（真机竞技场）", expect_clicks=True
+                )
+
     def test_decoy_text_is_never_clicked(self):
         for task in self.TASKS:
             with self.subTest(task=task):

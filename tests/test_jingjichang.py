@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-"""竞技场挂机的体检：锚定点击 + 打满次数（可选常驻）。
+"""竞技场挂机的体检：结构常驻 + 锚定点击 + 两行按钮合框。
 
-竞技场和擂台/剑会共用同一套识别的坑：`expected` 是子串正则、框架取最靠左的
-命中框，面板上的「开始匹配后自动进入对局」这类说明文字会被当成按钮点掉；
-固定比例 ROI 也扛不住换分辨率。所以这里校验锚定逻辑，另外兜住两条竞技场
-特有的语义：
+竞技场踩的坑和擂台/剑会同源，另外还多一条自己的：
 
-* 点击次数挂在**类**上（analyze 每次都可能是新实例，写实例上会让计数归零，
-  pipeline 的 on_error 重试会让它越点越多）；
-* `jjc_max_clicks <= 0` 表示不限次数/常驻，此时永远不返回成功，直到手动停止。
+* ``expected`` 写成子串匹配时，面板上的说明「开始匹配后自动进入对局」照样命中，
+  框架又按 ``order_by=Horizontal`` 取最靠左的框 → 点的是文字；
+* 固定比例 ROI 按一张横屏截图量的，换分辨率/竖屏整块错开；
+* **按钮文字是上下两行**，OCR 把「开始」「匹配」各读成一个框（真机 918x500
+  实测：``开始``=[1038,577,63,37]、``匹配``=[1042,608,59,34]）。此时整段
+  关键词的正则一个都不命中 —— 按钮就在屏幕上，任务却一直蹲、从没点过。
+  老版本还把这套判断和点击一起塞在识别器里自己循环，跟另外两个任务的写法不一致。
 
+所以这里既校验 pipeline 的自循环结构，也校验识别器的锚定、两行合框与守候行为。
 假 maa / utils 与假设备在 `tests/maa_stubs.py`。
 """
 
@@ -27,26 +29,15 @@ from maa_stubs import (
 
 PIPELINE = "jingjichang.json"
 ENTRY_NODE = "jingjichang"
-WORK_NODE = "竞技场-开始挂机"
-
-HIT = [["开始匹配"]]
+KEEP_NODE = "竞技场-保持匹配"
 
 jjc_mod = load_recognizer("jingjichang.py")
 
-
-class _SequenceContext(FakeContext):
-    """按调用顺序送出预设帧内容，最后一项一直重复（模拟按钮被点掉后消失）。"""
-
-    def __init__(self, frames, **kwargs):
-        super().__init__(**kwargs)
-        self._frames = list(frames) or [[]]
-        self._seen = 0
-
-    def run_recognition(self, name, image, pipeline_override=None):
-        self._seen += 1
-        index = min(self._seen, len(self._frames)) - 1
-        self.ocr_items = self._frames[index]
-        return super().run_recognition(name, image, pipeline_override)
+# 真机 918x500 截图里按钮的两行 OCR 框（框架把截图缩放到 720 高后量的）。
+REAL_TOP_LINE = ("开始", FakeRect(1038, 577, 63, 37), 1.0)
+REAL_BOTTOM_LINE = ("匹配", FakeRect(1042, 608, 59, 34), 0.998)
+# 合框后应覆盖两行：起点取上框左上，右下取两框最大右下。
+REAL_MERGED_BOX = [1038, 577, 63, 65]
 
 
 class PipelineStructureTest(unittest.TestCase):
@@ -55,159 +46,196 @@ class PipelineStructureTest(unittest.TestCase):
         cls.pipe = load_pipeline(PIPELINE)
         cls.all_nodes = all_pipeline_nodes()
 
-    def test_only_entry_and_work_node_exist(self):
-        self.assertEqual(set(self.pipe), {ENTRY_NODE, WORK_NODE})
+    def test_only_entry_and_keep_node_exist(self):
+        self.assertEqual(set(self.pipe), {ENTRY_NODE, KEEP_NODE})
 
-    def test_entry_never_times_out(self):
+    def test_entry_never_times_out_and_only_goes_to_keep_node(self):
         entry = self.pipe[ENTRY_NODE]
         self.assertEqual(entry["timeout"], -1)
-        self.assertEqual(entry["next"], [WORK_NODE])
+        self.assertEqual(entry["next"], [KEEP_NODE])
 
-    def test_work_node_never_times_out_on_long_custom_recognition(self):
-        # 挂机节点要连续蹲满 10 场，节点超时不能说杀就杀。
-        self.assertEqual(self.pipe[WORK_NODE]["timeout"], -1)
+    def test_keep_node_self_loops_on_next_and_error(self):
+        keep = self.pipe[KEEP_NODE]
+        jump_back = f"[JumpBack]{KEEP_NODE}"
+        self.assertEqual(keep["next"], [jump_back])
+        self.assertEqual(keep["on_error"], [jump_back])
+        self.assertEqual(keep["timeout"], -1)
 
-    def test_work_node_recognizes_with_custom_reco(self):
-        work = self.pipe[WORK_NODE]
-        self.assertEqual(work["recognition"], "Custom")
-        self.assertEqual(work["custom_recognition"], "jingjichang")
-        self.assertEqual(work["custom_recognition_param"]["jjc_max_clicks"], 10)
-        # 点击发生在识别器内部（点击次数即场次），节点本身不再点一次。
-        self.assertNotIn("action", work)
+    def test_keep_node_recognizes_with_custom_reco_and_clicks(self):
+        # 跟擂台/剑会同构：识别器只负责「有没有按钮」，点击由 pipeline 的
+        # Click 完成（点击落点取自识别命中框）。
+        keep = self.pipe[KEEP_NODE]
+        self.assertEqual(keep["recognition"], "Custom")
+        self.assertEqual(keep["custom_recognition"], "jingjichang")
+        self.assertEqual(keep["action"], "Click")
+        self.assertGreater(keep["post_delay"], 0)
 
-    def test_wait_timeout_retries_same_node_keeping_count(self):
-        self.assertEqual(self.pipe[WORK_NODE]["on_error"], [f"[JumpBack]{WORK_NODE}"])
+    def test_task_never_ends_on_the_group_screen(self):
+        # 旧结构点完就跳 panduan_zhujiemian 收任务；常驻后链上不能有这条出口。
+        for name, key, target in node_refs(self.pipe):
+            with self.subTest(node=name, key=key, ref=target):
+                self.assertNotEqual(target, "panduan_zhujiemian")
 
     def test_no_dangling_node_reference(self):
         for name, key, target in node_refs(self.pipe):
             with self.subTest(node=name, key=key, ref=target):
                 self.assertIn(target, self.all_nodes)
 
+    def test_no_leftover_click_count_param(self):
+        # 点几次就收工的老参数一并删掉：常驻语义下它只会带来「点够次数就停」。
+        blob = self.pipe[KEEP_NODE].get("custom_recognition_param") or {}
+        self.assertNotIn("jjc_max_clicks", blob)
+
 
 class JingjichangBehaviorTest(unittest.TestCase):
     def setUp(self):
         jjc_mod.time = type(jjc_mod.time)()
-        jjc_mod.Jingjichang._CLICK_COUNT = 0
+        jjc_mod.Jingjichang._LAST_HIT_TS = 0.0
         jjc_mod.Jingjichang._LAST_NOTIFY_TS = 0.0
 
     def analyze(self, context, **params):
         params.setdefault("jjc_roi", [10, 10, 100, 40])
         params.setdefault("jjc_interval", 0.001)
-        params.setdefault("jjc_click_delay", 0.0)
         return jjc_mod.Jingjichang().analyze(context, make_arg(**params))
 
-    def test_clicks_button_max_times_then_reports_done(self):
-        ctx = _SequenceContext(HIT)
-        result = self.analyze(ctx, jjc_max_clicks=3)
-        self.assertEqual(ctx.tasker.controller.clicks, [(60, 20)] * 3)
+    def test_hit_returns_box_for_click(self):
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        result = self.analyze(ctx)
         self.assertEqual(result.box, [10, 10, 100, 20])
-        self.assertIn("打满3次", result.detail)
+        self.assertIn("命中按钮", result.detail)
 
-    def test_click_lands_on_button_center(self):
-        ctx = _SequenceContext(HIT)
-        self.analyze(ctx, jjc_max_clicks=1)
-        self.assertEqual(ctx.tasker.controller.clicks, [(60, 20)])
-
-    def test_counter_resets_after_completion(self):
-        ctx = _SequenceContext(HIT)
-        self.analyze(ctx, jjc_max_clicks=2)
-        self.assertEqual(jjc_mod.Jingjichang._CLICK_COUNT, 0)
-
-    def test_counter_persists_across_instances(self):
-        # pipeline 的 on_error 会重新进入 analyze（新实例），计数不能归零。
-        first = _SequenceContext([["开始匹配"], []])
-        result = self.analyze(first, jjc_max_clicks=3, jjc_max_wait=0.02)
-        self.assertIsNone(result.box)
-        self.assertEqual(jjc_mod.Jingjichang._CLICK_COUNT, 1)
-        second = _SequenceContext(HIT)
-        result = self.analyze(second, jjc_max_clicks=3)
-        self.assertIn("打满3次", result.detail)
-        self.assertEqual(
-            len(first.tasker.controller.clicks) + len(second.tasker.controller.clicks),
-            3,
-        )
-
-    def test_wait_timeout_keeps_count_and_reports_failure(self):
-        ctx = _SequenceContext([[]])
-        result = self.analyze(ctx, jjc_max_clicks=3, jjc_max_wait=0.02)
-        self.assertIsNone(result.box)
-        self.assertIn("已点0次", result.detail)
-        self.assertEqual(jjc_mod.Jingjichang._CLICK_COUNT, 0)
-        self.assertEqual(ctx.tasker.controller.clicks, [])
-
-    def test_unlimited_clicks_never_completes(self):
-        # jjc_max_clicks <= 0：一直挂，不会因为到了次数就收工。
-        ctx = _SequenceContext(HIT * 3 + [[]])
-        result = self.analyze(ctx, jjc_max_clicks=0, jjc_max_wait=0.02)
-        self.assertEqual(len(ctx.tasker.controller.clicks), 3)
-        self.assertIsNone(result.box)
-        self.assertNotIn("打满", result.detail)
-        self.assertEqual(jjc_mod.Jingjichang._CLICK_COUNT, 3)
-
-    def test_stopping_request_exits_without_clicking(self):
-        ctx = _SequenceContext(HIT)
-        ctx.tasker.stopping = True
-        result = self.analyze(ctx, jjc_max_clicks=3, jjc_max_wait=300)
-        self.assertIsNone(result.box)
-        self.assertIn("停止", result.detail)
-        self.assertEqual(ctx.tasker.controller.clicks, [])
-
-    def test_default_scan_is_whole_screen_with_anchored_pattern(self):
-        ctx = _SequenceContext(HIT)
-        self.analyze(ctx, jjc_roi=None, jjc_max_clicks=1)
+    def test_default_scan_is_whole_screen_with_anchored_patterns(self):
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        self.analyze(ctx, jjc_roi=None)
         override = (ctx.last_override or {})[jjc_mod.Jingjichang._ROC_NAME]
         self.assertEqual(override["roi"], [0, 0, 0, 0])
-        self.assertEqual(jjc_mod.DEFAULT_EXPECTED, [r"^\s*开始匹配\s*$"])
-        self.assertEqual(override["expected"], [r"^\s*开始匹配\s*$"])
-
-    def test_ratio_roi_is_used_when_explicitly_given(self):
-        ctx = _SequenceContext(HIT)
-        self.analyze(
-            ctx,
-            jjc_roi=None,
-            jjc_roi_ratio=[0.76, 0.75, 0.18, 0.23],
-            jjc_max_clicks=1,
+        self.assertEqual(
+            jjc_mod.DEFAULT_EXPECTED,
+            [r"^\s*开始匹配\s*$", r"^\s*开始\s*$", r"^\s*匹配\s*$"],
         )
-        override = (ctx.last_override or {})[jjc_mod.Jingjichang._ROC_NAME]
-        self.assertEqual(override["roi"], [820, 455, 194, 139])
+        self.assertEqual(override["expected"], jjc_mod.DEFAULT_EXPECTED)
+
+    def test_round_timeout_keeps_polling_and_does_not_raise(self):
+        ctx = FakeContext(ocr_items=[])
+        result = self.analyze(ctx, jjc_max_wait=0.005)
+        self.assertIsNone(result.box)
+        self.assertIn("继续守候", result.detail)
+        self.assertGreater(ctx.recognition_calls, 1)
+
+    def test_stopping_request_exits_immediately(self):
+        ctx = FakeContext(ocr_items=[])
+        ctx.tasker.stopping = True
+        result = self.analyze(ctx, jjc_max_wait=300)
+        self.assertIsNone(result.box)
+        self.assertIn("停止", result.detail)
+        self.assertLessEqual(ctx.tasker.controller.count, 1)
+
+    def test_repeated_hits_are_spaced_by_cooldown(self):
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        self.analyze(ctx)
+        before = jjc_mod.time.now
+        self.analyze(ctx, jjc_click_cooldown=0.5)
+        self.assertGreaterEqual(jjc_mod.time.now - before, 0.5)
+
+    def test_cooldown_state_survives_new_instances(self):
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        self.analyze(ctx)
+        self.assertGreater(jjc_mod.Jingjichang._LAST_HIT_TS, 0.0)
+
+    def test_notify_is_throttled(self):
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        sent = []
+        original = jjc_mod.send_message
+        jjc_mod.send_message = lambda *a, **k: (sent.append(a), True)[1]
+        try:
+            for _ in range(3):
+                self.analyze(ctx, jjc_notify=True, jjc_click_cooldown=0.0)
+        finally:
+            jjc_mod.send_message = original
+        self.assertEqual(len(sent), 1)
 
     def test_screenshot_error_is_tolerated(self):
-        ctx = _SequenceContext(HIT)
+        ctx = FakeContext(ocr_items=["开始匹配"])
         ctx.tasker.controller.error = RuntimeError("adb 掉线")
-        result = self.analyze(ctx, jjc_max_clicks=3, jjc_max_wait=0.02)
+        result = self.analyze(ctx, jjc_max_wait=0.005)
         self.assertIsNone(result.box)
-        self.assertEqual(ctx.tasker.controller.clicks, [])
+        self.assertIn("继续守候", result.detail)
+
+    def test_ocr_error_is_tolerated(self):
+        ctx = FakeContext(reco_error=RuntimeError("OCR 崩了"))
+        result = self.analyze(ctx, jjc_max_wait=0.005)
+        self.assertIsNone(result.box)
+        self.assertIn("继续守候", result.detail)
+
+    def test_ratio_roi_is_used_when_explicitly_given(self):
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        self.analyze(ctx, jjc_roi=None, jjc_roi_ratio=[0.76, 0.75, 0.18, 0.23])
+        override = (ctx.last_override or {})[jjc_mod.Jingjichang._ROC_NAME]
+        # 1080x607 的假帧 → 比例换算成绝对像素
+        self.assertEqual(override["roi"], [820, 455, 194, 139])
 
     def test_disabled_short_circuits(self):
-        ctx = _SequenceContext(HIT)
-        result = self.analyze(ctx, jjc_enabled=False, jjc_max_clicks=3)
-        self.assertEqual(ctx.tasker.controller.clicks, [])
+        ctx = FakeContext(ocr_items=["开始匹配"])
+        result = self.analyze(ctx, jjc_enabled=False)
+        self.assertIsNone(result.box)
         self.assertIn("已禁用", result.detail)
+        self.assertEqual(ctx.tasker.controller.count, 0)
 
-    # ---- 回归：面板上的说明文字不是按钮 ----
+    # ---- 回归：真机按钮是上下两行，必须合框后点中 ----
 
-    JJC_ITEMS = [
-        ("开始匹配后自动进入对局", FakeRect(820, 470, 300, 24), 0.98),
-        ("开始匹配", FakeRect(860, 500, 120, 45), 0.95),
-    ]
+    def test_two_line_button_is_merged_into_one_box(self):
+        ctx = FakeContext(ocr_items=[REAL_TOP_LINE, REAL_BOTTOM_LINE])
+        result = self.analyze(ctx)
+        self.assertEqual(result.box, REAL_MERGED_BOX)
+        self.assertIn("两行按钮合框", result.detail)
 
-    def test_clicks_the_button_not_the_note(self):
-        ctx = _SequenceContext([list(self.JJC_ITEMS)])
-        self.analyze(ctx, jjc_max_clicks=1)
-        # 860+120/2=920，500+45/2=522：点在按钮中心，不是说明文字。
-        self.assertEqual(ctx.tasker.controller.clicks, [(920, 522)])
+    def test_two_line_button_win_even_when_framework_filter_drops_everything(self):
+        # 框架按 expected 过滤后只剩空表时，候选要退回 all_results 才看得见两行。
+        ctx = FakeContext(ocr_items=[REAL_TOP_LINE, REAL_BOTTOM_LINE])
+        original = FakeContext.run_recognition
 
-    def test_note_alone_never_clicked(self):
-        ctx = _SequenceContext([[self.JJC_ITEMS[0]]])
-        result = self.analyze(ctx, jjc_max_clicks=1, jjc_max_wait=0.02)
-        self.assertEqual(ctx.tasker.controller.clicks, [])
+        def drop_filtered(self, name, image, pipeline_override=None):
+            reco = original(self, name, image, pipeline_override)
+            reco.filtered_results = []
+            return reco
+
+        FakeContext.run_recognition = drop_filtered
+        try:
+            result = self.analyze(ctx)
+        finally:
+            FakeContext.run_recognition = original
+        self.assertEqual(result.box, REAL_MERGED_BOX)
+
+    ARENA_DECOY = ("开始匹配后自动进入对局", FakeRect(300, 200, 240, 26), 0.99)
+
+    def test_decoy_line_never_becomes_the_button(self):
+        ctx = FakeContext(ocr_items=[self.ARENA_DECOY])
+        result = self.analyze(ctx, jjc_max_wait=0.005)
         self.assertIsNone(result.box)
 
-    def test_rect_dataclass_candidates_are_parsed(self):
-        ctx = _SequenceContext([[("开始匹配", FakeRect(11, 22, 33, 44), 0.9)]])
-        result = self.analyze(ctx, jjc_max_clicks=1)
-        self.assertEqual(ctx.tasker.controller.clicks, [(11 + 16, 22 + 22)])
-        self.assertEqual(result.box, [11, 22, 33, 44])
+    def test_decoy_line_does_not_shadow_the_two_line_button(self):
+        ctx = FakeContext(ocr_items=[self.ARENA_DECOY, REAL_TOP_LINE, REAL_BOTTOM_LINE])
+        result = self.analyze(ctx)
+        self.assertEqual(result.box, REAL_MERGED_BOX)
+
+    def test_single_line_button_still_works(self):
+        # 其它分辨率/机型上按钮仍是单行的，合框逻辑不能把它弄丢。
+        ctx = FakeContext(ocr_items=[("开始匹配", FakeRect(760, 780, 120, 45), 0.95)])
+        self.assertEqual(self.analyze(ctx).box, [760, 780, 120, 45])
+
+    def test_split_halves_far_apart_are_not_a_button(self):
+        items = [
+            ("开始", FakeRect(100, 100, 60, 34), 0.99),
+            ("匹配", FakeRect(900, 900, 60, 34), 0.99),
+        ]
+        ctx = FakeContext(ocr_items=items)
+        result = self.analyze(ctx, jjc_max_wait=0.005)
+        self.assertIsNone(result.box)
+
+    def test_half_keyword_alone_is_not_a_button(self):
+        ctx = FakeContext(ocr_items=[REAL_TOP_LINE])
+        result = self.analyze(ctx, jjc_max_wait=0.005)
+        self.assertIsNone(result.box)
 
 
 if __name__ == "__main__":

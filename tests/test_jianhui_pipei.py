@@ -103,8 +103,12 @@ class JianhuiPipeiBehaviorTest(unittest.TestCase):
         self.analyze(ctx, jianhui_roi=None)
         override = (ctx.last_override or {})[jianhui_mod.JianhuiPipei._ROC_NAME]
         self.assertEqual(override["roi"], [0, 0, 0, 0])
-        self.assertEqual(jianhui_mod.DEFAULT_EXPECTED, [r"^\s*开始匹配\s*$"])
-        self.assertEqual(override["expected"], [r"^\s*开始匹配\s*$"])
+        # 整段锚定 + 拆行半行锚定：真机按钮文字排两行时，整段正则一个都不命中。
+        self.assertEqual(
+            jianhui_mod.DEFAULT_EXPECTED,
+            [r"^\s*开始匹配\s*$", r"^\s*开始\s*$", r"^\s*匹配\s*$"],
+        )
+        self.assertEqual(override["expected"], jianhui_mod.DEFAULT_EXPECTED)
 
     def test_round_timeout_keeps_polling_and_does_not_raise(self):
         ctx = FakeContext(ocr_items=[])

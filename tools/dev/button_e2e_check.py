@@ -8,6 +8,7 @@ click 记录坐标），把仓库真实的 pipeline + 识别器跑起来，看�
 
 判定：
   * 含按钮场景 —— 每一次点击都必须落在「开始匹配」按钮矩形内；
+  * 按钮文字两行场景 —— 真机竞技场会把「开始」「匹配」读成两个框，合框后仍要点中；
   * 只有诱饵场景 —— 不允许出现任何点击（旧关键词/固定 ROI 的版本会点诱饵）。
 
 用法：
@@ -53,26 +54,45 @@ def _canvas(width: int, height: int):
     return img, draw, _font(body_size), _font(int(body_size * 1.25))
 
 
-def _button(draw, size, label, cx_ratio, cy_ratio, font, face, label_color=(255, 255, 255)):
-    """按文字实际尺寸画一个按钮，返回 (x, y, w, h)——就是 OCR 该读到的那个框。"""
+def _button(draw, size, label, cx_ratio, cy_ratio, font, face, label_color=(255, 255, 255), two_line=False):
+    """按文字实际尺寸画一个按钮，返回 (x, y, w, h)——就是 OCR 该读到的那个框。
+
+    ``two_line=True`` 复刻真机竞技场：按钮文字排成上下两行（「开始」/「匹配」），
+    OCR 会各读一个框，识别器必须把两个框合起来才点得中。这里为了不拿被测代码
+    当尺子，按字数自己对半切，不 import ``utils.ocr_button``。
+    """
     width, height = size
-    text_w = int(draw.textlength(label, font=font))
+    if two_line and len(label) >= 2:
+        mid = (len(label) + 1) // 2
+        lines = (label[:mid], label[mid:])
+        # 两行之间留够行距：贴太紧 OCR 检测器会把两行合成一个框（真机会各读一个）。
+        line_step = int(font.size * 1.5)
+        lift = 0
+    else:
+        lines = (label,)
+        line_step = int(font.size * 1.15)
+        lift = int(font.size * 0.12)
+    text_w = int(max(draw.textlength(line, font=font) for line in lines))
     text_h = int(font.size)
-    box_h = int(text_h * 1.9)
+    lines_h = line_step * (len(lines) - 1) + text_h
+    box_h = int(text_h * 1.9 * len(lines))
     box_w = text_w + max(24, text_h)
     x = int(width * cx_ratio)
     y = int(height * cy_ratio)
     draw.rounded_rectangle([x, y, x + box_w, y + box_h], radius=10, fill=face)
-    draw.text(
-        (x + (box_w - text_w) // 2, y + (box_h - text_h) // 2 - int(text_h * 0.12)),
-        label,
-        font=font,
-        fill=label_color,
-    )
+    top = y + (box_h - lines_h) // 2
+    for idx, line in enumerate(lines):
+        line_w = int(draw.textlength(line, font=font))
+        draw.text(
+            (x + (box_w - line_w) // 2, top + idx * line_step - lift),
+            line,
+            font=font,
+            fill=label_color,
+        )
     return (x, y, box_w, box_h)
 
 
-def build_jianhui_frame(width, height, with_button=True):
+def build_jianhui_frame(width, height, with_button=True, two_line=False):
     """剑会弹窗：诱饵标题「请及时开始匹配」+ 说明行 + 按钮「开始匹配」。"""
     img, d, body, title = _canvas(width, height)
     d.rounded_rectangle(
@@ -85,11 +105,11 @@ def build_jianhui_frame(width, height, with_button=True):
     _button(d, (width, height), "我再等等", 0.28, 0.56, title, (70, 78, 98), (210, 216, 230))
     button = None
     if with_button:
-        button = _button(d, (width, height), "开始匹配", 0.58, 0.56, title, (228, 132, 44))
+        button = _button(d, (width, height), "开始匹配", 0.58, 0.56, title, (228, 132, 44), two_line=two_line)
     return np.asarray(img)[:, :, ::-1].copy(), button
 
 
-def build_leitai_frame(width, height, with_button=True):
+def build_leitai_frame(width, height, with_button=True, two_line=False):
     """擂台面板：说明行「点击开始匹配…」在按钮左边（旧版取最左命中框就会点它），
     外加游戏里真实存在、含「匹配」但不含「开始匹配」的余票提示，任何情况都不该被点。"""
     img, d, body, title = _canvas(width, height)
@@ -108,11 +128,11 @@ def build_leitai_frame(width, height, with_button=True):
     )
     button = None
     if with_button:
-        button = _button(d, (width, height), "开始匹配", 0.62, 0.78, title, (228, 132, 44))
+        button = _button(d, (width, height), "开始匹配", 0.62, 0.78, title, (228, 132, 44), two_line=two_line)
     return np.asarray(img)[:, :, ::-1].copy(), button
 
 
-def build_jingjichang_frame(width, height, with_button=True):
+def build_jingjichang_frame(width, height, with_button=True, two_line=False):
     """竞技场面板：右下角一栏，说明文字「开始匹配后自动进入对局」压在按钮上方
     （旧 ROI 正好把这行和按钮框在一起）。"""
     img, d, body, title = _canvas(width, height)
@@ -130,7 +150,7 @@ def build_jingjichang_frame(width, height, with_button=True):
     )
     button = None
     if with_button:
-        button = _button(d, (width, height), "开始匹配", 0.82, 0.83, title, (228, 132, 44))
+        button = _button(d, (width, height), "开始匹配", 0.82, 0.83, title, (228, 132, 44), two_line=two_line)
     return np.asarray(img)[:, :, ::-1].copy(), button
 
 
@@ -156,13 +176,13 @@ TASKS = {
         "entry": "jingjichang",
         "recognition": "agent/custom/recognition/jingjichang.py",
         "build": build_jingjichang_frame,
-        # 空跑不该真等 10 场 × 5 秒：把场次/节流调小，只验点击落点。
+        # 空跑不该真等一整个蹲守轮：把等待/节流调小，只验点击落点。
+        # 常驻语义靠 pipeline 的 next/on_error 自环，识别器侧没有场次上限。
         "override": {
-            "竞技场-开始挂机": {
+            "竞技场-保持匹配": {
                 "custom_recognition_param": {
                     "jjc_enabled": True,
-                    "jjc_max_clicks": 2,
-                    "jjc_click_delay": 0.5,
+                    "jjc_click_cooldown": 0.5,
                     "jjc_interval": 0.2,
                     "jjc_max_wait": 2.0,
                 }
@@ -173,9 +193,11 @@ TASKS = {
 }
 
 CASES = [
-    ("横屏 1280x720 · 含按钮", 1280, 720, True),
-    ("竖屏 720x1280 · 含按钮", 720, 1280, True),
-    ("横屏 1280x720 · 只有诱饵文字", 1280, 720, False),
+    ("横屏 1280x720 · 含按钮", 1280, 720, True, False),
+    ("竖屏 720x1280 · 含按钮", 720, 1280, True, False),
+    ("横屏 1280x720 · 按钮文字两行（真机竞技场）", 1280, 720, True, True),
+    ("竖屏 720x1280 · 按钮文字两行（真机竞技场）", 720, 1280, True, True),
+    ("横屏 1280x720 · 只有诱饵文字", 1280, 720, False, False),
 ]
 
 
@@ -221,7 +243,7 @@ def load_recognition(path: str):
     raise SystemExit(f"没能从 {path} 里找到识别器类")
 
 
-def run_case(task, width, height, with_button, recognition_path, wait_s=25.0, verbose=False):
+def run_case(task, width, height, with_button, two_line, recognition_path, wait_s=25.0, verbose=False):
     import maa  # noqa: F401
     from maa.controller import CustomController
     from maa.define import LoggingLevelEnum
@@ -294,7 +316,7 @@ def run_case(task, width, height, with_button, recognition_path, wait_s=25.0, ve
         def get_custom_info(self):
             return {"resolution": {"width": width, "height": height}}
 
-    frame, button = TASKS[task]["build"](width, height, with_button)
+    frame, button = TASKS[task]["build"](width, height, with_button, two_line)
     results["frame"] = frame
 
     rec_cls, rec_name = load_recognition(recognition_path)
@@ -336,10 +358,12 @@ def run_task(task, args):
 
     failures = []
     case_results = []
-    for idx, (name, w, h, with_button) in enumerate(CASES, 1):
+    for idx, (name, w, h, with_button, two_line) in enumerate(CASES, 1):
         if args.only and idx != args.only:
             continue
-        button, clicks, shots, shape = run_case(task, w, h, with_button, recognition, args.wait, args.verbose)
+        button, clicks, shots, shape = run_case(
+            task, w, h, with_button, two_line, recognition, args.wait, args.verbose
+        )
         if not args.json:
             print(f"== {name} | 帧={shape[1]}x{shape[0]} 截图次数={shots} 点击次数={len(clicks)}")
         ok = True

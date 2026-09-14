@@ -19,6 +19,11 @@
    关键词和 ROI 隔离来防误报本来就脆 —— 锚定「整段文本等于 开始匹配」后
    这类文本结构上不可能命中。
 
+真机还有一种形态：按钮文字排成**上下两行**，OCR 把「开始」「匹配」各读成一个框，
+整段关键词的正则一个都不命中——按钮在屏幕上，却永远等不到。所以 ``expected`` 用
+:func:`expected_patterns`（整段锚定 + 拆行半行锚定），由 :func:`pick_button_box`
+把上下两框合成一个按钮框再交给 pipeline 点。
+
 常驻语义：本识别器**不负责结束任务**。单轮最多守候 ``leitai_max_wait`` 秒，
 等不到就返回未命中，由 pipeline 节点的 ``on_error`` 自循环回本节点再等；
 命中并点击后由 ``next`` 自循环回本节点，等下一次弹窗（队伍重组、打完一场
@@ -27,7 +32,7 @@
 
 配置（pipeline 节点 custom_recognition_param 传入）：
     leitai_enabled:          是否启用（默认 true）
-    leitai_expected:         OCR 关键词（默认 ["^\\\\s*开始匹配\\\\s*$"]，锚定正则）
+    leitai_expected:         OCR 关键词（默认整段锚定 + 拆行半行锚定，见 expected_patterns）
     leitai_roi:              自定义 ROI [x,y,w,h] 绝对像素（默认全屏 [0,0,0,0]）
     leitai_roi_ratio:        按比例算 ROI [x,y,w,h]，显式给出才生效
     leitai_threshold:        OCR 置信度阈值（默认 0.6）
@@ -47,13 +52,13 @@ from maa.context import Context
 from utils import logger
 from utils import send_message
 from utils.ocr_button import (
-    ANCHORED_EXACT,
+    expected_patterns,
     pick_button_box,
     ratio_roi,
     tasker_stopping,
 )
 
-DEFAULT_EXPECTED = [ANCHORED_EXACT]
+DEFAULT_EXPECTED = expected_patterns()
 DEFAULT_ROI = [0, 0, 0, 0]  # 全屏：不依赖分辨率与横竖屏
 DEFAULT_THRESHOLD = 0.6
 DEFAULT_MAX_WAIT = 300
