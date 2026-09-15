@@ -10,3 +10,4 @@ from .yaowang import *
 from .leitai_pipei import *
 from .jingjichang import *
 from .jianhui_pipei import *
+from .ExpressionRecognition import *
