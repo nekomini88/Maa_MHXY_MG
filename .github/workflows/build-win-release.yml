@@ -109,7 +109,7 @@ jobs:
           p='install/interface.json'; d=json.load(open(p,encoding='utf-8'))
           d['agent']['child_exec']='./python/python.exe'
           json.dump(d,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=4)
-          print('child_exec:', d['agent']['child_exec'], '| tasks:', len(d['task']))"
+          print('child_exec:', d['agent']['child_exec'], '| tasks:', len(d.get('task', d.get('import', []))))"
 
       - name: Package and upload to Release
         env:

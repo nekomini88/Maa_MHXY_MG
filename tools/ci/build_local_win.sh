@@ -49,7 +49,7 @@ d = json.load(open(p, encoding='utf-8'))
 d['agent']['child_exec'] = './python/python.exe'
 d['agent']['child_args'] = ['./agent/main.py', '-u']
 json.dump(d, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
-print('child_exec:', d['agent']['child_exec'], '| tasks:', len(d['task']))
+print('child_exec:', d['agent']['child_exec'], '| tasks:', len(d.get('task', d.get('import', []))))
 PY
 
 echo "==> [6/7] 打包（自动排除 install/deps 离线轮子仓库）"
