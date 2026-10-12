@@ -1,0 +1,18 @@
+{
+    "start_android": {
+        "focus": {
+            "Node.Recognition.Succeeded": "准备启动"
+        },
+        "next": [
+            "启动app"
+        ]
+    },
+    "启动app": {
+        "focus": {
+            "Node.Recognition.Succeeded": "启动app"
+        },
+        "action": "StartApp",
+        "package": "com.netease.my",
+        "post_delay": 10000
+    }
+}

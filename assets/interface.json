@@ -113,6 +113,7 @@
         "tasks/preset/all.json",
         "tasks/preset/Captain.json",
         "tasks/preset/other.json",
-        "tasks/preset/TeamMember.json"
+        "tasks/preset/TeamMember.json",
+        "tasks/start_android.json"
     ]
 }
