@@ -466,4 +466,6 @@ agent/data/mnma_storage.json.corrupt.*
 
 # 本地打包app环境
 structure.txt
+assets/agent
+requirementsAndroid.txt
 
