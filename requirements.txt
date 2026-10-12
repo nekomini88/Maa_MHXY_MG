@@ -1,6 +1,6 @@
 loguru
 MaaAgentBinary
-MaaFw==5.13.0
+MaaFw==5.14.3
 numpy
 pillow
 StrEnum
