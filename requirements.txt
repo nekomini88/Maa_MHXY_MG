@@ -5,7 +5,5 @@ numpy
 pillow
 StrEnum
 requests
-pydantic-core<2.43.0
 opencv-python-headless==4.10.0.84
 scikit-image
-
