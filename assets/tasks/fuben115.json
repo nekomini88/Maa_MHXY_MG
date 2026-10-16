@@ -5,7 +5,7 @@
             "entry": "fuben115",
             "option": [
                 "全自动/手动接取双侠士任务选项",
-                "是否强制开启只打5本"
+                "是否开启只打5本"
             ],
             "description": "./docs/description/fuben115.md"
         }
