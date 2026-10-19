@@ -294,6 +294,9 @@
         "pre_delay": 10000
     },
     "混队-抓鬼-坐标-60秒40次-单次结束": {
+        "focus": {
+            "Node.Recognition.Succeeded": "混队-抓鬼-坐标-60秒40次-单次结束"
+        },
         "recognition": "Custom",
         "custom_recognition": "coordinate",
         "attach": {
