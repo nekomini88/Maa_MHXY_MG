@@ -624,5 +624,21 @@
             ]
         ],
         "duration": 500
+    },
+    "坐标测试": {
+        "next": [
+            "坐标"
+        ]
+    },
+    "坐标": {
+        "recognition": "Custom",
+        "custom_recognition": "coordinate",
+        "attach": {
+            "sec": 10,
+            "min_count": 6
+        },
+        "next": [
+            "fuli_qiandao"
+        ]
     }
 }
