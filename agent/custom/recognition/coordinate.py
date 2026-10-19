@@ -49,7 +49,7 @@ class coordinate(CustomRecognition):
         # 地图名， 例如：长安城
         dtm = reco_result_dtm.best_result.text
         zb  = reco_result_zb.best_result.text
-        logger.info(f"识别结果: 地图名: {dtm}, 坐标: {zb}")
+        # logger.info(f"识别结果: 地图名: {dtm}, 坐标: {zb}")
         # 去除两边括号
         zb = re.match(r'^[（(](.+)[）)]$', zb)
         # 用逗号替换点 151.71→151，71
@@ -70,12 +70,12 @@ class coordinate(CustomRecognition):
         min_count: dict = context.get_node_data(argv.node_name)["attach"]["min_count"]
 
         if PositionTracker.same_within(sec, context=context, min_count=min_count):
-            logger.info(f"{sec}秒内{min_count}次坐标值一致，继续执行next任务")
+            # logger.info(f"{sec}秒内{min_count}次坐标值一致，继续执行next任务")
             return CustomRecognition.AnalyzeResult(box=(0,0,0,0),detail="")
            
         
         # 返回假结果使custom_recognition失败，触发节点失败逻辑
-        logger.info(f"10秒内坐标值不一致")
+        # logger.info(f"10秒内坐标值不一致")
         # return CustomRecognition.AnalyzeResult(success=False)
         return None
         
