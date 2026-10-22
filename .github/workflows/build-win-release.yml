@@ -17,8 +17,8 @@ permissions:
   contents: write
 
 env:
-  MAA_FRAMEWORK_VERSION: "v5.13.0"
-  MFAA_VERSION: "v2.16.1"
+  MAA_FRAMEWORK_VERSION: "v5.14.3"
+  MFAA_VERSION: "v2.16.2"
   PYTHON_VERSION: "3.12.10"
   REL_TAG: "v0.1.11"
 
