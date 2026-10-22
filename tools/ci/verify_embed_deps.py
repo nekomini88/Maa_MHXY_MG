@@ -11,7 +11,10 @@ import glob
 import os
 import sys
 
-# 顶层包目录名（import 名），这些必须在 site-packages 里出现
+# 顶层包目录名（import 名），这些必须在 site-packages 里出现。
+# 与 requirements.txt 对齐：上游 2026-10 的「去除未用的包」删掉了
+# colorama / RapidFuzz / python-Levenshtein / zai-sdk / pydantic-core（代码里确实没有
+# 任何 import），本清单必须跟着收，否则门禁会误杀正确产物。
 REQUIRED_PACKAGES = (
     "numpy",
     "cv2",
@@ -19,16 +22,14 @@ REQUIRED_PACKAGES = (
     "maa",
     "requests",
     "loguru",
-    "colorama",
     "skimage",
     "scipy",
-    "rapidfuzz",
-    "Levenshtein",
 )
 
-# requirements.txt 共 15 个顶层发行包，配套依赖装完远多于这个数；
-# 阈值取 25 用于兜住「只装了一半」的情况。
-MIN_DIST_INFO = 25
+# 只作「装了一半」的兜底水位。requirements.txt 现在 9 个顶层发行包，
+# 连传递依赖约十几个 dist-info；旧值 25 是按 15 个顶层包时代定的，会误杀。
+# 真正防漏包的是上面的 import 名清单，这里不追求精确。
+MIN_DIST_INFO = 12
 
 
 def verify(site_packages: str):
