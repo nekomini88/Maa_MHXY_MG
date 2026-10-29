@@ -47,7 +47,7 @@ def load_notify_config():
 def load_config():
     if not os.path.exists(CONFIG_PATH):
         print(f"[FAIL] 找不到配置文件：{CONFIG_PATH}")
-        print("       请确认在包根目录运行本脚本。")
+        print("       先把模板复制一份再填：cp config/config.example.json config/config.json")
         sys.exit(2)
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)

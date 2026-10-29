@@ -132,15 +132,21 @@ def install_agent():
 
 
 def install_config():
-    """把 config/config.json 模板复制进包，确保外部通知配置键存在。
+    """把 config/config.example.json 模板复制进包，确保外部通知配置键存在。
 
     程序包内默认不含 config.json，导致 send_message 读不到
     ExternalNotificationEnabled 而静默跳过发送。此函数把模板复制进包，
     用户只需在包内 config/config.json 填 Telegram token/chat_id 即可启用通知。
+
+    仓库里现在入库的是 ``config/config.example.json``（模板），运行期的
+    ``config/config.json`` 已进 .gitignore（用户填了真实 token，不该入库）。
+    这里两种文件名都认，老分支只有 config.json 时照旧能用。
     """
-    src = working_dir / "config" / "config.json"
+    src = working_dir / "config" / "config.example.json"
     if not src.exists():
-        print("[install] config/config.json template not found, skip config template install.")
+        src = working_dir / "config" / "config.json"      # 兼容旧分支
+    if not src.exists():
+        print("[install] config/config.example.json not found, skip config template install.")
         return
     dst_dir = install_path / "config"
     dst_dir.mkdir(parents=True, exist_ok=True)

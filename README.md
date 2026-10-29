@@ -47,6 +47,18 @@
 - [CMD 运行教程](./docs/CMD运行教程.md)
 - [功能列表](./docs/功能列表.md)
 
+## 配置文件
+
+仓库里只放**模板** `config/config.example.json`；运行时用的配置不入库（会填真实 token，也免得升级时被覆盖）。首次使用先复制一份：
+
+```bash
+cp config/config.example.json config/config.json
+```
+
+- `config/config.json`：运行期配置。外部通知要填 `ExternalNotificationTelegramBotToken` / `ExternalNotificationTelegramChatId`（`ExternalNotificationEnabled` 设成 `Telegram`）。
+- `config/notify.json`：可选的**明文**通知覆盖，MFA 不管理它，非空值优先于 `config.json`（MFA 会把界面里填的 token 加密写回 `config.json`，所以想长期生效建议写在这里）。
+- 打包/安装脚本 `tools/install.py` 会把 `config.example.json` 自动复制进安装包，用户只需改动包内的 `config/config.json`。
+
 ## 鸣谢
 
 本项目由 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 提供强力支持，感谢所有参与和支持项目开发的贡献者！

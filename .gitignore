@@ -447,8 +447,10 @@ install
 # Tools
 tools/ImageCropper/**/*.png
 
+# config/ 整体不入库：里面的 config.json / notify.json 是运行期配置（填了 Telegram token）。
+# 模板 config/config.example.json 已入库；注意**父目录被忽略时 git 无法用 ! 规则再包含**，
+# 所以模板是靠“已被跟踪”留在库里的，别把它 rm 掉再 add（会加不回来，得 -f）。
 config
-!config/config.json
 debug
 
 # 答题日志文件

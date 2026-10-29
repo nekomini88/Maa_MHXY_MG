@@ -63,7 +63,10 @@ def read_config() -> bool:
         fallback = Path("./config/config.json")
         config_path = fallback if fallback.exists() else config_path
         if not config_path.exists():
-            logger.info(f"未找到 config/config.json（{config_path}），外部通知不可用。")
+            logger.info(
+                f"未找到 config/config.json（{config_path}），外部通知不可用。"
+                "若要启用：把 config/config.example.json 复制成 config/config.json 再填 token。"
+            )
             return False
     try:
         with open(config_path, "r", encoding="utf-8") as f:
